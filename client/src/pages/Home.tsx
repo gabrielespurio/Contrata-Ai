@@ -96,14 +96,9 @@ export default function Home() {
       <section className="bg-white py-12 md:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="mb-4">
-              <span className="text-blue-600 text-lg font-semibold">
-                Contrata AI - O Serviço que você precisa a um clique de distância
-              </span>
-            </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-gray-900">
-              Mais de 500 tipos de serviços <br />
-              <span className="text-blue-600">em um só lugar</span>
+              Contrata AI - O Serviço que você precisa <br />
+              <span className="text-blue-600">a um clique de distância</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-600 leading-relaxed">
               Encontre profissionais e contrate serviços para tudo o que precisar
