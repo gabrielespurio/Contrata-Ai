@@ -47,9 +47,16 @@ export default function Register() {
       });
       setLocation('/dashboard');
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      let description = "Tente novamente ou verifique se o email já está em uso.";
+      
+      if (errorMessage.includes('User already exists') || errorMessage.includes('400')) {
+        description = "Este email já está cadastrado. Tente fazer login ou use outro email.";
+      }
+      
       toast({
         title: "Erro no cadastro",
-        description: "Tente novamente ou verifique se o email já está em uso.",
+        description,
         variant: "destructive",
       });
     } finally {
