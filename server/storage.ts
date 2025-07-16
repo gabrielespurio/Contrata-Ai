@@ -117,112 +117,62 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJobs(filters?: { city?: string; categoryId?: string; subcategoryId?: string; date?: string }): Promise<(Job & { client: User; subcategory: Subcategory & { category: Category } })[]> {
-    const query = db
-      .select({
-        id: jobs.id,
-        clientId: jobs.clientId,
-        subcategoryId: jobs.subcategoryId,
-        title: jobs.title,
-        description: jobs.description,
-        date: jobs.date,
-        time: jobs.time,
-        location: jobs.location,
-        payment: jobs.payment,
-        destaque: jobs.destaque,
-        createdAt: jobs.createdAt,
-        client: users,
-        subcategory: {
-          id: subcategories.id,
-          name: subcategories.name,
-          categoryId: subcategories.categoryId,
-          category: categories,
-        },
-      })
+    let query = db
+      .select()
       .from(jobs)
       .leftJoin(users, eq(jobs.clientId, users.id))
       .leftJoin(subcategories, eq(jobs.subcategoryId, subcategories.id))
       .leftJoin(categories, eq(subcategories.categoryId, categories.id))
       .orderBy(desc(jobs.destaque), desc(jobs.createdAt));
 
-    if (filters?.city) {
-      query.where(sql`${users.city} = ${filters.city}`);
-    }
-
-    if (filters?.categoryId) {
-      query.where(eq(categories.id, filters.categoryId));
-    }
-
-    if (filters?.subcategoryId) {
-      query.where(eq(subcategories.id, filters.subcategoryId));
-    }
-
-    if (filters?.date) {
-      query.where(eq(jobs.date, filters.date));
-    }
-
     const result = await query;
-    return result as (Job & { client: User; subcategory: Subcategory & { category: Category } })[];
+    return result.map(row => ({
+      ...row.jobs,
+      client: row.users!,
+      subcategory: {
+        ...row.subcategories!,
+        category: row.categories!
+      }
+    }));
   }
 
   async getJobById(id: string): Promise<(Job & { client: User; subcategory: Subcategory & { category: Category } }) | undefined> {
     const [result] = await db
-      .select({
-        id: jobs.id,
-        clientId: jobs.clientId,
-        subcategoryId: jobs.subcategoryId,
-        title: jobs.title,
-        description: jobs.description,
-        date: jobs.date,
-        time: jobs.time,
-        location: jobs.location,
-        payment: jobs.payment,
-        destaque: jobs.destaque,
-        createdAt: jobs.createdAt,
-        client: users,
-        subcategory: {
-          id: subcategories.id,
-          name: subcategories.name,
-          categoryId: subcategories.categoryId,
-          category: categories,
-        },
-      })
+      .select()
       .from(jobs)
       .leftJoin(users, eq(jobs.clientId, users.id))
       .leftJoin(subcategories, eq(jobs.subcategoryId, subcategories.id))
       .leftJoin(categories, eq(subcategories.categoryId, categories.id))
       .where(eq(jobs.id, id));
 
-    return result as (Job & { client: User; subcategory: Subcategory & { category: Category } }) | undefined;
+    if (!result || !result.users || !result.subcategories || !result.categories) return undefined;
+
+    return {
+      ...result.jobs,
+      client: result.users,
+      subcategory: {
+        ...result.subcategories,
+        category: result.categories
+      }
+    };
   }
 
   async getJobsByClient(clientId: string): Promise<(Job & { subcategory: Subcategory & { category: Category } })[]> {
     const result = await db
-      .select({
-        id: jobs.id,
-        clientId: jobs.clientId,
-        subcategoryId: jobs.subcategoryId,
-        title: jobs.title,
-        description: jobs.description,
-        date: jobs.date,
-        time: jobs.time,
-        location: jobs.location,
-        payment: jobs.payment,
-        destaque: jobs.destaque,
-        createdAt: jobs.createdAt,
-        subcategory: {
-          id: subcategories.id,
-          name: subcategories.name,
-          categoryId: subcategories.categoryId,
-          category: categories,
-        },
-      })
+      .select()
       .from(jobs)
       .leftJoin(subcategories, eq(jobs.subcategoryId, subcategories.id))
       .leftJoin(categories, eq(subcategories.categoryId, categories.id))
       .where(eq(jobs.clientId, clientId))
       .orderBy(desc(jobs.createdAt));
 
-    return result as (Job & { subcategory: Subcategory & { category: Category } })[];
+    return result.map(row => ({
+      ...row.jobs,
+      subcategory: {
+        ...row.subcategories!,
+        category: row.categories!
+      }
+    }));
   }
 
   async createJob(job: InsertJob): Promise<Job> {
@@ -248,60 +198,38 @@ export class DatabaseStorage implements IStorage {
 
   async getApplicationsByJob(jobId: string): Promise<(Application & { freelancer: User })[]> {
     const result = await db
-      .select({
-        id: applications.id,
-        jobId: applications.jobId,
-        freelancerId: applications.freelancerId,
-        status: applications.status,
-        createdAt: applications.createdAt,
-        freelancer: users,
-      })
+      .select()
       .from(applications)
       .leftJoin(users, eq(applications.freelancerId, users.id))
-      .where(eq(applications.jobId, jobId))
-      .orderBy(desc(applications.createdAt));
+      .where(eq(applications.jobId, jobId));
 
-    return result as (Application & { freelancer: User })[];
+    return result.map(row => ({
+      ...row.applications,
+      freelancer: row.users!
+    }));
   }
 
   async getApplicationsByFreelancer(freelancerId: string): Promise<(Application & { job: Job & { client: User; subcategory: Subcategory & { category: Category } } })[]> {
     const result = await db
-      .select({
-        id: applications.id,
-        jobId: applications.jobId,
-        freelancerId: applications.freelancerId,
-        status: applications.status,
-        createdAt: applications.createdAt,
-        job: {
-          id: jobs.id,
-          clientId: jobs.clientId,
-          subcategoryId: jobs.subcategoryId,
-          title: jobs.title,
-          description: jobs.description,
-          date: jobs.date,
-          time: jobs.time,
-          location: jobs.location,
-          payment: jobs.payment,
-          destaque: jobs.destaque,
-          createdAt: jobs.createdAt,
-          client: users,
-          subcategory: {
-            id: subcategories.id,
-            name: subcategories.name,
-            categoryId: subcategories.categoryId,
-            category: categories,
-          },
-        },
-      })
+      .select()
       .from(applications)
       .leftJoin(jobs, eq(applications.jobId, jobs.id))
       .leftJoin(users, eq(jobs.clientId, users.id))
       .leftJoin(subcategories, eq(jobs.subcategoryId, subcategories.id))
       .leftJoin(categories, eq(subcategories.categoryId, categories.id))
-      .where(eq(applications.freelancerId, freelancerId))
-      .orderBy(desc(applications.createdAt));
+      .where(eq(applications.freelancerId, freelancerId));
 
-    return result as (Application & { job: Job & { client: User; subcategory: Subcategory & { category: Category } } })[];
+    return result.map(row => ({
+      ...row.applications,
+      job: {
+        ...row.jobs!,
+        client: row.users!,
+        subcategory: {
+          ...row.subcategories!,
+          category: row.categories!
+        }
+      }
+    }));
   }
 
   async createApplication(application: InsertApplication): Promise<Application> {
@@ -338,19 +266,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrUpdateJobLimit(limit: InsertJobLimit): Promise<JobLimit> {
-    const existing = await this.getJobLimitForWeek(limit.userId, limit.weekNumber);
+    const existing = await this.getJobLimitForWeek(limit.userId!, limit.weekNumber!);
     
     if (existing) {
       const [result] = await db
         .update(jobLimits)
-        .set({ jobCount: (existing.jobCount || 0) + 1 })
-        .where(and(eq(jobLimits.userId, limit.userId), eq(jobLimits.weekNumber, limit.weekNumber)))
+        .set({ jobsCreated: limit.jobsCreated })
+        .where(eq(jobLimits.id, existing.id))
         .returning();
       return result;
     } else {
       const [result] = await db
         .insert(jobLimits)
-        .values({ ...limit, jobCount: 1 })
+        .values(limit)
         .returning();
       return result;
     }
@@ -361,7 +289,7 @@ export class DatabaseStorage implements IStorage {
     const start = new Date(now.getFullYear(), 0, 1);
     const diff = now.getTime() - start.getTime();
     const oneWeek = 1000 * 60 * 60 * 24 * 7;
-    return Math.ceil(diff / oneWeek);
+    return Math.floor(diff / oneWeek);
   }
 }
 
