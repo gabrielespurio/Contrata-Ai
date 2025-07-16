@@ -8,6 +8,18 @@ Contrata AI is a modern web application that connects contractors (contratantes)
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Homepage Redesign (July 16, 2025)
+- Completely redesigned homepage inspired by Workana and GetNinjas
+- Added modern hero section with search functionality
+- Implemented service categories grid with visual icons
+- Added popular services showcase
+- Included customer testimonials section
+- Updated footer with improved navigation
+- Enhanced mobile responsiveness and visual hierarchy
+- Focused on Brazilian market with local service types
+
 ## System Architecture
 
 The application follows a full-stack monorepo architecture with clear separation between client and server components:
