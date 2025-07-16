@@ -152,7 +152,7 @@ export default function CreateJob() {
                     </SelectTrigger>
                     <SelectContent>
                       {categoriesLoading ? (
-                        <SelectItem value="">Carregando...</SelectItem>
+                        <div className="p-2 text-sm text-gray-500">Carregando categorias...</div>
                       ) : (
                         categories?.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
@@ -182,13 +182,15 @@ export default function CreateJob() {
                         </FormControl>
                         <SelectContent>
                           {subcategoriesLoading ? (
-                            <SelectItem value="">Carregando...</SelectItem>
-                          ) : (
+                            <div className="p-2 text-sm text-gray-500">Carregando subcategorias...</div>
+                          ) : selectedCategoryId ? (
                             subcategories?.map((subcategory) => (
                               <SelectItem key={subcategory.id} value={subcategory.id}>
                                 {subcategory.name}
                               </SelectItem>
                             ))
+                          ) : (
+                            <div className="p-2 text-sm text-gray-500">Selecione uma categoria primeiro</div>
                           )}
                         </SelectContent>
                       </Select>
