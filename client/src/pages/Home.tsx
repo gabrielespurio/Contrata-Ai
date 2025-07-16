@@ -98,7 +98,7 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-gray-900">
               Contrata AI - O Serviço que você precisa <br />
-              <span className="text-blue-600">a um clique de distância</span>
+              <span style={{ color: '#D14900' }}>a um clique de distância</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-600 leading-relaxed">
               Encontre profissionais e contrate serviços para tudo o que precisar
@@ -110,7 +110,12 @@ export default function Home() {
                 <Input 
                   type="text"
                   placeholder="Que tipo de serviço você precisa?"
-                  className="w-full py-4 pl-12 pr-4 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-0"
+                  className="w-full py-4 pl-12 pr-4 text-lg border-2 border-gray-300 rounded-lg focus:ring-0"
+                  style={{ 
+                    '&:focus': { borderColor: '#D14900' }
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#D14900'}
+                  onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                 />
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -119,7 +124,7 @@ export default function Home() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto mb-12">
               <Link href="/register?type=contratante">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg border-2 border-blue-600">
+                <Button size="lg" className="bg-white font-semibold px-8 py-4 text-lg border-2 hover:bg-gray-100" style={{ color: '#D14900', borderColor: '#D14900' }}>
                   Eu quero contratar
                 </Button>
               </Link>
@@ -171,7 +176,7 @@ export default function Home() {
                   className="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-shadow duration-200 group"
                 >
                   <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <IconComponent className="w-8 h-8 text-blue-600 group-hover:scale-110 transition-transform" />
+                    <IconComponent className="w-8 h-8 group-hover:scale-110 transition-transform" style={{ color: '#D14900' }} />
                   </div>
                   <h3 className="font-semibold text-gray-900 text-sm">
                     {category.name}
@@ -190,10 +195,10 @@ export default function Home() {
       </section>
 
       {/* Help Section - Inspired by GetNinjas */}
-      <section className="py-16 bg-blue-50">
+      <section className="py-16" style={{ backgroundColor: '#FFF4F0' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-8">
-            <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: '#D14900' }}>
               <Heart className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -201,10 +206,10 @@ export default function Home() {
             </h2>
             <p className="text-lg text-gray-600 mb-6">
               Conte conosco para conectar você aos melhores profissionais e receba até{' '}
-              <span className="font-bold text-blue-600">4 orçamentos grátis</span>.
+              <span className="font-bold" style={{ color: '#D14900' }}>4 orçamentos grátis</span>.
             </p>
             <Link href="/jobs">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4">
+              <Button size="lg" className="text-white px-8 py-4 hover:opacity-90" style={{ backgroundColor: '#D14900' }}>
                 Buscar por serviços
               </Button>
             </Link>
@@ -227,7 +232,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Search className="w-12 h-12 text-blue-600" />
+                <Search className="w-12 h-12" style={{ color: '#D14900' }} />
               </div>
               <h4 className="text-xl font-semibold mb-4">Faça o seu pedido</h4>
               <p className="text-gray-600">
@@ -237,7 +242,7 @@ export default function Home() {
             
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Users className="w-12 h-12 text-blue-600" />
+                <Users className="w-12 h-12" style={{ color: '#D14900' }} />
               </div>
               <h4 className="text-xl font-semibold mb-4">Receba até quatro orçamentos</h4>
               <p className="text-gray-600">
@@ -247,7 +252,7 @@ export default function Home() {
             
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <CheckCircle className="w-12 h-12 text-blue-600" />
+                <CheckCircle className="w-12 h-12" style={{ color: '#D14900' }} />
               </div>
               <h4 className="text-xl font-semibold mb-4">Escolha o melhor</h4>
               <p className="text-gray-600">
@@ -258,7 +263,7 @@ export default function Home() {
 
           <div className="text-center">
             <Link href="/jobs">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4">
+              <Button size="lg" className="text-white px-8 py-4 hover:opacity-90" style={{ backgroundColor: '#D14900' }}>
                 Buscar por serviços
               </Button>
             </Link>
@@ -276,14 +281,14 @@ export default function Home() {
                 A maior plataforma de contratação de serviços do Brasil.
               </p>
               <div className="flex space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 cursor-pointer">
-                  <span className="text-xs font-bold">f</span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer hover:opacity-80" style={{ backgroundColor: '#D14900' }}>
+                  <span className="text-xs font-bold text-white">f</span>
                 </div>
-                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 cursor-pointer">
-                  <span className="text-xs font-bold">t</span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer hover:opacity-80" style={{ backgroundColor: '#D14900' }}>
+                  <span className="text-xs font-bold text-white">t</span>
                 </div>
-                <div className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 cursor-pointer">
-                  <span className="text-xs font-bold">i</span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer hover:opacity-80" style={{ backgroundColor: '#D14900' }}>
+                  <span className="text-xs font-bold text-white">i</span>
                 </div>
               </div>
             </div>
