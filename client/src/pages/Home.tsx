@@ -125,12 +125,12 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto mb-12">
               <Link href="/register?type=contratante">
                 <Button size="lg" className="bg-white font-semibold px-8 py-4 text-lg border-2 hover:bg-gray-100" style={{ color: '#D14900', borderColor: '#D14900' }}>
-                  Eu quero contratar
+                  Sou Contratante
                 </Button>
               </Link>
               <Link href="/register?type=freelancer">
                 <Button size="lg" className="bg-yellow-500 text-black hover:bg-yellow-600 font-semibold px-8 py-4 text-lg">
-                  Você quer trabalhar?
+                  Sou Prestador
                 </Button>
               </Link>
             </div>
