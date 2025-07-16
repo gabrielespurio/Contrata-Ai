@@ -4,6 +4,7 @@ import { storage } from '../storage';
 import { insertUserSchema } from '@shared/schema';
 import { hashPassword, comparePassword } from '../utils/bcrypt';
 import { generateToken } from '../utils/jwt';
+import { AuthRequest } from '../middleware/auth';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -107,7 +108,7 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-export async function getProfile(req: Request, res: Response) {
+export async function getProfile(req: AuthRequest, res: Response) {
   try {
     const user = await storage.getUser(req.user!.userId);
     if (!user) {

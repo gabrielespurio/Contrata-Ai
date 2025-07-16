@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,9 +11,16 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Redirecionar se o usuário já está logado
+  useEffect(() => {
+    if (user) {
+      setLocation('/dashboard');
+    }
+  }, [user, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +32,13 @@ export default function Login() {
         title: "Login realizado com sucesso!",
         description: "Bem-vindo de volta.",
       });
-      setLocation('/dashboard');
+      // O redirecionamento será feito pelo useEffect quando o user for atualizado
     } catch (error) {
       toast({
         title: "Erro no login",
         description: "Email ou senha incorretos.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
