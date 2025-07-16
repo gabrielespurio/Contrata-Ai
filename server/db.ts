@@ -5,14 +5,8 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Use Neon database URL if available, otherwise fallback to Replit's DATABASE_URL
-const databaseUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+// Use ONLY the specific Neon database - no other connections allowed
+const NEON_DATABASE_URL = "postgresql://neondb_owner:npg_BqzVv5d6KntG@ep-falling-snow-acibggbo-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
-if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL or NEON_DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
-
-export const pool = new Pool({ connectionString: databaseUrl });
+export const pool = new Pool({ connectionString: NEON_DATABASE_URL });
 export const db = drizzle({ client: pool, schema });
