@@ -27,8 +27,8 @@ import {
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Seed initial data - disabled for now
-  // await seedDatabase();
+  // Seed initial data
+  await seedDatabase();
 
   // Auth routes
   app.post('/api/auth/register', register);

@@ -44,10 +44,15 @@ export default function Jobs() {
     enabled: !!filters.categoryId,
   });
 
+  // Ensure data is arrays to prevent rendering issues
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  const safeSubcategories = Array.isArray(subcategories) ? subcategories : [];
+
   const handleFilterChange = (key: string, value: string) => {
+    const filterValue = value === 'all' ? '' : value;
     setFilters(prev => ({
       ...prev,
-      [key]: value,
+      [key]: filterValue,
       ...(key === 'categoryId' ? { subcategoryId: '' } : {}),
     }));
   };
@@ -79,12 +84,12 @@ export default function Jobs() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="city">Cidade</Label>
-              <Select value={filters.city} onValueChange={(value) => handleFilterChange('city', value)}>
+              <Select value={filters.city || 'all'} onValueChange={(value) => handleFilterChange('city', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as cidades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as cidades</SelectItem>
+                  <SelectItem value="all">Todas as cidades</SelectItem>
                   {cities.map((city) => (
                     <SelectItem key={city} value={city}>
                       {city}
@@ -96,16 +101,18 @@ export default function Jobs() {
             
             <div>
               <Label htmlFor="category">Categoria</Label>
-              <Select value={filters.categoryId} onValueChange={(value) => handleFilterChange('categoryId', value)}>
+              <Select value={filters.categoryId || 'all'} onValueChange={(value) => handleFilterChange('categoryId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as categorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
-                  {categories?.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  {safeCategories.map((category) => (
+                    category.id ? (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name || 'Categoria sem nome'}
+                      </SelectItem>
+                    ) : null
                   ))}
                 </SelectContent>
               </Select>
@@ -114,7 +121,7 @@ export default function Jobs() {
             <div>
               <Label htmlFor="subcategory">Subcategoria</Label>
               <Select 
-                value={filters.subcategoryId} 
+                value={filters.subcategoryId || 'all'} 
                 onValueChange={(value) => handleFilterChange('subcategoryId', value)}
                 disabled={!filters.categoryId}
               >
@@ -122,11 +129,13 @@ export default function Jobs() {
                   <SelectValue placeholder="Todas as subcategorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as subcategorias</SelectItem>
-                  {subcategories?.map((subcategory) => (
-                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                      {subcategory.name}
-                    </SelectItem>
+                  <SelectItem value="all">Todas as subcategorias</SelectItem>
+                  {safeSubcategories.map((subcategory) => (
+                    subcategory.id ? (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name || 'Subcategoria sem nome'}
+                      </SelectItem>
+                    ) : null
                   ))}
                 </SelectContent>
               </Select>
