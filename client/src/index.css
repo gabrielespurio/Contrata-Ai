@@ -13,7 +13,7 @@
   --card-foreground: hsl(240, 10%, 3.9%);
   --border: hsl(214, 32%, 91%);
   --input: hsl(214, 32%, 91%);
-  --primary: hsl(207, 90%, 54%);
+  --primary: hsl(16, 100%, 41%);
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(142, 76%, 36%);
   --secondary-foreground: hsl(0, 0%, 100%);
@@ -21,7 +21,7 @@
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(207, 90%, 54%);
+  --ring: hsl(16, 100%, 41%);
   --radius: 0.5rem;
 }
 
@@ -36,7 +36,7 @@
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
+  --primary: hsl(16, 100%, 41%);
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(142, 76%, 36%);
   --secondary-foreground: hsl(0, 0%, 100%);
@@ -44,7 +44,7 @@
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(207, 90%, 54%);
+  --ring: hsl(16, 100%, 41%);
   --radius: 0.5rem;
 }
 
@@ -68,11 +68,11 @@
 
 /* Ensure proper contrast for buttons */
 .bg-primary {
-  background-color: hsl(207, 90%, 54%);
+  background-color: hsl(16, 100%, 41%);
 }
 
 .text-primary {
-  color: hsl(207, 90%, 54%);
+  color: hsl(16, 100%, 41%);
 }
 
 .bg-secondary {
@@ -93,7 +93,7 @@
 
 /* Hover states for better interactivity */
 .hover\:bg-primary:hover {
-  background-color: hsl(207, 90%, 48%);
+  background-color: hsl(16, 100%, 36%);
 }
 
 .hover\:bg-secondary:hover {
