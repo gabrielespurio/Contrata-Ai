@@ -266,6 +266,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">Contrata AI</h3>
+              <p className="text-gray-400 mb-4">
+                A maior plataforma de contratação de serviços do Brasil.
+              </p>
+              <div className="flex space-x-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 cursor-pointer">
+                  <span className="text-xs font-bold">f</span>
+                </div>
+                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 cursor-pointer">
+                  <span className="text-xs font-bold">t</span>
+                </div>
+                <div className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 cursor-pointer">
+                  <span className="text-xs font-bold">i</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Para Contratantes</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/create-job" className="hover:text-white">Publicar Serviço</Link></li>
+                <li><Link href="/dashboard" className="hover:text-white">Meu Painel</Link></li>
+                <li><a href="#" className="hover:text-white">Como Funciona</a></li>
+                <li><a href="#" className="hover:text-white">Planos Premium</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Para Profissionais</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/jobs" className="hover:text-white">Buscar Trabalhos</Link></li>
+                <li><Link href="/applications" className="hover:text-white">Minhas Candidaturas</Link></li>
+                <li><Link href="/settings" className="hover:text-white">Meu Perfil</Link></li>
+                <li><a href="#" className="hover:text-white">Dicas de Sucesso</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Suporte</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><a href="#" className="hover:text-white">Central de Ajuda</a></li>
+                <li><a href="#" className="hover:text-white">Contato</a></li>
+                <li><a href="#" className="hover:text-white">Termos de Uso</a></li>
+                <li><a href="#" className="hover:text-white">Privacidade</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
+              <p>&copy; 2024 Contrata AI. Todos os direitos reservados.</p>
+              <div className="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" className="hover:text-white">Termos</a>
+                <a href="#" className="hover:text-white">Privacidade</a>
+                <a href="#" className="hover:text-white">Cookies</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
