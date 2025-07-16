@@ -1,0 +1,175 @@
+Crie um MVP web completo para um aplicativo chamado "Contrata AI". Ele conecta contratantes e freelancers para serviços presenciais e pontuais (ex: bares contratando garçons para eventos).
+
+---
+
+🧱 STACK:
+
+- Frontend: Next.js com React (foco em SEO e performance)
+- Backend: Node.js com Express
+- Banco de dados: PostgreSQL (Neon)
+- Autenticação: JWT
+- Estilização: TailwindCSS
+- Integração simples de plano mensal com lógica de pagamento fictícia (não precisa gateway real no MVP)
+
+---
+
+🔐 AUTENTICAÇÃO E USUÁRIOS:
+
+Dois tipos de usuário:
+1. Contratante
+2. Freelancer
+
+Campos obrigatórios no cadastro:
+- Nome
+- E-mail
+- Senha (com hash via bcrypt)
+- Tipo de usuário
+- Cidade
+
+Autenticação com JWT no backend, token armazenado no `localStorage`.
+
+---
+
+🧩 FUNCIONALIDADES PRINCIPAIS:
+
+🟦 **Contratante pode:**
+- Criar até **3 vagas por semana** no plano gratuito
+- Criar vagas ilimitadas no plano de R$19,90/mês
+- Criar vaga com os campos:
+  - Título
+  - Categoria e subcategoria
+  - Descrição
+  - Data e hora
+  - Localização
+  - Valor
+  - **Destacar vaga (R$4,99 por 7 dias)** → campo `destaque = true`
+- Visualizar lista de candidatos por vaga
+- Selecionar um freelancer entre os candidatos
+
+🟩 **Freelancer pode:**
+- Explorar vagas filtrando por cidade, categoria e data
+- Ver detalhes de cada vaga
+- Se candidatar
+- Destacar o próprio perfil (R$2,99 por 7 dias) → campo `destaque = true`
+
+---
+
+💰 MONETIZAÇÃO DO MVP:
+
+- Um plano único: R$19,90/mês
+  - Remove limites de criação de vagas (para contratantes)
+  - Remove qualquer limitação futura de candidaturas
+
+- Pagamentos simulados:
+  - `premium = true` no usuário indica plano ativo
+  - `vagas_criadas_semana` reseta a cada semana para contas gratuitas
+
+- Destaques pagos por fora:
+  - R$4,99 por vaga em destaque
+  - R$2,99 por destaque de perfil
+
+(No MVP, os pagamentos são simulados apenas com flags nos dados.)
+
+---
+
+🧾 ESTRUTURA DO BANCO (PostgreSQL):
+
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  type TEXT CHECK (type IN ('freelancer', 'contratante')),
+  city TEXT,
+  premium BOOLEAN DEFAULT FALSE,
+  destaque BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL
+);
+
+CREATE TABLE subcategories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  category_id UUID REFERENCES categories(id)
+);
+
+CREATE TABLE jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id UUID REFERENCES users(id),
+  subcategory_id UUID REFERENCES subcategories(id),
+  title TEXT,
+  description TEXT,
+  date DATE,
+  time TEXT,
+  location TEXT,
+  payment NUMERIC,
+  destaque BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_id UUID REFERENCES jobs(id),
+  freelancer_id UUID REFERENCES users(id),
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE job_limits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  week_number INTEGER,
+  job_count INTEGER DEFAULT 0
+);
+📲 FRONTEND COM NEXT.JS:
+
+Páginas:
+
+/login
+
+/register
+
+/dashboard (dinâmico conforme tipo de usuário)
+
+/vagas
+
+/vaga/[id] → detalhes
+
+/criar-vaga
+
+/candidaturas
+
+/configuracoes
+
+Autenticação via contexto
+
+Proteção de rotas (middleware para verificar token JWT)
+
+Axios para comunicação com o backend
+
+Layout limpo com foco mobile-first
+
+
+ OUTRAS OBSERVAÇÕES:
+
+Use a conexão Neon PostgreSQL:
+psql 'postgresql://neondb_owner:npg_BqzVv5d6KntG@ep-falling-snow-acibggbo-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+
+Crie seed para popular categorias e subcategorias (ex: Eventos → Garçom, Cozinheiro, etc.)
+
+Organize o backend em:
+
+routes/
+
+controllers/
+
+models/
+
+middlewares/
+
+utils/
