@@ -70,7 +70,7 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(insertUser)
+      .values([insertUser])
       .returning();
     return user;
   }
@@ -235,7 +235,7 @@ export class DatabaseStorage implements IStorage {
   async createApplication(application: InsertApplication): Promise<Application> {
     const [result] = await db
       .insert(applications)
-      .values(application)
+      .values([application])
       .returning();
     return result;
   }
@@ -271,14 +271,14 @@ export class DatabaseStorage implements IStorage {
     if (existing) {
       const [result] = await db
         .update(jobLimits)
-        .set({ jobsCreated: limit.jobsCreated })
+        .set({ jobCount: limit.jobCount })
         .where(eq(jobLimits.id, existing.id))
         .returning();
       return result;
     } else {
       const [result] = await db
         .insert(jobLimits)
-        .values(limit)
+        .values([limit])
         .returning();
       return result;
     }
