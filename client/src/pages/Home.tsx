@@ -97,7 +97,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-gray-900">
-              Contrata AI - O Serviço que você precisa <br />
+              O Serviço que você precisa <br />
               <span style={{ color: '#D14900' }}>a um clique de distância</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-600 leading-relaxed">
