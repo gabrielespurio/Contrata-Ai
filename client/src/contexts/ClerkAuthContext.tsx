@@ -1,5 +1,5 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useUser, useClerk, ClerkProvider } from '@clerk/clerk-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface User {
@@ -22,7 +22,7 @@ interface ClerkAuthContextType {
 
 const ClerkAuthContext = createContext<ClerkAuthContextType | undefined>(undefined);
 
-export function ClerkAuthProvider({ children }: { children: ReactNode }) {
+function InnerClerkAuthProvider({ children }: { children: ReactNode }) {
   const { user: clerkUser, isLoaded, isSignedIn } = useUser();
   const clerk = useClerk();
   const [user, setUser] = useState<User | null>(null);
@@ -113,10 +113,31 @@ export function ClerkAuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+export function ClerkAuthProvider({ children }: { children: ReactNode }) {
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  
+  if (!publishableKey) {
+    throw new Error('Missing Clerk Publishable Key');
+  }
+  
+  return (
+    <ClerkProvider publishableKey={publishableKey}>
+      <InnerClerkAuthProvider>
+        {children}
+      </InnerClerkAuthProvider>
+    </ClerkProvider>
+  );
+}
+
 export function useClerkAuth() {
   const context = useContext(ClerkAuthContext);
   if (context === undefined) {
     throw new Error('useClerkAuth must be used within a ClerkAuthProvider');
   }
   return context;
+}
+
+// Export a universal useAuth hook for compatibility
+export function useAuth() {
+  return useClerkAuth();
 }

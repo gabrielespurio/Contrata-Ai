@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
+import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
