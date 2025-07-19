@@ -8,14 +8,28 @@ import { UserCheck, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ClerkRegister() {
-  const { isSignedIn } = useUser();
-  const { user, setUserType } = useClerkAuth();
   const [, setLocation] = useLocation();
+  
+  // Check if we're in Clerk mode based on environment
+  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+
+  // Only use Clerk hooks if we have valid keys
+  const { isSignedIn } = hasValidClerkKey ? useUser() : { isSignedIn: false };
+  const clerkAuth = hasValidClerkKey ? useClerkAuth() : { user: null, setUserType: () => Promise.resolve() };
+  const { user, setUserType } = clerkAuth;
   const [showUserTypeSelection, setShowUserTypeSelection] = useState(false);
   const [isSettingType, setIsSettingType] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    // If we don't have valid Clerk keys, redirect to regular register
+    if (!hasValidClerkKey) {
+      setLocation('/register');
+      return;
+    }
+    
     if (isSignedIn && !user) {
       // User is signed in with Clerk but not in our system
       setShowUserTypeSelection(true);
@@ -23,7 +37,7 @@ export default function ClerkRegister() {
       // User is fully set up
       setLocation('/dashboard');
     }
-  }, [isSignedIn, user, setLocation]);
+  }, [isSignedIn, user, setLocation, hasValidClerkKey]);
 
   const handleUserTypeSelect = async (type: 'freelancer' | 'contratante') => {
     setIsSettingType(true);
@@ -44,6 +58,11 @@ export default function ClerkRegister() {
       setIsSettingType(false);
     }
   };
+
+  // If we don't have valid Clerk keys, don't render anything (redirect happens in useEffect)
+  if (!hasValidClerkKey) {
+    return null;
+  }
 
   if (showUserTypeSelection) {
     return (
