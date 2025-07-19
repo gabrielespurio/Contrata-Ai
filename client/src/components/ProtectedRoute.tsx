@@ -1,6 +1,6 @@
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,19 +11,21 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
   const { user, isLoading } = useUnifiedAuth();
   const [, setLocation] = useLocation();
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      // Check if using Clerk
-      const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-        !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-      
-      const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
+  // Simple redirect logic without useEffect to avoid infinite loops
+  if (!isLoading && !user) {
+    const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+      !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+      import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+    
+    const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
     setLocation(loginPath);
-    } else if (user && requiredUserType && user.type !== requiredUserType) {
-      setLocation('/dashboard');
-    }
-  }, [user, isLoading, requiredUserType]);
+    return null;
+  }
+
+  if (user && requiredUserType && user.type !== requiredUserType) {
+    setLocation('/dashboard');
+    return null;
+  }
 
   if (isLoading) {
     return (
