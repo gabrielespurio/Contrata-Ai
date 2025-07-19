@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,7 +32,7 @@ const createJobSchema = z.object({
 type CreateJobForm = z.infer<typeof createJobSchema>;
 
 export default function CreateJob() {
-  const { user } = useAuth();
+  const { user } = useUnifiedAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [selectedCategoryId, setSelectedCategoryId] = useState('');

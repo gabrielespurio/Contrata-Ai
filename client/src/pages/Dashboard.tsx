@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,7 @@ import { Link } from 'wouter';
 import { Plus, Briefcase, Users, CheckCircle, Eye } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user } = useUnifiedAuth();
   
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/users/stats'],

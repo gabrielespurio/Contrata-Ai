@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,9 +11,20 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, user } = useAuth();
+  const { login, user } = useUnifiedAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Check if we should redirect to Clerk login
+  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+
+  useEffect(() => {
+    if (hasValidClerkKey) {
+      setLocation('/clerk-login');
+    }
+  }, [hasValidClerkKey, setLocation]);
 
   // Redirecionar se o usuário já está logado
   useEffect(() => {
@@ -42,6 +53,11 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+
+  // If we have Clerk keys, don't render this page (redirect happens in useEffect)
+  if (hasValidClerkKey) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

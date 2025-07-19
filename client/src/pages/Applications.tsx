@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function Applications() {
-  const { user } = useAuth();
+  const { user } = useUnifiedAuth();
   
   const { data: applications, isLoading } = useQuery({
     queryKey: ['/api/applications/my'],

@@ -1,4 +1,4 @@
-import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { useEffect } from 'react';
 
@@ -8,12 +8,17 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredUserType }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useUnifiedAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (!isLoading && !user) {
-      setLocation('/login');
+      // Check if using Clerk
+      const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+        !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+      
+      setLocation(hasValidClerkKey ? '/clerk-login' : '/login');
     } else if (user && requiredUserType && user.type !== requiredUserType) {
       setLocation('/dashboard');
     }

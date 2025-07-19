@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,9 +62,20 @@ export default function Register() {
   const [categories, setCategories] = useState<any[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const { register } = useAuth();
+  const { register } = useUnifiedAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Check if we should redirect to Clerk register
+  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+
+  useEffect(() => {
+    if (hasValidClerkKey) {
+      setLocation('/clerk-register');
+    }
+  }, [hasValidClerkKey, setLocation]);
 
   // Carregar categorias na inicialização
   useEffect(() => {
