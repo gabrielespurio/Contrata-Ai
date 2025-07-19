@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { useAuth as useJWTAuth } from '@/contexts/AuthContext';
-import { useClerkAuth } from '@/contexts/ClerkAuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
@@ -18,10 +17,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
     !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
     import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 
-  // Use appropriate auth hook based on Clerk availability
-  const jwtAuth = useJWTAuth();
-  const clerkAuth = hasValidClerkKey ? useClerkAuth() : { user: null, logout: () => {} };
-  const { user, logout } = hasValidClerkKey ? clerkAuth : jwtAuth;
+  // Use unified auth hook
+  const { user, logout } = useUnifiedAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,10 +84,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
-                <Link href="/clerk-login">
+                <Link href={hasValidClerkKey ? "/clerk-login" : "/login"}>
                   <Button variant="ghost">Entrar</Button>
                 </Link>
-                <Link href="/clerk-register">
+                <Link href={hasValidClerkKey ? "/clerk-register" : "/register"}>
                   <Button>Cadastrar</Button>
                 </Link>
               </div>
