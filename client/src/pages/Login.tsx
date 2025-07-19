@@ -24,7 +24,7 @@ export default function Login() {
     if (hasValidClerkKey) {
       setLocation('/clerk-login');
     }
-  }, [hasValidClerkKey, setLocation]);
+  }, [hasValidClerkKey]);
 
   // Redirecionar se o usuário já está logado
   useEffect(() => {

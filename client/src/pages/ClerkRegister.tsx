@@ -37,7 +37,7 @@ export default function ClerkRegister() {
       // User is fully set up
       setLocation('/dashboard');
     }
-  }, [isSignedIn, user, setLocation, hasValidClerkKey]);
+  }, [isSignedIn, user, hasValidClerkKey]);
 
   const handleUserTypeSelect = async (type: 'freelancer' | 'contratante') => {
     setIsSettingType(true);

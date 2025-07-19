@@ -23,7 +23,7 @@ export default function ClerkLogin() {
     if (isSignedIn) {
       setLocation('/dashboard');
     }
-  }, [isSignedIn, setLocation, hasValidClerkKey]);
+  }, [isSignedIn, hasValidClerkKey]);
 
   // If we don't have valid Clerk keys, don't render anything (redirect happens in useEffect)
   if (!hasValidClerkKey) {

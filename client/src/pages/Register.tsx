@@ -75,7 +75,7 @@ export default function Register() {
     if (hasValidClerkKey) {
       setLocation('/clerk-register');
     }
-  }, [hasValidClerkKey, setLocation]);
+  }, [hasValidClerkKey]);
 
   // Carregar categorias na inicialização
   useEffect(() => {
