@@ -35,7 +35,6 @@ export default function Register() {
     // Dados básicos
     name: '',
     email: '',
-    password: '',
     phone: '',
     city: '',
     // Campos específicos para freelancer
@@ -49,6 +48,13 @@ export default function Register() {
     companyName: '',
     responsibleName: '',
     companySize: '',
+    // Dados de endereço
+    cep: '',
+    street: '',
+    neighborhood: '',
+    addressCity: '',
+    state: '',
+    houseNumber: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
@@ -81,12 +87,58 @@ export default function Register() {
         setCurrentStep('select-type');
         setSelectedType(null);
       }
+    } else if (currentStep === 'address') {
+      setCurrentStep('personal-data');
     }
   };
 
   const handleNext = () => {
-    // Por enquanto, só implementando até a etapa 2
-    // Etapas 3 e 4 serão desenvolvidas posteriormente
+    if (currentStep === 'personal-data' && selectedType === 'contratante') {
+      setCurrentStep('address');
+    }
+  };
+
+  // Função para buscar dados do CEP
+  const fetchAddressByCEP = async (cep: string) => {
+    if (cep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await response.json();
+        
+        if (!data.erro) {
+          setFormData({
+            ...formData,
+            cep: cep,
+            street: data.logradouro || '',
+            neighborhood: data.bairro || '',
+            addressCity: data.localidade || '',
+            state: data.uf || '',
+          });
+        } else {
+          toast({
+            title: "CEP não encontrado",
+            description: "Verifique se o CEP está correto",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Erro ao buscar CEP",
+          description: "Tente novamente em alguns instantes",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleCEPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (cep.length <= 8) {
+      setFormData({ ...formData, cep });
+      if (cep.length === 8) {
+        fetchAddressByCEP(cep);
+      }
+    }
   };
 
   const getStepInfo = () => {
@@ -309,6 +361,139 @@ export default function Register() {
     );
   }
 
+  // Etapa 4: Formulário de endereço
+  if (currentStep === 'address') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <StepIndicator />
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                className="p-1 h-8 w-8"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <CardTitle className="text-2xl">Endereço</CardTitle>
+            </div>
+            <div className="flex justify-center">
+              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                {selectedPersonType === 'fisica' ? 'Pessoa Física' : 'Pessoa Jurídica'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cep">CEP</Label>
+                <Input
+                  id="cep"
+                  type="text"
+                  placeholder="00000-000"
+                  value={formData.cep.replace(/(\d{5})(\d{3})/, '$1-$2')}
+                  onChange={handleCEPChange}
+                  maxLength={9}
+                  required
+                />
+                <p className="text-xs text-gray-500">
+                  Digite o CEP para preenchimento automático
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="street">Rua</Label>
+                <Input
+                  id="street"
+                  type="text"
+                  placeholder="Nome da rua"
+                  value={formData.street}
+                  onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="houseNumber">Número</Label>
+                <Input
+                  id="houseNumber"
+                  type="text"
+                  placeholder="123"
+                  value={formData.houseNumber}
+                  onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="neighborhood">Bairro</Label>
+                <Input
+                  id="neighborhood"
+                  type="text"
+                  placeholder="Nome do bairro"
+                  value={formData.neighborhood}
+                  onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <Label htmlFor="addressCity">Cidade</Label>
+                  <Input
+                    id="addressCity"
+                    type="text"
+                    placeholder="Cidade"
+                    value={formData.addressCity}
+                    onChange={(e) => setFormData({ ...formData, addressCity: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">Estado</Label>
+                  <Input
+                    id="state"
+                    type="text"
+                    placeholder="UF"
+                    value={formData.state}
+                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    maxLength={2}
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button 
+                type="button"
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                onClick={() => {
+                  // Implementar próxima etapa posteriormente
+                  toast({
+                    title: "Cadastro salvo!",
+                    description: "Próxima etapa será implementada em breve",
+                  });
+                }}
+              >
+                Continuar - Finalizar cadastro
+              </Button>
+            </form>
+            
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">
+                Já tem conta?{' '}
+                <Link href="/login">
+                  <a className="text-orange-600 hover:underline font-medium">Entrar</a>
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Etapa 3: Formulário de dados pessoais
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -372,18 +557,6 @@ export default function Register() {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required
-                    minLength={6}
                   />
                 </div>
                 <div className="space-y-2">
@@ -475,18 +648,6 @@ export default function Register() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required
-                    minLength={6}
-                  />
-                </div>
               </>
             )}
 
@@ -548,27 +709,16 @@ export default function Register() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required
-                    minLength={6}
-                  />
-                </div>
               </>
             )}
 
             <Button 
-              type="submit" 
+              type={selectedType === 'freelancer' ? "submit" : "button"}
+              onClick={selectedType === 'contratante' ? handleNext : undefined}
               className="w-full bg-orange-600 hover:bg-orange-700" 
               disabled={isLoading}
             >
-              {isLoading ? 'Criando conta...' : 
+              {isLoading ? 'Processando...' : 
                selectedType === 'freelancer' ? 'Criar conta' : 
                'Continuar - Próxima etapa'}
             </Button>
