@@ -9,15 +9,9 @@ export function useUnifiedAuth() {
     import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 
   if (hasValidClerkKey) {
-    try {
-      return useClerkAuth();
-    } catch (error) {
-      // Fallback to regular auth if Clerk fails
-      console.warn('Clerk auth failed, falling back to regular auth:', error);
-      return useContext(AuthContext)!;
-    }
+    return useClerkAuth();
   }
   
-  // Use regular JWT auth
+  // Use regular JWT auth as fallback
   return useContext(AuthContext)!;
 }

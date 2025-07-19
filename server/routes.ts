@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { authenticateToken, requireUserType } from "./middleware/auth";
-import { register, login, getProfile, syncClerkUser } from "./controllers/auth";
+import { register, login, getProfile } from "./controllers/auth";
+import { syncClerkUser } from "./controllers/clerkAuth";
 import { 
   getJobs, 
   getJobById, 

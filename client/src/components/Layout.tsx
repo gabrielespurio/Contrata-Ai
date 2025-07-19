@@ -78,10 +78,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
-                <Link href="/login">
+                <Link href={hasValidClerkKey ? "/clerk-login" : "/login"}>
                   <Button variant="ghost">Entrar</Button>
                 </Link>
-                <Link href="/register">
+                <Link href={hasValidClerkKey ? "/clerk-register" : "/register"}>
                   <Button>Cadastrar</Button>
                 </Link>
               </div>
