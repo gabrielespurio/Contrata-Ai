@@ -28,6 +28,8 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/clerk-login" component={ClerkLogin} />
+        <Route path="/clerk-register" component={ClerkRegister} />
         <Route path="/clerk-demo" component={ClerkDemo} />
         
         <Route path="/dashboard">
