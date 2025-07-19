@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UserCheck, Briefcase, User, Building2 } from 'lucide-react';
+import { ArrowLeft, UserCheck, Briefcase, User, Building2, Search, X } from 'lucide-react';
 
 const cities = [
   'São Paulo',
@@ -60,6 +60,8 @@ export default function Register() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const { register } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -68,9 +70,20 @@ export default function Register() {
   useEffect(() => {
     fetch('/api/categories')
       .then(res => res.json())
-      .then(data => setCategories(data))
+      .then(data => {
+        setCategories(data);
+        setFilteredCategories(data);
+      })
       .catch(error => console.error('Erro ao carregar categorias:', error));
   }, []);
+
+  // Filtrar categorias baseado na pesquisa
+  useEffect(() => {
+    const filtered = categories.filter(category =>
+      category.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  }, [searchTerm, categories]);
 
   const handleTypeSelect = (type: UserType) => {
     setSelectedType(type);
@@ -555,47 +568,101 @@ export default function Register() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {categories.map((category) => {
-                const isSelected = formData.selectedCategories.includes(category.id);
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => toggleCategory(category.id)}
-                    className={`w-full p-4 border-2 rounded-lg text-left transition-all duration-200 ${
-                      isSelected
-                        ? 'border-orange-500 bg-orange-50 text-orange-700'
-                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{category.name}</span>
-                      {isSelected && (
-                        <div className="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+            {/* Categorias já selecionadas */}
+            {formData.selectedCategories.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">Categorias selecionadas:</p>
+                <div className="flex flex-wrap gap-2">
+                  {formData.selectedCategories.map(categoryId => {
+                    const category = categories.find(c => c.id === categoryId);
+                    return (
+                      <div
+                        key={categoryId}
+                        className="flex items-center bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm"
+                      >
+                        <span>{category?.name}</span>
+                        <button
+                          onClick={() => toggleCategory(categoryId)}
+                          className="ml-2 hover:bg-orange-200 rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Campo de busca */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Buscar categorias..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
-            <div className="mt-6">
+            {/* Lista de categorias disponíveis */}
+            <div className="max-h-60 overflow-y-auto border rounded-lg">
+              {filteredCategories.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  {searchTerm ? 'Nenhuma categoria encontrada' : 'Carregando categorias...'}
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {filteredCategories.map((category) => {
+                    const isSelected = formData.selectedCategories.includes(category.id);
+                    const isDisabled = !isSelected && formData.selectedCategories.length >= 3;
+                    
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => !isDisabled && toggleCategory(category.id)}
+                        disabled={isDisabled}
+                        className={`w-full p-3 text-left transition-all duration-200 ${
+                          isSelected
+                            ? 'bg-orange-50 text-orange-700 border-l-4 border-orange-500'
+                            : isDisabled
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{category.name}</span>
+                          {isSelected && (
+                            <div className="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center">
+                              <svg
+                                className="w-3 h-3 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                <span>Categorias selecionadas:</span>
+                <span>Selecionadas:</span>
                 <span className="font-medium">
                   {formData.selectedCategories.length}/3
                 </span>

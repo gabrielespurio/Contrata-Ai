@@ -16,7 +16,11 @@ Preferred communication style: Simple, everyday language.
 - Step 2: Person type selection for contractors (Individual vs Company)
 - Step 3: Personal/company data forms with specific fields (CPF/CNPJ, contact info)
 - Step 4: Address form with automatic CEP lookup via ViaCEP API
-- Step 5: Service category selection (up to 3 categories) for contractors
+- Step 5: Service category selection with scalable search interface
+- Enhanced category selection with search functionality and tag-based UI
+- Supports large datasets (200+ categories) with real-time filtering
+- Visual selected categories as removable tags above search field
+- Disabled state for unselected categories when limit (3) is reached
 - Removed password field temporarily for development
 - Enhanced UX with step-by-step navigation and back buttons
 - Added form validation and error handling for address API calls
