@@ -10,14 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Registration Form Enhancement (July 19, 2025)
-- Redesigned registration flow into two-step process
-- First step: User selects between Freelancer or Contratante with visual cards
-- Second step: Shows customized form based on user type selection
-- Added specific fields for freelancers (skills, experience level)
-- Added specific fields for contratantes (company name, company size)
-- Improved UX with back navigation and clear visual hierarchy
-- Enhanced styling with orange brand colors and hover effects
+### Advanced Multi-Step Registration System (July 19, 2025)
+- Implemented complete 4-step registration flow for contractors with visual progress indicator
+- Step 1: User type selection (Freelancer vs Contractor)  
+- Step 2: Person type selection for contractors (Individual vs Company)
+- Step 3: Personal/company data forms with specific fields (CPF/CNPJ, contact info)
+- Step 4: Address form with automatic CEP lookup via ViaCEP API
+- Step 5: Service category selection (up to 3 categories) for contractors
+- Removed password field temporarily for development
+- Enhanced UX with step-by-step navigation and back buttons
+- Added form validation and error handling for address API calls
 
 ### Security Improvements (July 19, 2025)
 - Fixed hardcoded database credentials security vulnerability

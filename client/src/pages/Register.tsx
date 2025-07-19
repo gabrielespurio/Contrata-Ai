@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ const cities = [
 
 type UserType = 'freelancer' | 'contratante';
 type PersonType = 'fisica' | 'juridica';
-type RegistrationStep = 'select-type' | 'select-person-type' | 'personal-data' | 'address' | 'final';
+type RegistrationStep = 'select-type' | 'select-person-type' | 'personal-data' | 'address' | 'service-categories';
 
 export default function Register() {
   const [currentStep, setCurrentStep] = useState<RegistrationStep>('select-type');
@@ -55,11 +55,22 @@ export default function Register() {
     addressCity: '',
     state: '',
     houseNumber: '',
+    // Categorias de interesse
+    selectedCategories: [] as string[],
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
   const { register } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Carregar categorias na inicialização
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(error => console.error('Erro ao carregar categorias:', error));
+  }, []);
 
   const handleTypeSelect = (type: UserType) => {
     setSelectedType(type);
@@ -89,12 +100,16 @@ export default function Register() {
       }
     } else if (currentStep === 'address') {
       setCurrentStep('personal-data');
+    } else if (currentStep === 'service-categories') {
+      setCurrentStep('address');
     }
   };
 
   const handleNext = () => {
     if (currentStep === 'personal-data' && selectedType === 'contratante') {
       setCurrentStep('address');
+    } else if (currentStep === 'address') {
+      setCurrentStep('service-categories');
     }
   };
 
@@ -141,6 +156,29 @@ export default function Register() {
     }
   };
 
+  const toggleCategory = (categoryId: string) => {
+    const currentSelected = formData.selectedCategories;
+    if (currentSelected.includes(categoryId)) {
+      // Remove categoria se já estiver selecionada
+      setFormData({
+        ...formData,
+        selectedCategories: currentSelected.filter(id => id !== categoryId)
+      });
+    } else if (currentSelected.length < 3) {
+      // Adiciona categoria se não atingiu o limite
+      setFormData({
+        ...formData,
+        selectedCategories: [...currentSelected, categoryId]
+      });
+    } else {
+      toast({
+        title: "Limite atingido",
+        description: "Você pode selecionar no máximo 3 categorias",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStepInfo = () => {
     if (selectedType === 'freelancer') {
       switch (currentStep) {
@@ -152,8 +190,9 @@ export default function Register() {
       switch (currentStep) {
         case 'select-type': return { current: 1, total: 4, title: 'Tipo de usuário' };
         case 'select-person-type': return { current: 2, total: 4, title: 'Tipo de pessoa' };
-        case 'personal-data': return { current: 3, total: 4, title: selectedPersonType === 'fisica' ? 'Dados pessoais' : 'Dados da empresa' };
-        case 'address': return { current: 4, total: 4, title: 'Endereço' };
+        case 'personal-data': return { current: 2, total: 4, title: selectedPersonType === 'fisica' ? 'Dados pessoais' : 'Dados da empresa' };
+        case 'address': return { current: 3, total: 4, title: 'Endereço' };
+        case 'service-categories': return { current: 4, total: 4, title: 'Serviços de interesse' };
         default: return { current: 1, total: 4, title: 'Cadastro' };
       }
     }
@@ -468,15 +507,9 @@ export default function Register() {
               <Button 
                 type="button"
                 className="w-full bg-orange-600 hover:bg-orange-700"
-                onClick={() => {
-                  // Implementar próxima etapa posteriormente
-                  toast({
-                    title: "Cadastro salvo!",
-                    description: "Próxima etapa será implementada em breve",
-                  });
-                }}
+                onClick={handleNext}
               >
-                Continuar - Finalizar cadastro
+                Continuar - Próxima etapa
               </Button>
             </form>
             
@@ -494,7 +527,111 @@ export default function Register() {
     );
   }
 
-  // Etapa 3: Formulário de dados pessoais
+  // Etapa 4: Seleção de categorias de interesse
+  if (currentStep === 'service-categories') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <StepIndicator />
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                className="p-1 h-8 w-8"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <CardTitle className="text-2xl">Serviços de Interesse</CardTitle>
+            </div>
+            <div className="flex justify-center">
+              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                {selectedPersonType === 'fisica' ? 'Pessoa Física' : 'Pessoa Jurídica'}
+              </Badge>
+            </div>
+            <p className="text-center text-gray-600 text-sm">
+              Selecione até 3 categorias que você tem interesse em contratar
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {categories.map((category) => {
+                const isSelected = formData.selectedCategories.includes(category.id);
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => toggleCategory(category.id)}
+                    className={`w-full p-4 border-2 rounded-lg text-left transition-all duration-200 ${
+                      isSelected
+                        ? 'border-orange-500 bg-orange-50 text-orange-700'
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{category.name}</span>
+                      {isSelected && (
+                        <div className="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                <span>Categorias selecionadas:</span>
+                <span className="font-medium">
+                  {formData.selectedCategories.length}/3
+                </span>
+              </div>
+
+              <Button 
+                type="button"
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                disabled={formData.selectedCategories.length === 0}
+                onClick={() => {
+                  toast({
+                    title: "Cadastro finalizado!",
+                    description: `Você selecionou ${formData.selectedCategories.length} categoria(s) de interesse`,
+                  });
+                  // Aqui implementaremos o envio final do cadastro
+                }}
+              >
+                Finalizar Cadastro
+              </Button>
+            </div>
+            
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">
+                Já tem conta?{' '}
+                <Link href="/login">
+                  <a className="text-orange-600 hover:underline font-medium">Entrar</a>
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Etapa 2/3: Formulário de dados pessoais
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
