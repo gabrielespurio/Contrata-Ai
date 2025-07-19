@@ -7,11 +7,12 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),
   type: text("type").notNull().$type<"freelancer" | "contratante">(),
   city: text("city").notNull(),
   premium: boolean("premium").default(false),
   destaque: boolean("destaque").default(false),
+  clerkId: text("clerk_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

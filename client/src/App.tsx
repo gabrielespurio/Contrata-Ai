@@ -4,12 +4,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ClerkAuthProvider } from "@/contexts/ClerkAuthContext";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ClerkDemo } from "@/components/ClerkDemo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ClerkLogin from "@/pages/ClerkLogin";
+import ClerkRegister from "@/pages/ClerkRegister";
 import Dashboard from "@/pages/Dashboard";
 import Jobs from "@/pages/Jobs";
 import JobDetails from "@/pages/JobDetails";
@@ -24,6 +28,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/clerk-demo" component={ClerkDemo} />
         
         <Route path="/dashboard">
           <ProtectedRoute>
@@ -63,14 +68,21 @@ function Router() {
 }
 
 function App() {
+  // Check if we're in Clerk mode based on environment
+  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+
+  const AuthProviderComponent = hasValidClerkKey ? ClerkAuthProvider : AuthProvider;
+
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <AuthProviderComponent>
         <TooltipProvider>
           <Toaster />
           <Router />
         </TooltipProvider>
-      </AuthProvider>
+      </AuthProviderComponent>
     </QueryClientProvider>
   );
 }

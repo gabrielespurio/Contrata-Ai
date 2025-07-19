@@ -129,3 +129,66 @@ export async function getProfile(req: AuthRequest, res: Response) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+export async function syncClerkUser(req: Request, res: Response) {
+  try {
+    const { name, email, type, city, clerkId } = req.body;
+
+    if (!name || !email || !type || !clerkId) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Check if user already exists by email
+    let existingUser;
+    try {
+      existingUser = await storage.getUserByEmail(email);
+    } catch (error) {
+      // User doesn't exist, which is fine
+    }
+
+    let user;
+    if (existingUser) {
+      // Update existing user with Clerk ID if not already set
+      user = await storage.updateUser(existingUser.id, {
+        clerkId: clerkId,
+        name: name,
+        type: type
+      });
+    } else {
+      // Create new user
+      user = await storage.createUser({
+        name,
+        email,
+        type,
+        city: city || 'São Paulo',
+        clerkId,
+        premium: false,
+        destaque: false,
+        password: '' // Not needed for Clerk users
+      });
+    }
+
+    // Generate JWT token for our system
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      type: user.type,
+    });
+
+    res.json({ 
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        type: user.type,
+        city: user.city,
+        premium: user.premium,
+        destaque: user.destaque,
+      }, 
+      token 
+    });
+  } catch (error) {
+    console.error('Error syncing Clerk user:', error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}

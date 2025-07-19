@@ -72,6 +72,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <nav className="hidden md:flex space-x-8">
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Como funciona</a>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Categorias</a>
+                  <Link href="/clerk-demo">
+                    <a className="text-gray-700 hover:text-primary font-medium">Clerk Demo</a>
+                  </Link>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
                 <Link href="/login">

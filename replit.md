@@ -10,6 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Clerk Authentication Integration (July 19, 2025)
+- Integrated Clerk authentication system as an alternative to custom JWT authentication
+- Created ClerkAuthProvider context for managing Clerk user state
+- Added ClerkLogin and ClerkRegister pages with custom Clerk components
+- Implemented user type selection (freelancer/contractor) after Clerk registration
+- Added backend endpoint `/api/auth/sync-clerk-user` to sync Clerk users with local database
+- Enhanced database schema with optional `clerkId` field for Clerk integration
+- Created ClerkDemo component to guide users through Clerk setup
+- Maintained backward compatibility with existing JWT authentication system
+- Added conditional rendering to use Clerk when valid keys are provided
+- Environment variables configured for VITE_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY
+
 ### Advanced Multi-Step Registration System (July 19, 2025)
 - Implemented complete 4-step registration flow for contractors with visual progress indicator
 - Step 1: User type selection (Freelancer vs Contractor)  
