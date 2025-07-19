@@ -3,8 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ClerkAuthProvider } from "@/contexts/ClerkAuthContext";
+import { SimpleClerkAuthProvider } from "@/contexts/SimpleClerkAuthContext";
+import { ClerkErrorBoundary } from "@/components/ClerkErrorBoundary";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClerkDemo } from "@/components/ClerkDemo";
@@ -70,22 +70,17 @@ function Router() {
 }
 
 function App() {
-  // Check if we have valid Clerk keys configured
-  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-
-  // Use Clerk if keys are available, otherwise fallback to regular auth
-  const AuthProviderComponent = hasValidClerkKey ? ClerkAuthProvider : AuthProvider;
-
+  // Always use Clerk authentication only
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProviderComponent>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </AuthProviderComponent>
+      <ClerkErrorBoundary>
+        <SimpleClerkAuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </SimpleClerkAuthProvider>
+      </ClerkErrorBoundary>
     </QueryClientProvider>
   );
 }

@@ -12,10 +12,7 @@ import { User, Settings, LogOut } from 'lucide-react';
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   
-  // Check if we're in Clerk mode based on environment
-  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+  // Always use Clerk authentication
 
   // Use unified auth hook
   const { user, logout } = useUnifiedAuth();
@@ -78,10 +75,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
-                <Link href={hasValidClerkKey ? "/clerk-login" : "/login"}>
+                <Link href="/clerk-login">
                   <Button variant="ghost">Entrar</Button>
                 </Link>
-                <Link href={hasValidClerkKey ? "/clerk-register" : "/register"}>
+                <Link href="/clerk-register">
                   <Button>Cadastrar</Button>
                 </Link>
               </div>
