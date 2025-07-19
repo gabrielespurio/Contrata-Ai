@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link, useLocation, Redirect } from 'wouter';
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,11 +71,10 @@ export default function Register() {
     !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
     import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 
-  useEffect(() => {
-    if (hasValidClerkKey) {
-      setLocation('/clerk-register');
-    }
-  }, [hasValidClerkKey]);
+  // Redirect to Clerk register if keys are configured
+  if (hasValidClerkKey) {
+    return <Redirect to="/clerk-register" />;
+  }
 
   // Carregar categorias na inicialização
   useEffect(() => {

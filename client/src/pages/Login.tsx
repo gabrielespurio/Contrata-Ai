@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'wouter';
+import { useState } from 'react';
+import { Link, useLocation, Redirect } from 'wouter';
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,18 +20,15 @@ export default function Login() {
     !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
     import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 
-  useEffect(() => {
-    if (hasValidClerkKey) {
-      setLocation('/clerk-login');
-    }
-  }, [hasValidClerkKey]);
+  // Redirect to Clerk login if keys are configured
+  if (hasValidClerkKey) {
+    return <Redirect to="/clerk-login" />;
+  }
 
-  // Redirecionar se o usuário já está logado
-  useEffect(() => {
-    if (user) {
-      setLocation('/dashboard');
-    }
-  }, [user, setLocation]);
+  // Redirect if user is already logged in
+  if (user) {
+    return <Redirect to="/dashboard" />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,10 +51,7 @@ export default function Login() {
     }
   };
 
-  // If we have Clerk keys, don't render this page (redirect happens in useEffect)
-  if (hasValidClerkKey) {
-    return null;
-  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
