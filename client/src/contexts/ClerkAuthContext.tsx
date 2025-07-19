@@ -27,39 +27,59 @@ function InnerClerkAuthProvider({ children }: { children: ReactNode }) {
   const clerk = useClerk();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasSynced, setHasSynced] = useState(false);
 
   useEffect(() => {
+    if (!isLoaded) {
+      setIsLoading(true);
+      return;
+    }
+
+    if (hasSynced && !isSignedIn) {
+      // User signed out
+      setUser(null);
+      setIsLoading(false);
+      setHasSynced(false);
+      return;
+    }
+
+    if (!isSignedIn || !clerkUser || hasSynced) {
+      setIsLoading(false);
+      if (!isSignedIn) {
+        setUser(null);
+      }
+      return;
+    }
+
     const syncUserData = async () => {
-      if (isLoaded) {
-        if (isSignedIn && clerkUser) {
-          try {
-            // Try to get user data from our backend using Clerk token
-            const token = await clerkUser.getToken();
-            const response = await fetch('/api/auth/profile', {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-              },
-            });
-            
-            if (response.ok) {
-              const userData = await response.json();
-              setUser(userData);
-            } else {
-              // User not found in our system, will need onboarding
-              console.log('User not found in our system, might need onboarding');
-            }
-          } catch (error) {
-            console.log('Error syncing user data:', error);
-          }
+      try {
+        // Try to get user data from our backend using Clerk token
+        const token = await clerkUser.getToken();
+        const response = await fetch('/api/auth/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
         } else {
+          // User not found in our system, will need onboarding
+          console.log('User not found in our system, might need onboarding');
           setUser(null);
         }
+      } catch (error) {
+        console.log('Error syncing user data:', error);
+        setUser(null);
+      } finally {
         setIsLoading(false);
+        setHasSynced(true);
       }
     };
 
     syncUserData();
-  }, [isLoaded, isSignedIn, clerkUser]);
+  }, [isLoaded, isSignedIn, clerkUser?.id, hasSynced]);
 
   const setUserType = async (type: 'freelancer' | 'contratante') => {
     if (!clerkUser) return;
@@ -91,6 +111,7 @@ function InnerClerkAuthProvider({ children }: { children: ReactNode }) {
       // Store the token for our backend
       localStorage.setItem('token', data.token);
       setUser(data.user);
+      setHasSynced(true);
     } catch (error) {
       console.error('Failed to set user type:', error);
       throw error;
@@ -98,8 +119,15 @@ function InnerClerkAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await clerk.signOut();
-    setUser(null);
+    try {
+      setUser(null);
+      setHasSynced(false);
+      await clerk.signOut();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      setUser(null);
+      setHasSynced(false);
+    }
   };
 
   return (
