@@ -45,7 +45,15 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
-  const { user } = useClerkAuth();
+  // Check if we're in Clerk mode based on environment
+  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+
+  // Use appropriate auth hook based on Clerk availability
+  const jwtAuth = useJWTAuth();
+  const clerkAuth = hasValidClerkKey ? useClerkAuth() : { user: null };
+  const { user } = hasValidClerkKey ? clerkAuth : jwtAuth;
 
   // Fetch categories from database
   const { data: categories = [] } = useQuery({

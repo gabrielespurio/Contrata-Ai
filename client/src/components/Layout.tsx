@@ -11,8 +11,17 @@ import {
 import { User, Settings, LogOut } from 'lucide-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useClerkAuth();
   const [location] = useLocation();
+  
+  // Check if we're in Clerk mode based on environment
+  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+
+  // Use appropriate auth hook based on Clerk availability
+  const jwtAuth = useJWTAuth();
+  const clerkAuth = hasValidClerkKey ? useClerkAuth() : { user: null, logout: () => {} };
+  const { user, logout } = hasValidClerkKey ? clerkAuth : jwtAuth;
 
   return (
     <div className="min-h-screen bg-gray-50">
