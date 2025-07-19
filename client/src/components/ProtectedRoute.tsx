@@ -1,6 +1,5 @@
 import { useUnifiedAuth } from '@/hooks/useAuth';
-import { useLocation } from 'wouter';
-import { useEffect, useRef } from 'react';
+import { Redirect } from 'wouter';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,26 +8,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredUserType }: ProtectedRouteProps) {
   const { user, isLoading } = useUnifiedAuth();
-  const [, setLocation] = useLocation();
-  const hasRedirectedRef = useRef(false);
 
-  useEffect(() => {
-    if (hasRedirectedRef.current) return;
-    
-    if (!isLoading && !user) {
-      const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-        !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-      
-      const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
-      hasRedirectedRef.current = true;
-      setLocation(loginPath);
-    } else if (user && requiredUserType && user.type !== requiredUserType) {
-      hasRedirectedRef.current = true;
-      setLocation('/dashboard');
-    }
-  }, [user, isLoading, requiredUserType, setLocation]);
-
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -40,13 +21,21 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
     );
   }
 
+  // Redirect to login if not authenticated
   if (!user) {
-    return null;
+    const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+      !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+      import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+    
+    const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
+    return <Redirect to={loginPath} />;
   }
 
+  // Redirect if user type doesn't match required type
   if (requiredUserType && user.type !== requiredUserType) {
-    return null;
+    return <Redirect to="/dashboard" />;
   }
 
+  // User is authenticated and has correct permissions
   return <>{children}</>;
 }

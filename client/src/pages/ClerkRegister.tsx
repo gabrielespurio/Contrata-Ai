@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'wouter';
+import { useState, useEffect } from 'react';
+import { useLocation, Redirect } from 'wouter';
 import { SignUp, useUser } from '@clerk/clerk-react';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ClerkRegister() {
   const [, setLocation] = useLocation();
-  const hasRedirectedRef = useRef(false);
   
   // Check if we're in Clerk mode based on environment
   const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
@@ -25,24 +24,21 @@ export default function ClerkRegister() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (hasRedirectedRef.current) return;
-    
-    // If we don't have valid Clerk keys, redirect to regular register
-    if (!hasValidClerkKey) {
-      hasRedirectedRef.current = true;
-      setLocation('/register');
-      return;
-    }
-    
     if (isSignedIn && !user) {
       // User is signed in with Clerk but not in our system
       setShowUserTypeSelection(true);
-    } else if (user) {
-      // User is fully set up
-      hasRedirectedRef.current = true;
-      setLocation('/dashboard');
     }
-  }, [isSignedIn, user, hasValidClerkKey, setLocation]);
+  }, [isSignedIn, user]);
+
+  // If we don't have valid Clerk keys, redirect to regular register
+  if (!hasValidClerkKey) {
+    return <Redirect to="/register" />;
+  }
+
+  // If user is fully set up, redirect to dashboard
+  if (user) {
+    return <Redirect to="/dashboard" />;
+  }
 
   const handleUserTypeSelect = async (type: 'freelancer' | 'contratante') => {
     setIsSettingType(true);
