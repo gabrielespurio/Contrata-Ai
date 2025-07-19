@@ -18,11 +18,12 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
         !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
         import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
       
-      setLocation(hasValidClerkKey ? '/clerk-login' : '/login');
+      const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
+    setLocation(loginPath);
     } else if (user && requiredUserType && user.type !== requiredUserType) {
       setLocation('/dashboard');
     }
-  }, [user, isLoading, requiredUserType, setLocation]);
+  }, [user, isLoading, requiredUserType]);
 
   if (isLoading) {
     return (
