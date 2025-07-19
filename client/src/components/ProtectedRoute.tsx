@@ -10,22 +10,24 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requiredUserType }: ProtectedRouteProps) {
   const { user, isLoading } = useUnifiedAuth();
   const [, setLocation] = useLocation();
+  const hasRedirectedRef = useRef(false);
 
-  // Simple redirect logic without useEffect to avoid infinite loops
-  if (!isLoading && !user) {
-    const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-      !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-      import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+  useEffect(() => {
+    if (hasRedirectedRef.current) return;
     
-    const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
-    setLocation(loginPath);
-    return null;
-  }
-
-  if (user && requiredUserType && user.type !== requiredUserType) {
-    setLocation('/dashboard');
-    return null;
-  }
+    if (!isLoading && !user) {
+      const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+        !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
+        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
+      
+      const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
+      hasRedirectedRef.current = true;
+      setLocation(loginPath);
+    } else if (user && requiredUserType && user.type !== requiredUserType) {
+      hasRedirectedRef.current = true;
+      setLocation('/dashboard');
+    }
+  }, [user, isLoading, requiredUserType, setLocation]);
 
   if (isLoading) {
     return (

@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { SignIn, useUser } from '@clerk/clerk-react';
 
 export default function ClerkLogin() {
   const [, setLocation] = useLocation();
+  const hasRedirectedRef = useRef(false);
   
   // Check if we're in Clerk mode based on environment
   const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
@@ -14,16 +15,20 @@ export default function ClerkLogin() {
   const { isSignedIn } = hasValidClerkKey ? useUser() : { isSignedIn: false };
 
   useEffect(() => {
+    if (hasRedirectedRef.current) return;
+    
     // If we don't have valid Clerk keys, redirect to regular login
     if (!hasValidClerkKey) {
+      hasRedirectedRef.current = true;
       setLocation('/login');
       return;
     }
     
     if (isSignedIn) {
+      hasRedirectedRef.current = true;
       setLocation('/dashboard');
     }
-  }, [isSignedIn, hasValidClerkKey]);
+  }, [isSignedIn, hasValidClerkKey, setLocation]);
 
   // If we don't have valid Clerk keys, don't render anything (redirect happens in useEffect)
   if (!hasValidClerkKey) {
