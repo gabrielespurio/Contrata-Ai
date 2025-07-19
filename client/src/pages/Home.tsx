@@ -1,5 +1,6 @@
 import { Link } from 'wouter';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth as useJWTAuth } from '@/contexts/AuthContext';
+import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -44,7 +45,7 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
 
   // Fetch categories from database
   const { data: categories = [] } = useQuery({

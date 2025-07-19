@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth as useJWTAuth } from '@/contexts/AuthContext';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { Button } from '@/components/ui/button';
 import { 
@@ -11,7 +11,7 @@ import {
 import { User, Settings, LogOut } from 'lucide-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout } = useClerkAuth();
   const [location] = useLocation();
 
   return (

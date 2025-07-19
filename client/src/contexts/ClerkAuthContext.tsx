@@ -137,7 +137,3 @@ export function useClerkAuth() {
   return context;
 }
 
-// Export a universal useAuth hook for compatibility
-export function useAuth() {
-  return useClerkAuth();
-}
