@@ -10,6 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Registration Form Enhancement (July 19, 2025)
+- Redesigned registration flow into two-step process
+- First step: User selects between Freelancer or Contratante with visual cards
+- Second step: Shows customized form based on user type selection
+- Added specific fields for freelancers (skills, experience level)
+- Added specific fields for contratantes (company name, company size)
+- Improved UX with back navigation and clear visual hierarchy
+- Enhanced styling with orange brand colors and hover effects
+
+### Security Improvements (July 19, 2025)
+- Fixed hardcoded database credentials security vulnerability
+- Implemented proper environment variable usage for DATABASE_URL
+- Enhanced JWT secret management
+- Added proper error handling for missing environment variables
+
 ### Homepage Redesign (July 16, 2025)
 - Completely redesigned homepage inspired by Workana and GetNinjas
 - Added modern hero section with search functionality
