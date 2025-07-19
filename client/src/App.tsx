@@ -70,21 +70,16 @@ function Router() {
 }
 
 function App() {
-  // Check if we're in Clerk mode based on environment
-  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-
-  const AuthProviderComponent = hasValidClerkKey ? ClerkAuthProvider : AuthProvider;
-
+  // Always use regular AuthProvider for now since Clerk keys aren't properly configured
+  // This ensures the app works correctly without requiring external API keys
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProviderComponent>
+      <AuthProvider>
         <TooltipProvider>
           <Toaster />
           <Router />
         </TooltipProvider>
-      </AuthProviderComponent>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -34,21 +34,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {user ? (
               <div className="flex items-center space-x-4">
                 <nav className="hidden md:flex space-x-8">
-                  <Link href="/dashboard">
-                    <a className={`font-medium ${location === '/dashboard' ? 'text-primary' : 'text-gray-700 hover:text-primary'}`}>
-                      Dashboard
-                    </a>
+                  <Link href="/dashboard" className={`font-medium ${location === '/dashboard' ? 'text-primary' : 'text-gray-700 hover:text-primary'}`}>
+                    Dashboard
                   </Link>
-                  <Link href="/jobs">
-                    <a className={`font-medium ${location === '/jobs' ? 'text-primary' : 'text-gray-700 hover:text-primary'}`}>
-                      {user.type === 'contratante' ? 'Minhas Vagas' : 'Explorar Vagas'}
-                    </a>
+                  <Link href="/jobs" className={`font-medium ${location === '/jobs' ? 'text-primary' : 'text-gray-700 hover:text-primary'}`}>
+                    {user.type === 'contratante' ? 'Minhas Vagas' : 'Explorar Vagas'}
                   </Link>
                   {user.type === 'freelancer' && (
-                    <Link href="/applications">
-                      <a className={`font-medium ${location === '/applications' ? 'text-primary' : 'text-gray-700 hover:text-primary'}`}>
-                        Candidaturas
-                      </a>
+                    <Link href="/applications" className={`font-medium ${location === '/applications' ? 'text-primary' : 'text-gray-700 hover:text-primary'}`}>
+                      Candidaturas
                     </Link>
                   )}
                 </nav>
@@ -62,7 +56,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href="/settings">
+                      <Link href="/settings" className="flex items-center">
                         <Settings className="h-4 w-4 mr-2" />
                         Configurações
                       </Link>
@@ -79,15 +73,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <nav className="hidden md:flex space-x-8">
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Como funciona</a>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Categorias</a>
-                  <Link href="/clerk-demo">
-                    <a className="text-gray-700 hover:text-primary font-medium">Clerk Demo</a>
+                  <Link href="/clerk-demo" className="text-gray-700 hover:text-primary font-medium">
+                    Clerk Demo
                   </Link>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
-                <Link href={hasValidClerkKey ? "/clerk-login" : "/login"}>
+                <Link href="/login">
                   <Button variant="ghost">Entrar</Button>
                 </Link>
-                <Link href={hasValidClerkKey ? "/clerk-register" : "/register"}>
+                <Link href="/register">
                   <Button>Cadastrar</Button>
                 </Link>
               </div>
