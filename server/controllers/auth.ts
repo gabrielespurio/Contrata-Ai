@@ -134,8 +134,14 @@ export async function syncClerkUser(req: Request, res: Response) {
   try {
     const { name, email, type, city, clerkId } = req.body;
 
+    console.log('Received sync request:', { name, email, type, city, clerkId });
+
     if (!name || !email || !type || !clerkId) {
-      return res.status(400).json({ message: "Missing required fields" });
+      console.log('Missing fields:', { name: !!name, email: !!email, type: !!type, clerkId: !!clerkId });
+      return res.status(400).json({ 
+        message: "Missing required fields", 
+        received: { name: !!name, email: !!email, type: !!type, clerkId: !!clerkId }
+      });
     }
 
     // Check if user already exists by email

@@ -66,12 +66,14 @@ function InnerClerkAuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const userData = {
-        name: clerkUser.fullName || clerkUser.firstName || '',
+        name: clerkUser.fullName || clerkUser.firstName || clerkUser.username || 'Usuário',
         email: clerkUser.primaryEmailAddress?.emailAddress || '',
         type,
         city: 'São Paulo', // Default city, can be updated later
         clerkId: clerkUser.id,
       };
+
+      console.log('Sending user data:', userData);
 
       const response = await fetch('/api/auth/sync-clerk-user', {
         method: 'POST',
