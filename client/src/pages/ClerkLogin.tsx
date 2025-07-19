@@ -31,7 +31,7 @@ export default function ClerkLogin() {
             }
           }}
           redirectUrl="/dashboard"
-          signUpUrl="/register"
+          signUpUrl="/clerk-register"
         />
       </div>
     </div>
