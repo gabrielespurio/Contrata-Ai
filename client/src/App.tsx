@@ -9,6 +9,7 @@ import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClerkDemo } from "@/components/ClerkDemo";
 import NotFound from "@/pages/not-found";
+import Onboarding from "@/pages/Onboarding";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/clerk-login" component={ClerkLogin} />
         <Route path="/clerk-register" component={ClerkRegister} />
         <Route path="/clerk-demo" component={ClerkDemo} />
+        <Route path="/onboarding" component={Onboarding} />
         
         <Route path="/dashboard">
           <ProtectedRoute>

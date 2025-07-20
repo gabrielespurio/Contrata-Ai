@@ -1,5 +1,6 @@
 import { useUnifiedAuth } from '@/hooks/useAuth';
-import { Redirect } from 'wouter';
+import { useEffect } from 'react';
+import { Redirect, useLocation } from 'wouter';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -7,7 +8,15 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredUserType }: ProtectedRouteProps) {
-  const { user, isLoading } = useUnifiedAuth();
+  const { user, isLoading, needsOnboarding } = useUnifiedAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    // Redirect to onboarding if user needs it and not already there
+    if (!isLoading && user && needsOnboarding && window.location.pathname !== '/onboarding') {
+      setLocation('/onboarding');
+    }
+  }, [user, isLoading, needsOnboarding, setLocation]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -23,12 +32,12 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
 
   // Redirect to login if not authenticated
   if (!user) {
-    const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-      !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-      import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-    
-    const loginPath = hasValidClerkKey ? '/clerk-login' : '/login';
-    return <Redirect to={loginPath} />;
+    return <Redirect to="/clerk-login" />;
+  }
+
+  // If user needs onboarding, don't show protected content
+  if (needsOnboarding && window.location.pathname !== '/onboarding') {
+    return <Redirect to="/onboarding" />;
   }
 
   // Redirect if user type doesn't match required type

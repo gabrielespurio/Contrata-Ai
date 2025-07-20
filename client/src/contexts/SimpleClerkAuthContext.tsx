@@ -14,6 +14,7 @@ interface User {
 interface SimpleClerkAuthContextType {
   user: User | null;
   isLoading: boolean;
+  needsOnboarding: boolean;
   logout: () => void;
 }
 
@@ -27,11 +28,18 @@ function InnerSimpleClerkAuthProvider({ children }: { children: ReactNode }) {
     id: clerkUser.id,
     name: clerkUser.fullName || clerkUser.firstName || 'Usuário',
     email: clerkUser.primaryEmailAddress?.emailAddress || '',
-    type: 'freelancer',
-    city: 'São Paulo',
+    type: 'freelancer', // Default, will be updated during onboarding
+    city: 'São Paulo', // Default, will be updated during onboarding
     premium: false,
     destaque: false
   } : null;
+
+  // Check if user needs onboarding
+  const needsOnboarding = user && (
+    user.city === 'São Paulo' && 
+    user.type === 'freelancer' &&
+    user.name === 'Usuário'
+  ) || false;
 
   const logout = () => {
     clerk.signOut();
@@ -41,6 +49,7 @@ function InnerSimpleClerkAuthProvider({ children }: { children: ReactNode }) {
     <SimpleClerkAuthContext.Provider value={{ 
       user, 
       isLoading: !isLoaded,
+      needsOnboarding,
       logout 
     }}>
       {children}
