@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleClerkAuthProvider } from "@/contexts/SimpleClerkAuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ClerkErrorBoundary } from "@/components/ClerkErrorBoundary";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -72,19 +73,36 @@ function Router() {
 }
 
 function App() {
-  // Always use Clerk authentication only
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ClerkErrorBoundary>
-        <SimpleClerkAuthProvider>
+  // Check if Clerk keys are available, fallback to JWT auth if not
+  const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  
+  if (clerkKey) {
+    // Use Clerk authentication when keys are available
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ClerkErrorBoundary>
+          <SimpleClerkAuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </SimpleClerkAuthProvider>
+        </ClerkErrorBoundary>
+      </QueryClientProvider>
+    );
+  } else {
+    // Fallback to JWT authentication when Clerk keys are not available
+    return (
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
           <TooltipProvider>
             <Toaster />
             <Router />
           </TooltipProvider>
-        </SimpleClerkAuthProvider>
-      </ClerkErrorBoundary>
-    </QueryClientProvider>
-  );
+        </AuthProvider>
+      </QueryClientProvider>
+    );
+  }
 }
 
 export default App;

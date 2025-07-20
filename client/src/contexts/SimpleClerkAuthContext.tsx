@@ -18,7 +18,7 @@ interface SimpleClerkAuthContextType {
   logout: () => void;
 }
 
-const SimpleClerkAuthContext = createContext<SimpleClerkAuthContextType | undefined>(undefined);
+export const SimpleClerkAuthContext = createContext<SimpleClerkAuthContextType | undefined>(undefined);
 
 function InnerSimpleClerkAuthProvider({ children }: { children: ReactNode }) {
   const { user: clerkUser, isLoaded } = useUser();
