@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ClerkDemo } from "@/components/ClerkDemo";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/Onboarding";
+import ProfileSetup from "@/pages/ProfileSetup";
 import Home from "@/pages/Home";
 import ClerkLogin from "@/pages/ClerkLogin";
 import ClerkRegister from "@/pages/ClerkRegister";
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/clerk-register" component={ClerkRegister} />
         <Route path="/clerk-demo" component={ClerkDemo} />
         <Route path="/onboarding" component={Onboarding} />
+        <Route path="/profile-setup" component={ProfileSetup} />
         
         <Route path="/dashboard">
           <ProtectedRoute>

@@ -22,26 +22,52 @@ export async function syncClerkUser(req: Request, res: Response) {
     // Check if user already exists in our database
     let user = await storage.getUserByClerkId(userId);
     
+    // Prepare user data based on userType and profile information
+    const userDataToSave: any = {
+      clerkId: userId,
+      email: clerkUser.emailAddresses[0]?.emailAddress || '',
+      type: userType as 'freelancer' | 'contratante',
+      city: userData?.city || userData?.address?.city || 'São Paulo'
+    };
+
+    if (userType === 'freelancer') {
+      userDataToSave.name = userData?.name || clerkUser.firstName || 'Freelancer';
+      userDataToSave.phone = userData?.phone || '';
+    } else if (userType === 'contratante') {
+      if (userData?.personType === 'individual') {
+        userDataToSave.name = userData?.fullName || userData?.name || clerkUser.firstName || 'Contratante';
+        userDataToSave.cpf = userData?.cpf || '';
+        userDataToSave.phone = userData?.phone || '';
+      } else if (userData?.personType === 'empresa') {
+        userDataToSave.name = userData?.companyName || 'Empresa';
+        userDataToSave.cnpj = userData?.cnpj || '';
+        userDataToSave.responsibleName = userData?.responsibleName || '';
+        userDataToSave.phone = userData?.phone || '';
+      }
+    }
+    
     if (!user) {
       // Create new user in our database
-      const newUser = {
-        clerkId: userId,
-        email: clerkUser.emailAddresses[0]?.emailAddress || '',
-        name: userData?.name || clerkUser.firstName || '',
-        type: userType as 'freelancer' | 'contratante',
-        city: userData?.city || '',
-      };
-      
-      user = await storage.createUser(newUser);
+      user = await storage.createUser(userDataToSave);
+    } else {
+      // Update existing user
+      await storage.updateUser(user.id, userDataToSave);
+      user = await storage.getUserByClerkId(userId); // Get updated user
     }
 
     // Update Clerk user's public metadata
     await clerkClient.users.updateUserMetadata(userId, {
       publicMetadata: {
         userType: userType,
-        databaseSynced: true
+        city: userDataToSave.city,
+        databaseSynced: true,
+        premium: false
       }
     });
+
+    if (!user) {
+      return res.status(500).json({ error: 'Failed to create or update user' });
+    }
 
     res.json({
       success: true,

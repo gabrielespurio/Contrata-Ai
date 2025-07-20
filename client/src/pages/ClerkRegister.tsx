@@ -19,7 +19,7 @@ export default function ClerkRegister() {
               headerSubtitle: 'hidden',
             }
           }}
-          afterSignUpUrl="/onboarding"
+          afterSignUpUrl="/profile-setup"
           signInUrl="/clerk-login"
         />
       </div>
