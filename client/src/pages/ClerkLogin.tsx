@@ -1,25 +1,6 @@
-import { Redirect } from 'wouter';
-import { SignIn, useUser } from '@clerk/clerk-react';
+import { SignIn } from '@clerk/clerk-react';
 
 export default function ClerkLogin() {
-  // Check if we're in Clerk mode based on environment
-  const hasValidClerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-    !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') && 
-    import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-
-  // Only use Clerk hooks if we have valid keys
-  const { isSignedIn } = hasValidClerkKey ? useUser() : { isSignedIn: false };
-
-  // If we don't have valid Clerk keys, redirect to regular login
-  if (!hasValidClerkKey) {
-    return <Redirect to="/login" />;
-  }
-
-  // If user is already signed in, redirect to dashboard
-  if (isSignedIn) {
-    return <Redirect to="/dashboard" />;
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
@@ -38,7 +19,7 @@ export default function ClerkLogin() {
               headerSubtitle: 'hidden',
             }
           }}
-          redirectUrl="/dashboard"
+          afterSignInUrl="/"
           signUpUrl="/clerk-register"
         />
       </div>
