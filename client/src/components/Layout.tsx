@@ -70,17 +70,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <nav className="hidden md:flex space-x-8">
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Como funciona</a>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Categorias</a>
-                  {import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && (
-                    <Link href="/clerk-demo" className="text-gray-700 hover:text-primary font-medium">
-                      Clerk Demo
-                    </Link>
-                  )}
+                  <Link href="/clerk-demo" className="text-gray-700 hover:text-primary font-medium">
+                    Clerk Demo
+                  </Link>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
-                <Link href={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ? "/clerk-login" : "/login"}>
+                <Link href="/clerk-login">
                   <Button variant="ghost">Entrar</Button>
                 </Link>
-                <Link href={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ? "/clerk-register" : "/register"}>
+                <Link href="/clerk-register">
                   <Button>Cadastrar</Button>
                 </Link>
               </div>

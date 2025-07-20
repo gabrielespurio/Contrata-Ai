@@ -1,56 +1,89 @@
-import type { Request, Response } from "express";
-import { storage } from "../storage";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-here';
+import { Request, Response } from 'express';
+import { clerkClient } from '@clerk/clerk-sdk-node';
+import { storage } from '../storage';
 
 export async function syncClerkUser(req: Request, res: Response) {
   try {
-    const { name, email, type, city, clerkId } = req.body;
+    const { userId, userType, userData } = req.body;
 
-    if (!name || !email || !type || !clerkId) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    // Check if user already exists by email or clerkId
-    let existingUser;
-    try {
-      existingUser = await storage.getUserByEmail(email);
-    } catch (error) {
-      // User doesn't exist, which is fine
-    }
-
-    let user;
-    if (existingUser) {
-      // Update existing user with Clerk ID if not already set
-      user = await storage.updateUser(existingUser.id, {
-        clerkId: clerkId,
-        name: name,
-        type: type
-      });
-    } else {
-      // Create new user
-      user = await storage.createUser({
-        name,
-        email,
-        type,
-        city: city || 'São Paulo',
-        clerkId,
-        premium: false,
-        destaque: false
+    if (!userId || !userType) {
+      return res.status(400).json({ 
+        error: 'userId and userType are required' 
       });
     }
 
-    // Generate JWT token for our system
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, type: user.type },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Get user from Clerk to verify
+    const clerkUser = await clerkClient.users.getUser(userId);
+    
+    if (!clerkUser) {
+      return res.status(404).json({ error: 'User not found in Clerk' });
+    }
 
-    res.json({ user, token });
+    // Check if user already exists in our database
+    let user = await storage.getUserByClerkId(userId);
+    
+    if (!user) {
+      // Create new user in our database
+      const newUser = {
+        clerkId: userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        name: userData?.name || clerkUser.firstName || '',
+        type: userType as 'freelancer' | 'contratante',
+        city: userData?.city || '',
+      };
+      
+      user = await storage.createUser(newUser);
+    }
+
+    // Update Clerk user's public metadata
+    await clerkClient.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        userType: userType,
+        databaseSynced: true
+      }
+    });
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        userType: user.type,
+        needsOnboarding: false
+      }
+    });
   } catch (error) {
     console.error('Error syncing Clerk user:', error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ error: 'Failed to sync user data' });
+  }
+}
+
+export async function getClerkProfile(req: Request, res: Response) {
+  try {
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    // Get user from our database
+    const user = await storage.getUserByClerkId(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found in database' });
+    }
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.type,
+      city: user.city,
+      premium: user.premium
+    });
+  } catch (error) {
+    console.error('Error getting profile:', error);
+    res.status(500).json({ error: 'Failed to get profile' });
   }
 }

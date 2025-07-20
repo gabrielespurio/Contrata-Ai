@@ -11,46 +11,76 @@ interface User {
   destaque: boolean;
 }
 
-interface SimpleClerkAuthContextType {
+export interface SimpleClerkAuthContextType {
   user: User | null;
-  isLoading: boolean;
+  isLoaded: boolean;
+  isSignedIn: boolean | undefined;
+  signIn: () => void;
+  signUp: () => void;
+  signOut: () => Promise<void>;
+  syncUserWithDatabase: (userData: any) => Promise<any>;
   needsOnboarding: boolean;
-  logout: () => void;
 }
 
 export const SimpleClerkAuthContext = createContext<SimpleClerkAuthContextType | undefined>(undefined);
 
 function InnerSimpleClerkAuthProvider({ children }: { children: ReactNode }) {
-  const { user: clerkUser, isLoaded } = useUser();
+  const { user: clerkUser, isLoaded, isSignedIn } = useUser();
   const clerk = useClerk();
 
   const user: User | null = clerkUser ? {
     id: clerkUser.id,
     name: clerkUser.fullName || clerkUser.firstName || 'Usuário',
     email: clerkUser.primaryEmailAddress?.emailAddress || '',
-    type: 'freelancer', // Default, will be updated during onboarding
-    city: 'São Paulo', // Default, will be updated during onboarding
-    premium: false,
+    type: (clerkUser.publicMetadata?.userType as 'freelancer' | 'contratante') || 'freelancer',
+    city: (clerkUser.publicMetadata?.city as string) || 'São Paulo',
+    premium: (clerkUser.publicMetadata?.premium as boolean) || false,
     destaque: false
   } : null;
 
   // Check if user needs onboarding
-  const needsOnboarding = user && (
-    user.city === 'São Paulo' && 
-    user.type === 'freelancer' &&
-    user.name === 'Usuário'
-  ) || false;
+  const needsOnboarding = user && (!user.city || (user.city === 'São Paulo' && !clerkUser?.publicMetadata?.databaseSynced));
 
-  const logout = () => {
-    clerk.signOut();
+  const syncUserWithDatabase = async (userData: any) => {
+    if (!user || !isSignedIn) {
+      throw new Error("User not authenticated");
+    }
+
+    try {
+      const response = await fetch('/api/auth/sync-clerk-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          userType: userData.userType,
+          userData: userData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync user data');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error syncing user:', error);
+      throw error;
+    }
   };
 
   return (
     <SimpleClerkAuthContext.Provider value={{ 
       user, 
-      isLoading: !isLoaded,
-      needsOnboarding,
-      logout 
+      isLoaded,
+      isSignedIn,
+      signIn: () => clerk.openSignIn(),
+      signUp: () => clerk.openSignUp(),
+      signOut: () => clerk.signOut(),
+      syncUserWithDatabase,
+      needsOnboarding: needsOnboarding || false
     }}>
       {children}
     </SimpleClerkAuthContext.Provider>

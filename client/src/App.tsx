@@ -4,7 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleClerkAuthProvider } from "@/contexts/SimpleClerkAuthContext";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { ClerkErrorBoundary } from "@/components/ClerkErrorBoundary";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -12,8 +11,6 @@ import { ClerkDemo } from "@/components/ClerkDemo";
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/Onboarding";
 import Home from "@/pages/Home";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
 import ClerkLogin from "@/pages/ClerkLogin";
 import ClerkRegister from "@/pages/ClerkRegister";
 import Dashboard from "@/pages/Dashboard";
@@ -28,8 +25,8 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
+        <Route path="/login" component={ClerkLogin} />
+        <Route path="/register" component={ClerkRegister} />
         <Route path="/clerk-login" component={ClerkLogin} />
         <Route path="/clerk-register" component={ClerkRegister} />
         <Route path="/clerk-demo" component={ClerkDemo} />
@@ -73,36 +70,19 @@ function Router() {
 }
 
 function App() {
-  // Check if Clerk keys are available, fallback to JWT auth if not
-  const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  
-  if (clerkKey) {
-    // Use Clerk authentication when keys are available
-    return (
-      <QueryClientProvider client={queryClient}>
-        <ClerkErrorBoundary>
-          <SimpleClerkAuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </SimpleClerkAuthProvider>
-        </ClerkErrorBoundary>
-      </QueryClientProvider>
-    );
-  } else {
-    // Fallback to JWT authentication when Clerk keys are not available
-    return (
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+  // Use Clerk authentication only
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ClerkErrorBoundary>
+        <SimpleClerkAuthProvider>
           <TooltipProvider>
             <Toaster />
             <Router />
           </TooltipProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    );
-  }
+        </SimpleClerkAuthProvider>
+      </ClerkErrorBoundary>
+    </QueryClientProvider>
+  );
 }
 
 export default App;

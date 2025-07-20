@@ -10,6 +10,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Clerk-Only Authentication System (July 20, 2025)
+- Completely removed JWT authentication system in favor of Clerk-only authentication
+- Removed all JWT-related files: AuthContext.tsx, Login.tsx, Register.tsx, auth middleware
+- Created new Clerk-based authentication middleware in server/middleware/clerkAuth.ts
+- Updated all API routes to use Clerk authentication instead of JWT
+- Enhanced SimpleClerkAuthContext to support user synchronization with database
+- Redirected all login/register routes to use Clerk authentication
+- Added getUserByClerkId method to database storage for Clerk user lookups
+- Updated user creation and application creation to handle proper type casting
+- System now exclusively uses Clerk for authentication with database sync functionality
+
+## Previous Changes
+
 ### CPF/CNPJ/Phone Field Formatting (July 20, 2025)
 - Implemented automatic field formatting for CPF, CNPJ, phone numbers, and CEP
 - Created comprehensive mask utilities in `@/lib/masks.ts` with validation functions

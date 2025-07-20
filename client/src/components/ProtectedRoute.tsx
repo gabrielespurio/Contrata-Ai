@@ -32,8 +32,7 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
 
   // Redirect to login if not authenticated
   if (!user) {
-    const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-    return <Redirect to={clerkKey ? "/clerk-login" : "/login"} />;
+    return <Redirect to="/clerk-login" />;
   }
 
   // If user needs onboarding, don't show protected content

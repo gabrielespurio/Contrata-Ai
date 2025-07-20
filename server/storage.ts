@@ -25,6 +25,7 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByClerkId(clerkId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User>;
 
@@ -67,10 +68,18 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByClerkId(clerkId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.clerkId, clerkId));
+    return user || undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values([insertUser])
+      .values([{
+        ...insertUser,
+        type: insertUser.type as "freelancer" | "contratante"
+      }])
       .returning();
     return user;
   }
@@ -235,7 +244,10 @@ export class DatabaseStorage implements IStorage {
   async createApplication(application: InsertApplication): Promise<Application> {
     const [result] = await db
       .insert(applications)
-      .values([application])
+      .values([{
+        ...application,
+        status: (application.status || "pending") as "pending" | "accepted" | "rejected"
+      }])
       .returning();
     return result;
   }
