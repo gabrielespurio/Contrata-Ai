@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, UserCheck, Briefcase, User, Building2, Search, X } from 'lucide-react';
+import { formatCPF, formatCNPJ, formatPhone, formatCEP } from '@/lib/masks';
 
 const cities = [
   'São Paulo',
@@ -455,8 +456,8 @@ export default function Register() {
                   id="cep"
                   type="text"
                   placeholder="00000-000"
-                  value={formData.cep.replace(/(\d{5})(\d{3})/, '$1-$2')}
-                  onChange={handleCEPChange}
+                  value={formatCEP(formData.cep)}
+                  onChange={(e) => setFormData({ ...formData, cep: formatCEP(e.target.value) })}
                   maxLength={9}
                   required
                 />
@@ -769,7 +770,8 @@ export default function Register() {
                     type="tel"
                     placeholder="(11) 99999-9999"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
+                    maxLength={15}
                     required
                   />
                 </div>
@@ -836,7 +838,8 @@ export default function Register() {
                     type="text"
                     placeholder="000.000.000-00"
                     value={formData.cpf}
-                    onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
+                    maxLength={14}
                     required
                   />
                 </div>
@@ -858,7 +861,8 @@ export default function Register() {
                     type="tel"
                     placeholder="(11) 99999-9999"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
+                    maxLength={15}
                     required
                   />
                 </div>
@@ -886,7 +890,8 @@ export default function Register() {
                     type="text"
                     placeholder="00.000.000/0000-00"
                     value={formData.cnpj}
-                    onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, cnpj: formatCNPJ(e.target.value) })}
+                    maxLength={18}
                     required
                   />
                 </div>
@@ -919,7 +924,8 @@ export default function Register() {
                     type="tel"
                     placeholder="(11) 99999-9999"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
+                    maxLength={15}
                     required
                   />
                 </div>

@@ -10,6 +10,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### CPF/CNPJ/Phone Field Formatting (July 20, 2025)
+- Implemented automatic field formatting for CPF, CNPJ, phone numbers, and CEP
+- Created comprehensive mask utilities in `@/lib/masks.ts` with validation functions
+- Applied formatting to all registration forms (freelancer, pessoa física, pessoa jurídica)
+- CPF format: 000.000.000-00 with real-time validation
+- CNPJ format: 00.000.000/0000-00 with real-time validation  
+- Phone format: (00) 00000-0000 supporting both landline and mobile
+- CEP format: 00000-000 with automatic address lookup
+- Enhanced user experience with proper input masking and length limits
+
+### Migration to Replit Environment (July 20, 2025)
+- Successfully migrated project from Replit Agent to standard Replit environment
+- Fixed hardcoded database credentials security vulnerability
+- Set up PostgreSQL database with proper schema migrations via Drizzle
+- Implemented authentication system fallback (Clerk → JWT when keys unavailable)
+- Fixed module export errors and authentication context integration
+- Application now runs cleanly with proper client/server separation
+- All dependencies properly configured for Replit deployment
+
 ### Clerk Authentication Integration (July 19, 2025)
 - Integrated Clerk authentication system as an alternative to custom JWT authentication
 - Created ClerkAuthProvider context for managing Clerk user state
