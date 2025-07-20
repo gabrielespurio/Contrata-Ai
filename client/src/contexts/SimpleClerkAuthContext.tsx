@@ -90,9 +90,35 @@ function InnerSimpleClerkAuthProvider({ children }: { children: ReactNode }) {
 export function SimpleClerkAuthProvider({ children }: { children: ReactNode }) {
   const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
   
+  // Debug the key being used
+  console.log('Clerk Key Debug:', {
+    key: publishableKey?.substring(0, 10) + '...',
+    keyType: publishableKey?.startsWith('pk_') ? 'publishable' : publishableKey?.startsWith('sk_') ? 'secret' : 'unknown'
+  });
+  
   if (!publishableKey) {
     console.error('Missing Clerk Publishable Key');
     return <div>Erro: Chaves do Clerk não configuradas</div>;
+  }
+  
+  // Check if key is actually a secret key
+  if (publishableKey.startsWith('sk_')) {
+    console.error('Secret key being used as publishable key!');
+    return (
+      <div className="p-4 bg-red-100 text-red-800 rounded-lg max-w-2xl mx-auto mt-8">
+        <h2 className="font-bold text-lg mb-2">🔑 Erro de Configuração do Clerk</h2>
+        <p className="mb-2">As chaves do Clerk estão trocadas!</p>
+        <div className="bg-white p-3 rounded text-sm mb-3">
+          <p><strong>Problema:</strong> VITE_CLERK_PUBLISHABLE_KEY tem valor de chave secreta (sk_test_...)</p>
+          <p><strong>Solução:</strong> Trocar os valores das chaves no Replit Secrets:</p>
+          <ul className="list-disc ml-4 mt-2">
+            <li>VITE_CLERK_PUBLISHABLE_KEY deve ter valor pk_test_...</li>
+            <li>CLERK_SECRET_KEY deve ter valor sk_test_...</li>
+          </ul>
+        </div>
+        <p className="text-sm">Após corrigir, o sistema funcionará normalmente.</p>
+      </div>
+    );
   }
 
   // Add error boundary for Clerk initialization errors
