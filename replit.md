@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Registration Form Simplification (July 26, 2025)
+- Removed "Tipo de usuário" field from registration form
+- Removed "Cidade" field from registration form
+- Set default values: type='freelancer', city='São Paulo'
+- Simplified registration flow to only require name, email, and password
+- User type and city selection now handled in onboarding flow instead
+
 ### Onboarding Flow Implementation (July 26, 2025)
 - Configured complete user onboarding system for profile identification after registration
 - Implemented automatic redirection to profile setup (/profile-setup) for new users

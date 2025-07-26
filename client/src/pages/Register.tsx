@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,14 +16,13 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    type: '' as 'freelancer' | 'contratante' | '',
-    city: ''
+    type: 'freelancer' as 'freelancer' | 'contratante',
+    city: 'São Paulo'
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.type) return;
     
     setIsLoading(true);
     
@@ -87,30 +86,7 @@ export default function Register() {
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="type">Tipo de usuário</Label>
-              <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value as 'freelancer' | 'contratante' })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione seu tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="freelancer">Freelancer</SelectItem>
-                  <SelectItem value="contratante">Contratante</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="city">Cidade</Label>
-              <Input
-                id="city"
-                type="text"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                placeholder="São Paulo"
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading || !formData.type}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </form>
