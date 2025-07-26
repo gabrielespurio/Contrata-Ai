@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Enhanced Onboarding with Category Selection for Contractors (July 26, 2025)
+- Added 5th step in ProfileSetup specifically for contractors to select categories of interest
+- Contractors can now select up to 3 service categories they're most interested in hiring
+- Added search functionality for easy category filtering
+- Visual feedback with selected categories displayed as removable badges
+- Updated step validation to require category selection for contractors
+- Enhanced progress indicator to show 5 steps for contractors vs 4 for freelancers
+
 ### Registration Form Simplification (July 26, 2025)
 - Removed "Tipo de usuário" field from registration form
 - Removed "Cidade" field from registration form

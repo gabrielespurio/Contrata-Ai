@@ -103,7 +103,7 @@ export default function ProfileSetup() {
 
   const getTotalSteps = () => {
     if (data.userType === 'freelancer') return 4; // Type -> Personal -> Address -> Categories
-    if (data.userType === 'contratante') return 4; // Type -> Person Type -> Data -> Address
+    if (data.userType === 'contratante') return 5; // Type -> Person Type -> Data -> Address -> Categories
     return 4;
   };
 
@@ -221,6 +221,9 @@ export default function ProfileSetup() {
         if (data.userType === 'freelancer') return data.selectedCategories.length > 0;
         if (data.userType === 'contratante') return data.address.cep.trim() && data.address.city.trim();
         return false;
+      case 5:
+        if (data.userType === 'contratante') return data.selectedCategories.length > 0;
+        return false;
       default: return false;
     }
   };
@@ -266,6 +269,7 @@ export default function ProfileSetup() {
               {currentStep === 2 && (data.userType === 'contratante' ? "Tipo de pessoa" : "Informações pessoais")}
               {currentStep === 3 && (data.userType === 'contratante' ? "Dados pessoais/empresa" : "Endereço")}
               {currentStep === 4 && (data.userType === 'freelancer' ? "Áreas de atuação" : "Endereço")}
+              {currentStep === 5 && data.userType === 'contratante' && "Categorias de interesse"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -579,6 +583,64 @@ export default function ProfileSetup() {
             {/* Categories Step for Freelancer (Step 4) */}
             {currentStep === 4 && data.userType === 'freelancer' && (
               <div className="space-y-4">
+                <div>
+                  <Label htmlFor="search">Buscar categorias (máximo 3)</Label>
+                  <Input
+                    id="search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Digite para buscar categorias..."
+                  />
+                </div>
+                
+                {data.selectedCategories.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Categorias selecionadas:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {data.selectedCategories.map(categoryId => {
+                        const category = categories.find(c => c.id === categoryId);
+                        return category ? (
+                          <Badge key={categoryId} variant="secondary" className="flex items-center gap-1">
+                            {category.name}
+                            <X 
+                              size={14} 
+                              className="cursor-pointer hover:text-red-500" 
+                              onClick={() => handleCategoryToggle(categoryId)}
+                            />
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {filteredCategories
+                    .filter(cat => !data.selectedCategories.includes(cat.id))
+                    .map(category => (
+                      <div
+                        key={category.id}
+                        onClick={() => handleCategoryToggle(category.id)}
+                        className={`p-3 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${
+                          data.selectedCategories.length >= 3 
+                            ? 'opacity-50 cursor-not-allowed' 
+                            : 'hover:border-primary'
+                        }`}
+                      >
+                        <span className="font-medium">{category.name}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Categories Step for Contratante (Step 5) */}
+            {currentStep === 5 && data.userType === 'contratante' && (
+              <div className="space-y-4">
+                <p className="text-gray-600 mb-4">
+                  Selecione até 3 categorias de serviços que você tem interesse em contratar mais frequentemente.
+                </p>
+                
                 <div>
                   <Label htmlFor="search">Buscar categorias (máximo 3)</Label>
                   <Input
