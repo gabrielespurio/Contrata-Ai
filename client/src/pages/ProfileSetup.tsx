@@ -73,6 +73,103 @@ export default function ProfileSetup() {
     }
   }, [user, setLocation]);
 
+  // Load categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const categoriesData = await response.json();
+        setCategories(categoriesData);
+        setFilteredCategories(categoriesData);
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Filter categories based on search term
+  useEffect(() => {
+    if (searchTerm) {
+      setFilteredCategories(
+        categories.filter(category => 
+          category.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredCategories(categories);
+    }
+  }, [searchTerm, categories]);
+
+  const getTotalSteps = () => {
+    if (data.userType === 'freelancer') return 4; // Type -> Personal -> Address -> Categories
+    if (data.userType === 'contratante') return 4; // Type -> Person Type -> Data -> Address
+    return 4;
+  };
+
+  const handleNext = () => {
+    if (currentStep < getTotalSteps()) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleUserTypeSelect = (type: 'freelancer' | 'contratante') => {
+    setData({ ...data, userType: type });
+    handleNext();
+  };
+
+  const handlePersonTypeSelect = (type: 'individual' | 'empresa') => {
+    setData({ ...data, personType: type });
+    handleNext();
+  };
+
+  const handleCEPLookup = async (cep: string) => {
+    if (cep.length === 9) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep.replace('-', '')}/json/`);
+        const addressData = await response.json();
+        
+        if (!addressData.erro) {
+          setData(prev => ({
+            ...prev,
+            address: {
+              ...prev.address,
+              cep,
+              street: addressData.logradouro || '',
+              neighborhood: addressData.bairro || '',
+              city: addressData.localidade || '',
+              state: addressData.uf || ''
+            },
+            city: addressData.localidade || prev.city
+          }));
+        }
+      } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
+      }
+    }
+  };
+
+  const handleCategoryToggle = (categoryId: string) => {
+    const isSelected = data.selectedCategories.includes(categoryId);
+    if (isSelected) {
+      setData(prev => ({
+        ...prev,
+        selectedCategories: prev.selectedCategories.filter(id => id !== categoryId)
+      }));
+    } else if (data.selectedCategories.length < 3) {
+      setData(prev => ({
+        ...prev,
+        selectedCategories: [...prev.selectedCategories, categoryId]
+      }));
+    }
+  };
+
   // Load categories for freelancer selection
   useEffect(() => {
     fetch('/api/categories')
