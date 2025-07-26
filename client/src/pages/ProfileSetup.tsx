@@ -400,7 +400,11 @@ export default function ProfileSetup() {
                     onChange={(e) => setData(prev => ({ ...prev, cpf: formatCPF(e.target.value) }))}
                     placeholder="000.000.000-00"
                     maxLength={14}
+                    className={data.cpf && !isValidCPF(data.cpf) ? 'border-red-500' : ''}
                   />
+                  {data.cpf && !isValidCPF(data.cpf) && (
+                    <p className="text-red-500 text-sm mt-1">Por favor, insira um CPF válido</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="phone">Telefone</Label>
@@ -434,7 +438,11 @@ export default function ProfileSetup() {
                     onChange={(e) => setData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
                     placeholder="00.000.000/0000-00"
                     maxLength={18}
+                    className={data.cnpj && !isValidCNPJ(data.cnpj) ? 'border-red-500' : ''}
                   />
+                  {data.cnpj && !isValidCNPJ(data.cnpj) && (
+                    <p className="text-red-500 text-sm mt-1">Por favor, insira um CNPJ válido</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="responsibleName">Nome do responsável</Label>
