@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { authenticateClerk, requireUserType } from "./middleware/clerkAuth";
-import { syncClerkUser, getClerkProfile } from "./controllers/clerkAuth";
+import { authenticateToken, requireUserType } from "./middleware/auth";
+import { login, signup, getProfile } from "./controllers/auth";
 import { 
   getJobs, 
   getJobById, 
@@ -31,32 +31,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await seedDatabase();
 
   // Auth routes
-  app.post('/api/auth/sync-clerk-user', syncClerkUser);
-  app.get('/api/auth/profile', authenticateClerk, getClerkProfile);
+  app.post('/api/auth/login', login);
+  app.post('/api/auth/signup', signup);
+  app.get('/api/auth/profile', authenticateToken, getProfile);
 
   // Job routes
   app.get('/api/jobs', getJobs);
   app.get('/api/jobs/:id', getJobById);
-  app.get('/api/jobs/my/jobs', authenticateClerk, requireUserType('contratante'), getMyJobs);
-  app.post('/api/jobs', authenticateClerk, requireUserType('contratante'), createJob);
-  app.patch('/api/jobs/:id', authenticateClerk, requireUserType('contratante'), updateJob);
-  app.delete('/api/jobs/:id', authenticateClerk, requireUserType('contratante'), deleteJob);
+  app.get('/api/jobs/my/jobs', authenticateToken, requireUserType('contratante'), getMyJobs);
+  app.post('/api/jobs', authenticateToken, requireUserType('contratante'), createJob);
+  app.patch('/api/jobs/:id', authenticateToken, requireUserType('contratante'), updateJob);
+  app.delete('/api/jobs/:id', authenticateToken, requireUserType('contratante'), deleteJob);
 
   // Category routes
   app.get('/api/categories', getCategories);
   app.get('/api/subcategories', getSubcategories);
 
   // Application routes
-  app.get('/api/applications/job/:jobId', authenticateClerk, requireUserType('contratante'), getApplicationsByJob);
-  app.get('/api/applications/my', authenticateClerk, requireUserType('freelancer'), getMyApplications);
-  app.post('/api/applications', authenticateClerk, requireUserType('freelancer'), createApplication);
-  app.patch('/api/applications/:id/status', authenticateClerk, requireUserType('contratante'), updateApplicationStatus);
+  app.get('/api/applications/job/:jobId', authenticateToken, requireUserType('contratante'), getApplicationsByJob);
+  app.get('/api/applications/my', authenticateToken, requireUserType('freelancer'), getMyApplications);
+  app.post('/api/applications', authenticateToken, requireUserType('freelancer'), createApplication);
+  app.patch('/api/applications/:id/status', authenticateToken, requireUserType('contratante'), updateApplicationStatus);
 
   // User routes
-  app.patch('/api/users/profile', authenticateClerk, updateProfile);
-  app.post('/api/users/upgrade', authenticateClerk, upgradeToPremium);
-  app.post('/api/users/highlight', authenticateClerk, purchaseHighlight);
-  app.get('/api/users/stats', authenticateClerk, getStats);
+  app.patch('/api/users/profile', authenticateToken, updateProfile);
+  app.post('/api/users/upgrade', authenticateToken, upgradeToPremium);
+  app.post('/api/users/highlight', authenticateToken, purchaseHighlight);
+  app.get('/api/users/stats', authenticateToken, getStats);
 
   const httpServer = createServer(app);
   return httpServer;

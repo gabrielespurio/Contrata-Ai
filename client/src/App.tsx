@@ -72,14 +72,20 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SimpleAuthProvider>
-        <OnboardingRedirectSimple>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </OnboardingRedirectSimple>
+        <OnboardingRedirectWrapper />
       </SimpleAuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function OnboardingRedirectWrapper() {
+  return (
+    <OnboardingRedirectSimple>
+      <TooltipProvider>
+        <Router />
+        <Toaster />
+      </TooltipProvider>
+    </OnboardingRedirectSimple>
   );
 }
 
