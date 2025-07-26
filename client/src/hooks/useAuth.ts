@@ -1,19 +1,22 @@
 import { useContext } from 'react';
-import { SimpleClerkAuthContext } from '@/contexts/SimpleClerkAuthContext';
+import { SimpleAuthContext } from '@/contexts/SimpleAuthContext';
 
 export function useUnifiedAuth() {
-  // Use Clerk authentication only
-  const clerkContext = useContext(SimpleClerkAuthContext);
-  if (!clerkContext) {
-    throw new Error('useUnifiedAuth must be used within SimpleClerkAuthProvider');
+  const context = useContext(SimpleAuthContext);
+  if (!context) {
+    throw new Error('useUnifiedAuth must be used within SimpleAuthProvider');
   }
-  return clerkContext;
+  return {
+    ...context,
+    isLoading: !context.isLoaded,
+    needsOnboarding: false
+  };
 }
 
-export function useSimpleClerkAuth() {
-  const context = useContext(SimpleClerkAuthContext);
+export function useSimpleAuth() {
+  const context = useContext(SimpleAuthContext);
   if (!context) {
-    throw new Error('useSimpleClerkAuth must be used within a SimpleClerkAuthProvider');
+    throw new Error('useSimpleAuth must be used within a SimpleAuthProvider');
   }
   return context;
 }

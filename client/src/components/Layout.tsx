@@ -15,7 +15,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   // Always use Clerk authentication
 
   // Use unified auth hook
-  const { user, logout } = useUnifiedAuth();
+  const { user, signOut } = useUnifiedAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,7 +58,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         Configurações
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem onClick={signOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sair
                     </DropdownMenuItem>
@@ -70,15 +70,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <nav className="hidden md:flex space-x-8">
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Como funciona</a>
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Categorias</a>
-                  <Link href="/clerk-demo" className="text-gray-700 hover:text-primary font-medium">
-                    Clerk Demo
-                  </Link>
+
                   <a href="#" className="text-gray-700 hover:text-primary font-medium">Suporte</a>
                 </nav>
-                <Link href="/clerk-login">
+                <Link href="/login">
                   <Button variant="ghost">Entrar</Button>
                 </Link>
-                <Link href="/clerk-register">
+                <Link href="/register">
                   <Button>Cadastrar</Button>
                 </Link>
               </div>

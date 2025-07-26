@@ -32,7 +32,7 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
 
   // Redirect to login if not authenticated
   if (!user) {
-    return <Redirect to="/clerk-login" />;
+    return <Redirect to="/login" />;
   }
 
   // If user needs onboarding, don't show protected content

@@ -3,17 +3,16 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SimpleClerkAuthProvider } from "@/contexts/SimpleClerkAuthContext";
-import { ClerkErrorBoundary } from "@/components/ClerkErrorBoundary";
+import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { ClerkDemo } from "@/components/ClerkDemo";
+
 import NotFound from "@/pages/not-found";
 import Onboarding from "@/pages/Onboarding";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Home from "@/pages/Home";
-import ClerkLogin from "@/pages/ClerkLogin";
-import ClerkRegister from "@/pages/ClerkRegister";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Jobs from "@/pages/Jobs";
 import JobDetails from "@/pages/JobDetails";
@@ -26,11 +25,8 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/login" component={ClerkLogin} />
-        <Route path="/register" component={ClerkRegister} />
-        <Route path="/clerk-login" component={ClerkLogin} />
-        <Route path="/clerk-register" component={ClerkRegister} />
-        <Route path="/clerk-demo" component={ClerkDemo} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/profile-setup" component={ProfileSetup} />
         
@@ -72,17 +68,14 @@ function Router() {
 }
 
 function App() {
-  // Use Clerk authentication only
   return (
     <QueryClientProvider client={queryClient}>
-      <ClerkErrorBoundary>
-        <SimpleClerkAuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </SimpleClerkAuthProvider>
-      </ClerkErrorBoundary>
+      <SimpleAuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </SimpleAuthProvider>
     </QueryClientProvider>
   );
 }
