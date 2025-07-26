@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
+import { OnboardingRedirectSimple } from "@/components/OnboardingRedirectSimple";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -71,10 +72,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SimpleAuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <OnboardingRedirectSimple>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </OnboardingRedirectSimple>
       </SimpleAuthProvider>
     </QueryClientProvider>
   );

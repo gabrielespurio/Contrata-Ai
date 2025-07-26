@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useSimpleAuth } from '@/contexts/SimpleAuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { signIn } = useSimpleAuth();
+  const { signIn } = useUnifiedAuth();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,9 +21,18 @@ export default function Login() {
     
     try {
       await signIn(email, password);
-      setLocation('/dashboard');
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Bem-vindo de volta ao Contrata AI.",
+      });
+      // The onboarding redirect will handle navigation automatically
     } catch (error) {
       console.error('Erro no login:', error);
+      toast({
+        title: "Erro no login",
+        description: "Credenciais inválidas.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

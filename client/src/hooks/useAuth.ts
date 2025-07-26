@@ -8,8 +8,7 @@ export function useUnifiedAuth() {
   }
   return {
     ...context,
-    isLoading: !context.isLoaded,
-    needsOnboarding: false
+    isLoading: !context.isLoaded
   };
 }
 

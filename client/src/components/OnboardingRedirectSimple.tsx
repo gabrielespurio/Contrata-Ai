@@ -1,16 +1,17 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useSimpleClerkAuth } from '@/contexts/SimpleClerkAuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 
-export function OnboardingRedirect({ children }: { children: React.ReactNode }) {
+export function OnboardingRedirectSimple({ children }: { children: React.ReactNode }) {
   const [, setLocation] = useLocation();
-  const { user, isLoaded, needsOnboarding } = useSimpleClerkAuth();
+  const { user, isLoaded, needsOnboarding } = useUnifiedAuth();
 
   useEffect(() => {
     // Check if user is logged in but hasn't completed onboarding
     if (isLoaded && user && needsOnboarding) {
       const currentPath = window.location.pathname;
-      if (currentPath !== '/onboarding' && currentPath !== '/profile-setup') {
+      // Don't redirect if already on onboarding pages
+      if (currentPath !== '/profile-setup' && currentPath !== '/onboarding') {
         setLocation('/profile-setup');
       }
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useSimpleClerkAuth } from '@/contexts/SimpleClerkAuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ interface ProfileData {
 
 export default function ProfileSetup() {
   const [, setLocation] = useLocation();
-  const { user, syncUserWithDatabase } = useSimpleClerkAuth();
+  const { user, completeOnboarding } = useUnifiedAuth();
   const { toast } = useToast();
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -69,7 +69,7 @@ export default function ProfileSetup() {
   // Redirect if user is not authenticated
   useEffect(() => {
     if (!user) {
-      setLocation('/clerk-login');
+      setLocation('/login');
     }
   }, [user, setLocation]);
 
@@ -164,10 +164,10 @@ export default function ProfileSetup() {
   const handleFinish = async () => {
     setIsLoading(true);
     try {
-      await syncUserWithDatabase({
-        userType: data.userType,
-        userData: data
-      });
+      // For the simple auth system, use completeOnboarding
+      if (completeOnboarding) {
+        await completeOnboarding(data);
+      }
       
       toast({
         title: "Perfil configurado com sucesso!",

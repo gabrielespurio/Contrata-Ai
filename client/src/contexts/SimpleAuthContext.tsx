@@ -8,15 +8,18 @@ interface User {
   city: string;
   premium: boolean;
   destaque: boolean;
+  needsOnboarding: boolean;
 }
 
 export interface SimpleAuthContextType {
   user: User | null;
   isLoaded: boolean;
   isSignedIn: boolean;
+  needsOnboarding: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (userData: any) => Promise<void>;
   signOut: () => Promise<void>;
+  completeOnboarding: (profileData: any) => Promise<void>;
 }
 
 export const SimpleAuthContext = createContext<SimpleAuthContextType | undefined>(undefined);
@@ -26,7 +29,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(true);
 
   const signIn = async (email: string, password: string) => {
-    // For now, create a mock user
+    // For now, create a mock user that needs onboarding
     const mockUser: User = {
       id: '1',
       name: 'Usuário Teste',
@@ -34,13 +37,14 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       type: 'freelancer',
       city: 'São Paulo',
       premium: false,
-      destaque: false
+      destaque: false,
+      needsOnboarding: true
     };
     setUser(mockUser);
   };
 
   const signUp = async (userData: any) => {
-    // For now, create a mock user
+    // For now, create a mock user that needs onboarding
     const mockUser: User = {
       id: '1',
       name: userData.name || 'Usuário Teste',
@@ -48,9 +52,22 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       type: userData.type || 'freelancer',
       city: userData.city || 'São Paulo',
       premium: false,
-      destaque: false
+      destaque: false,
+      needsOnboarding: true
     };
     setUser(mockUser);
+  };
+
+  const completeOnboarding = async (profileData: any) => {
+    if (user) {
+      setUser({
+        ...user,
+        name: profileData.name || user.name,
+        type: profileData.userType || user.type,
+        city: profileData.address?.city || profileData.city || user.city,
+        needsOnboarding: false
+      });
+    }
   };
 
   const signOut = async () => {
@@ -62,9 +79,11 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       user, 
       isLoaded,
       isSignedIn: !!user,
+      needsOnboarding: user?.needsOnboarding || false,
       signIn,
       signUp,
-      signOut
+      signOut,
+      completeOnboarding
     }}>
       {children}
     </SimpleAuthContext.Provider>
