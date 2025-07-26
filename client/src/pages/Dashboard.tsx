@@ -18,6 +18,8 @@ export default function Dashboard() {
   const { data: jobs, isLoading: jobsLoading } = useQuery({
     queryKey: ['/api/jobs/my/jobs'],
     enabled: !!user && user.type === 'contratante',
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache
   });
 
   const { data: applications, isLoading: applicationsLoading } = useQuery({
@@ -186,7 +188,10 @@ export default function Dashboard() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                 <p className="mt-2 text-gray-600">Carregando vagas...</p>
               </div>
-            ) : jobs && jobs.length > 0 ? (
+            ) : (() => {
+              console.log('Dashboard jobs data:', jobs);
+              return jobs && jobs.length > 0;
+            })() ? (
               <div className="divide-y divide-gray-200">
                 {jobs.map((job) => (
                   <div key={job.id} className="py-6 flex items-center justify-between">

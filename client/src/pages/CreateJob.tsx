@@ -73,7 +73,9 @@ export default function CreateJob() {
         title: "Vaga criada com sucesso!",
         description: "Sua vaga foi publicada e está disponível para candidatos.",
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs/my/jobs'] });
       queryClient.invalidateQueries({ queryKey: ['/api/jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/stats'] });
       setLocation('/dashboard');
     },
     onError: (error: any) => {
