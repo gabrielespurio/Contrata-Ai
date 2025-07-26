@@ -51,7 +51,7 @@ export async function login(req: Request, res: Response) {
         city: user.city,
         premium: user.premium,
         destaque: user.destaque,
-        needsOnboarding: false // Assume existing users don't need onboarding
+        needsOnboarding: false // For login users, assume onboarding is complete
       }
     });
   } catch (error) {
