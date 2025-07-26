@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSimpleAuth } from '@/contexts/SimpleAuthContext';
+import { useUnifiedAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Register() {
   const [, setLocation] = useLocation();
-  const { signUp } = useSimpleAuth();
+  const { signUp } = useUnifiedAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,9 +29,18 @@ export default function Register() {
     
     try {
       await signUp(formData);
-      setLocation('/dashboard');
+      toast({
+        title: "Cadastro realizado com sucesso!",
+        description: "Agora vamos configurar seu perfil.",
+      });
+      // The onboarding redirect will handle navigation automatically
     } catch (error) {
       console.error('Erro no cadastro:', error);
+      toast({
+        title: "Erro no cadastro",
+        description: "Tente novamente com dados válidos.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
