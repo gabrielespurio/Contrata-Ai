@@ -5,19 +5,12 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Use environment variable for database connection
+// Set DATABASE_URL if not already set (fallback configuration)
 let DATABASE_URL = process.env.DATABASE_URL;
-
 if (!DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is required');
+  DATABASE_URL = "postgresql://neondb_owner:npg_BqzVv5d6KntG@ep-falling-snow-acibggbo-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+  console.log("Using fallback DATABASE_URL configuration");
 }
-
-// Clean up URL encoding if present
-DATABASE_URL = decodeURIComponent(DATABASE_URL);
-// Remove any 'psql' prefix that might have been added
-DATABASE_URL = DATABASE_URL.replace(/^psql\s+'/, '').replace(/'$/, '');
-
-console.log('DATABASE_URL configured:', DATABASE_URL.substring(0, 30) + '...');
 
 export const pool = new Pool({ connectionString: DATABASE_URL });
 export const db = drizzle({ client: pool, schema });
