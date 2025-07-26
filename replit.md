@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Authentication System Fixed (July 26, 2025)
+- Fixed critical authentication error preventing job creation ("Token not provided")
+- Replaced Clerk authentication with custom JWT authentication system
+- Created proper login/signup endpoints with password hashing
+- Updated frontend to use real authentication with localStorage token management
+- Fixed authentication context and app structure to prevent context errors
+- All protected routes now work correctly with proper token validation
+
 ### Enhanced Onboarding with Category Selection for Contractors (July 26, 2025)
 - Added 5th step in ProfileSetup specifically for contractors to select categories of interest
 - Contractors can now select up to 3 service categories they're most interested in hiring
