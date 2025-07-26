@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'wouter';
 import { Plus, Briefcase, Users, CheckCircle, Eye } from 'lucide-react';
+import { FreelancerDashboard } from '@/components/freelancer/FreelancerDashboard';
 
 export default function Dashboard() {
   const { user } = useUnifiedAuth();
@@ -26,6 +27,12 @@ export default function Dashboard() {
 
   if (!user) return null;
 
+  // Se for freelancer, usar o novo dashboard
+  if (user.type === 'freelancer') {
+    return <FreelancerDashboard />;
+  }
+
+  // Dashboard para contratantes
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Dashboard Header */}
