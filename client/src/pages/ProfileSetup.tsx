@@ -207,10 +207,11 @@ export default function ProfileSetup() {
         return false;
       case 3:
         if (data.userType === 'contratante' && data.personType === 'individual') {
-          return data.fullName?.trim() && data.cpf?.trim() && isValidCPF(data.cpf);
+          return data.fullName?.trim() && data.cpf?.trim() && isValidCPF(data.cpf) && data.phone.trim();
         }
         if (data.userType === 'contratante' && data.personType === 'empresa') {
-          return data.companyName?.trim() && data.cnpj?.trim() && isValidCNPJ(data.cnpj);
+          return data.companyName?.trim() && data.cnpj?.trim() && isValidCNPJ(data.cnpj) && 
+                 data.responsibleName?.trim() && data.companySize?.trim() && data.phone.trim();
         }
         if (data.userType === 'freelancer') {
           return data.address.cep.trim() && data.address.city.trim();
@@ -352,6 +353,30 @@ export default function ProfileSetup() {
                     maxLength={15}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="skills">Principais habilidades (opcional)</Label>
+                  <Textarea
+                    id="skills"
+                    value={data.skills || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, skills: e.target.value }))}
+                    placeholder="Descreva suas principais habilidades e experiências"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="experience">Anos de experiência</Label>
+                  <Select value={data.experience || ''} onValueChange={(value) => setData(prev => ({ ...prev, experience: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione sua experiência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="iniciante">Iniciante (0-1 anos)</SelectItem>
+                      <SelectItem value="junior">Júnior (1-3 anos)</SelectItem>
+                      <SelectItem value="pleno">Pleno (3-5 anos)</SelectItem>
+                      <SelectItem value="senior">Sênior (5+ anos)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -377,6 +402,16 @@ export default function ProfileSetup() {
                     maxLength={14}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={data.phone}
+                    onChange={(e) => setData(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
+                    placeholder="(11) 99999-9999"
+                    maxLength={15}
+                  />
+                </div>
               </div>
             )}
 
@@ -399,6 +434,49 @@ export default function ProfileSetup() {
                     onChange={(e) => setData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
                     placeholder="00.000.000/0000-00"
                     maxLength={18}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="responsibleName">Nome do responsável</Label>
+                  <Input
+                    id="responsibleName"
+                    value={data.responsibleName || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, responsibleName: e.target.value }))}
+                    placeholder="Nome do responsável pela empresa"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="companySize">Tamanho da empresa</Label>
+                  <Select value={data.companySize || ''} onValueChange={(value) => setData(prev => ({ ...prev, companySize: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tamanho" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="micro">Micro (até 9 funcionários)</SelectItem>
+                      <SelectItem value="pequena">Pequena (10-49 funcionários)</SelectItem>
+                      <SelectItem value="media">Média (50-249 funcionários)</SelectItem>
+                      <SelectItem value="grande">Grande (250+ funcionários)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="website">Website (opcional)</Label>
+                  <Input
+                    id="website"
+                    value={data.website || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, website: e.target.value }))}
+                    placeholder="https://www.suaempresa.com.br"
+                    type="url"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={data.phone}
+                    onChange={(e) => setData(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
+                    placeholder="(11) 99999-9999"
+                    maxLength={15}
                   />
                 </div>
               </div>
