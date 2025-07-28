@@ -104,6 +104,9 @@ export async function createJob(req: AuthRequest, res: Response) {
     const jobData = {
       ...jobDataWithoutSchedules,
       clientId: userId,
+      // Adiciona data padrão se não fornecida (necessário para o campo obrigatório)
+      date: body.date || new Date().toISOString().split('T')[0],
+      time: body.time || '08:00',
     };
 
     console.log('📝 Dados para criação:', JSON.stringify(jobData, null, 2));
@@ -129,7 +132,7 @@ export async function createJob(req: AuthRequest, res: Response) {
       return res.status(400).json({ message: 'Validation error', errors: error.errors });
     }
     console.error('❌ Erro geral:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    res.status(500).json({ message: 'Internal server error', error: (error as Error).message });
   }
 }
 
