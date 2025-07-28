@@ -7,6 +7,20 @@ import { AuthRequest } from '../middleware/auth';
 const createJobSchema = insertJobSchema.extend({
   payment: z.string().transform((val) => val),
   destaque: z.boolean().optional(),
+  // Novos campos para múltiplos horários
+  schedules: z.array(z.object({
+    day: z.string(),
+    dayName: z.string(),
+    startTime: z.string(),
+    endTime: z.string(),
+  })).optional(),
+}).refine((data) => {
+  // Valida que pelo menos um tipo de agendamento foi preenchido
+  const hasSimpleSchedule = data.date && data.time;
+  const hasMultipleSchedules = data.schedules && data.schedules.length > 0;
+  return hasSimpleSchedule || hasMultipleSchedules;
+}, {
+  message: 'É necessário definir pelo menos um horário (data/hora simples ou múltiplos dias)',
 });
 
 const jobFiltersSchema = z.object({
@@ -73,18 +87,23 @@ export async function createJob(req: AuthRequest, res: Response) {
       const currentWeek = storage.getCurrentWeekNumber();
       const jobLimit = await storage.getJobLimitForWeek(userId, currentWeek);
       
-      if (jobLimit && jobLimit.jobCount >= 3) {
+      if (jobLimit && (jobLimit.jobCount || 0) >= 3) {
         return res.status(400).json({ 
           message: 'Weekly job limit reached. Upgrade to premium for unlimited jobs.' 
         });
       }
     }
 
-    // Create job
-    const job = await storage.createJob({
+    // Prepare job data
+    const jobData = {
       ...body,
       clientId: userId,
-    });
+      // Se tem schedules, converte para JSON string, senão usa os campos tradicionais
+      schedules: body.schedules ? JSON.stringify(body.schedules) : null,
+    };
+
+    // Create job
+    const job = await storage.createJob(jobData);
 
     // Update job count for non-premium users
     if (!user.premium) {

@@ -14,20 +14,45 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { LocationInput } from '@/components/LocationInput';
+import { MultiDaySchedule } from '@/components/MultiDaySchedule';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { ArrowLeft, Star } from 'lucide-react';
 import { Link } from 'wouter';
 
+// Interface para horários múltiplos
+interface DaySchedule {
+  day: string;
+  dayName: string;
+  startTime: string;
+  endTime: string;
+}
+
 const createJobSchema = z.object({
   title: z.string().min(5, 'Título deve ter pelo menos 5 caracteres'),
   subcategoryId: z.string().min(1, 'Subcategoria é obrigatória'),
   description: z.string().min(20, 'Descrição deve ter pelo menos 20 caracteres'),
-  date: z.string().min(1, 'Data é obrigatória'),
-  time: z.string().min(1, 'Horário é obrigatório'),
+  // Campos para vaga simples (um dia)
+  date: z.string().optional(),
+  time: z.string().optional(),
+  // Campo para múltiplos horários
+  schedules: z.array(z.object({
+    day: z.string(),
+    dayName: z.string(),
+    startTime: z.string(),
+    endTime: z.string(),
+  })).optional(),
   location: z.string().min(5, 'Localização é obrigatória'),
   payment: z.string().min(1, 'Valor é obrigatório'),
   destaque: z.boolean().default(false),
+}).refine((data) => {
+  // Valida que pelo menos um tipo de agendamento foi preenchido
+  const hasSimpleSchedule = data.date && data.time;
+  const hasMultipleSchedules = data.schedules && data.schedules.length > 0;
+  return hasSimpleSchedule || hasMultipleSchedules;
+}, {
+  message: 'É necessário definir pelo menos um horário (data/hora simples ou múltiplos dias)',
+  path: ['schedules']
 });
 
 type CreateJobForm = z.infer<typeof createJobSchema>;
@@ -37,6 +62,8 @@ export default function CreateJob() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [scheduleType, setScheduleType] = useState<'simple' | 'multiple'>('simple');
+  const [multipleSchedules, setMultipleSchedules] = useState<DaySchedule[]>([]);
 
   // Função para formatar valor em reais
   const formatCurrency = (value: string): string => {
@@ -74,6 +101,7 @@ export default function CreateJob() {
       description: '',
       date: '',
       time: '',
+      schedules: [],
       location: '',
       payment: '',
       destaque: false,
@@ -117,7 +145,15 @@ export default function CreateJob() {
   });
 
   const onSubmit = (data: CreateJobForm) => {
-    createJobMutation.mutate(data);
+    // Prepara os dados baseado no tipo de agendamento
+    const submitData = {
+      ...data,
+      schedules: scheduleType === 'multiple' ? multipleSchedules : undefined,
+      // Se for múltiplos dias, limpa date/time
+      ...(scheduleType === 'multiple' && { date: undefined, time: undefined })
+    };
+    
+    createJobMutation.mutate(submitData);
   };
 
   if (!user || user.type !== 'contratante') {
@@ -249,34 +285,89 @@ export default function CreateJob() {
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Seleção do tipo de agendamento */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-base font-semibold">Tipo de Agendamento</Label>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Escolha se a vaga é para um dia específico ou para múltiplos dias da semana
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card 
+                      className={`cursor-pointer transition-all ${scheduleType === 'simple' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-300'}`}
+                      onClick={() => setScheduleType('simple')}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-4 h-4 rounded-full border-2 ${scheduleType === 'simple' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`} />
+                          <div>
+                            <h3 className="font-medium">Dia Específico</h3>
+                            <p className="text-sm text-gray-600">Trabalho em uma data e horário específicos</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Horário</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <Card 
+                      className={`cursor-pointer transition-all ${scheduleType === 'multiple' ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-300'}`}
+                      onClick={() => setScheduleType('multiple')}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-4 h-4 rounded-full border-2 ${scheduleType === 'multiple' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`} />
+                          <div>
+                            <h3 className="font-medium">Múltiplos Dias</h3>
+                            <p className="text-sm text-gray-600">Trabalho em vários dias da semana com horários diferentes</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Formulário para vaga simples */}
+                {scheduleType === 'simple' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Horário</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {/* Formulário para múltiplos dias */}
+                {scheduleType === 'multiple' && (
+                  <div>
+                    <MultiDaySchedule
+                      value={multipleSchedules}
+                      onChange={setMultipleSchedules}
+                    />
+                  </div>
+                )}
               </div>
 
               <FormField
