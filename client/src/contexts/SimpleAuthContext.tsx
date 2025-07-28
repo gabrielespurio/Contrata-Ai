@@ -96,13 +96,34 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
 
   const completeOnboarding = async (profileData: any) => {
     if (user) {
-      setUser({
-        ...user,
-        name: profileData.name || user.name,
-        type: profileData.userType || user.type,
-        city: profileData.address?.city || profileData.city || user.city,
-        needsOnboarding: false
+      // Chama a API para salvar os dados no banco
+      const response = await fetch('/api/auth/complete-onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          userType: profileData.userType,
+          name: profileData.name,
+          city: profileData.address?.city || profileData.city
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error('Erro ao completar onboarding');
+      }
+
+      const data = await response.json();
+      
+      console.log('Onboarding completed successfully:', {
+        originalType: user.type,
+        newType: profileData.userType,
+        savedType: data.user.type
+      });
+      
+      // Atualiza o usuário com os dados salvos no banco
+      setUser(data.user);
     }
   };
 

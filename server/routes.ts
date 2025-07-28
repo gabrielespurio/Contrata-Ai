@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { authenticateToken, requireUserType } from "./middleware/auth";
-import { login, signup, getProfile } from "./controllers/auth";
+import { login, signup, getProfile, completeOnboarding } from "./controllers/auth";
 import { 
   getJobs, 
   getJobById, 
@@ -34,6 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', login);
   app.post('/api/auth/signup', signup);
   app.get('/api/auth/profile', authenticateToken, getProfile);
+  app.post('/api/auth/complete-onboarding', authenticateToken, completeOnboarding);
 
   // Job routes
   app.get('/api/jobs', getJobs);

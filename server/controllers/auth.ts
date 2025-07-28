@@ -13,7 +13,7 @@ const signupSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
-  type: z.enum(['freelancer', 'contratante']).default('freelancer'),
+  type: z.enum(['freelancer', 'contratante']),
   city: z.string().default('São Paulo'),
 });
 
@@ -139,6 +139,52 @@ export async function getProfile(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Get profile error:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+}
+
+const completeOnboardingSchema = z.object({
+  userType: z.enum(['freelancer', 'contratante']),
+  name: z.string().optional(),
+  city: z.string().optional(),
+});
+
+export async function completeOnboarding(req: Request, res: Response) {
+  try {
+    const authReq = req as any;
+    const userId = authReq.user?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Usuário não autenticado' });
+    }
+
+    const { userType, name, city } = completeOnboardingSchema.parse(req.body);
+    
+    // Atualizar usuário no banco de dados
+    const updateData: any = { type: userType };
+    if (name) updateData.name = name;
+    if (city) updateData.city = city;
+    
+    const user = await storage.updateUser(userId, updateData);
+    
+    res.json({
+      message: 'Onboarding completed successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        type: user.type,
+        city: user.city,
+        premium: user.premium,
+        destaque: user.destaque,
+        needsOnboarding: false
+      }
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
+    }
+    console.error('Complete onboarding error:', error);
     res.status(500).json({ message: 'Erro interno do servidor' });
   }
 }
