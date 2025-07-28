@@ -120,6 +120,43 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
     }
   };
 
+  // Reverse geocode coordinates to get address
+  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+    try {
+      // Using Nominatim (OpenStreetMap) reverse geocoding service - free and no API key required
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'Contrata-AI-App' // Required by Nominatim
+          }
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (data && data.display_name) {
+        // Extract meaningful parts from the address
+        const address = data.address;
+        const parts = [];
+        
+        if (address.road) parts.push(address.road);
+        if (address.house_number) parts.push(address.house_number);
+        if (address.neighbourhood || address.suburb) parts.push(address.neighbourhood || address.suburb);
+        if (address.city || address.town || address.village) parts.push(address.city || address.town || address.village);
+        if (address.state) parts.push(address.state);
+        
+        return parts.length > 0 ? parts.join(', ') : data.display_name;
+      }
+      
+      // Fallback to coordinates if no address found
+      return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+    } catch (error) {
+      console.error('Erro na geocodificação reversa:', error);
+      return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+    }
+  };
+
   // Get current GPS location
   const getCurrentLocation = () => {
     if (!('geolocation' in navigator)) {
@@ -138,9 +175,8 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
         const { latitude, longitude } = position.coords;
         
         try {
-          // Try to get address from coordinates using a reverse geocoding service
-          // For this example, we'll use a simple formatted address
-          const address = `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`;
+          // Get readable address from coordinates
+          const address = await reverseGeocode(latitude, longitude);
           
           const gpsData = {
             latitude,
@@ -331,6 +367,33 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
                         <span className="text-sm font-medium">Localização capturada!</span>
                       </div>
                       <p className="text-sm text-green-600 mt-1">{gpsLocation.address}</p>
+                    </div>
+
+                    {/* Mini Map Display */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="h-32 relative bg-gray-100">
+                        <iframe
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${gpsLocation.longitude-0.01},${gpsLocation.latitude-0.01},${gpsLocation.longitude+0.01},${gpsLocation.latitude+0.01}&layer=mapnik&marker=${gpsLocation.latitude},${gpsLocation.longitude}`}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          title="Mapa da localização"
+                          className="rounded-lg"
+                        />
+                      </div>
+                      <div className="p-2 bg-white border-t">
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>📍 Localização identificada</span>
+                          <a 
+                            href={`https://www.google.com/maps?q=${gpsLocation.latitude},${gpsLocation.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            Ver no Google Maps
+                          </a>
+                        </div>
+                      </div>
                     </div>
                     
                     <Button
