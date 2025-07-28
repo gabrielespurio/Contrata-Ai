@@ -101,13 +101,20 @@ export async function createJob(req: AuthRequest, res: Response) {
 
     // Prepare job data (temporariamente sem schedules até o banco ser atualizado)
     const { schedules, ...jobDataWithoutSchedules } = body;
+    
+    // Adiciona data e hora padrão se não fornecidas (necessário para campos obrigatórios)
+    const currentDate = new Date().toISOString().split('T')[0];
+    const defaultTime = '08:00';
+    
     const jobData = {
       ...jobDataWithoutSchedules,
       clientId: userId,
-      // Adiciona data padrão se não fornecida (necessário para o campo obrigatório)
-      date: body.date || new Date().toISOString().split('T')[0],
-      time: body.time || '08:00',
+      date: body.date || currentDate,
+      time: body.time || defaultTime,
     };
+    
+    console.log('🔧 Data padrão aplicada:', currentDate);
+    console.log('🔧 Hora padrão aplicada:', defaultTime);
 
     console.log('📝 Dados para criação:', JSON.stringify(jobData, null, 2));
 
