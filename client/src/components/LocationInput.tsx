@@ -120,11 +120,14 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
     }
   };
 
-  // Reverse geocode coordinates to get address
+  // Reverse geocode coordinates to get address (temporarily simplified to avoid CORS)
   const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
     try {
+      // Temporarily returning coordinates to avoid CORS issues
+      return `Localização GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      
       // Using Nominatim (OpenStreetMap) reverse geocoding service - free and no API key required
-      const response = await fetch(
+      /* const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
         {
           headers: {
@@ -146,11 +149,12 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
         if (address.city || address.town || address.village) parts.push(address.city || address.town || address.village);
         if (address.state) parts.push(address.state);
         
-        return parts.length > 0 ? parts.join(', ') : data.display_name;
-      }
+        // return parts.length > 0 ? parts.join(', ') : data.display_name;
+      // }
       
       // Fallback to coordinates if no address found
-      return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+      // return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+      // */
     } catch (error) {
       console.error('Erro na geocodificação reversa:', error);
       return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
