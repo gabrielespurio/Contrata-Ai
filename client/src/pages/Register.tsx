@@ -35,9 +35,17 @@ export default function Register() {
       // The onboarding redirect will handle navigation automatically
     } catch (error) {
       console.error('Erro no cadastro:', error);
+      
+      let errorMessage = "Tente novamente com dados válidos.";
+      
+      // Verificar se é erro de email duplicado
+      if (error instanceof Error && error.message.includes("Email já está em uso")) {
+        errorMessage = "Este email já está cadastrado. Tente fazer login ou use outro email.";
+      }
+      
       toast({
         title: "Erro no cadastro",
-        description: "Tente novamente com dados válidos.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
