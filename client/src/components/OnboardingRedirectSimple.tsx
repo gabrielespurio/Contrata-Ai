@@ -10,8 +10,8 @@ export function OnboardingRedirectSimple({ children }: { children: React.ReactNo
     // Check if user is logged in but hasn't completed onboarding
     if (isLoaded && user && needsOnboarding) {
       const currentPath = window.location.pathname;
-      // Don't redirect if already on onboarding pages
-      if (currentPath !== '/profile-setup' && currentPath !== '/onboarding') {
+      // Don't redirect if already on profile setup page
+      if (currentPath !== '/profile-setup') {
         setLocation('/profile-setup');
       }
     }

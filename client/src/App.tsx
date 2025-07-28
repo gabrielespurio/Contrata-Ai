@@ -9,7 +9,6 @@ import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 import NotFound from "@/pages/not-found";
-import Onboarding from "@/pages/Onboarding";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Home from "@/pages/Home";
 import Login from "./pages/Login";
@@ -28,7 +27,6 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
-        <Route path="/onboarding" component={Onboarding} />
         <Route path="/profile-setup" component={ProfileSetup} />
         
         <Route path="/dashboard">
