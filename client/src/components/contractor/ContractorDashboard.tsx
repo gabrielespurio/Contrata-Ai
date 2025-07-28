@@ -39,7 +39,7 @@ export function ContractorDashboard() {
 
   // Filtrar vagas por categoria e termo de busca
   const filteredJobs = jobsArray.filter((job: any) => {
-    const matchesCategory = !selectedCategory || job.subcategory?.category?.id === selectedCategory;
+    const matchesCategory = !selectedCategory || selectedCategory === 'all' || job.subcategory?.category?.id === selectedCategory;
     const matchesSearch = !searchTerm || job.title?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -215,7 +215,7 @@ export function ContractorDashboard() {
                     <SelectValue placeholder="Todas as categorias" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas as categorias</SelectItem>
+                    <SelectItem value="all">Todas as categorias</SelectItem>
                     {categoriesArray.map((category: any) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
@@ -276,12 +276,12 @@ export function ContractorDashboard() {
                 <div className="text-center py-8">
                   <Filter className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">
-                    {selectedCategory || searchTerm 
+                    {(selectedCategory && selectedCategory !== 'all') || searchTerm 
                       ? 'Nenhuma vaga encontrada com os filtros aplicados.' 
                       : 'Você ainda não criou nenhuma vaga.'
                     }
                   </p>
-                  {!selectedCategory && !searchTerm && (
+                  {(!selectedCategory || selectedCategory === 'all') && !searchTerm && (
                     <Link href="/criar-vaga">
                       <Button className="mt-4">
                         <Plus className="w-4 h-4 mr-2" />
