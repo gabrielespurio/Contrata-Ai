@@ -36,8 +36,8 @@ export const jobs = pgTable("jobs", {
   // Mantemos date e time para compatibilidade com vagas simples (um dia só)
   date: date("date"),
   time: text("time"),
-  // Novo campo para horários múltiplos - JSON array
-  schedules: text("schedules"), // JSON string: [{"day": "friday", "dayName": "Sexta-feira", "startTime": "20:00", "endTime": "23:00"}]
+  // Novo campo para horários múltiplos - JSON array (temporariamente comentado)
+  // schedules: text("schedules"), // JSON string: [{"day": "friday", "dayName": "Sexta-feira", "startTime": "20:00", "endTime": "23:00"}]
   location: text("location").notNull(),
   payment: numeric("payment").notNull(),
   destaque: boolean("destaque").default(false),

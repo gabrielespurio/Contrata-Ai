@@ -94,12 +94,11 @@ export async function createJob(req: AuthRequest, res: Response) {
       }
     }
 
-    // Prepare job data
+    // Prepare job data (temporariamente sem schedules até o banco ser atualizado)
+    const { schedules, ...jobDataWithoutSchedules } = body;
     const jobData = {
-      ...body,
+      ...jobDataWithoutSchedules,
       clientId: userId,
-      // Se tem schedules, converte para JSON string, senão usa os campos tradicionais
-      schedules: body.schedules ? JSON.stringify(body.schedules) : null,
     };
 
     // Create job

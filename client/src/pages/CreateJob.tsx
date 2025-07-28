@@ -32,9 +32,9 @@ const createJobSchema = z.object({
   title: z.string().min(5, 'Título deve ter pelo menos 5 caracteres'),
   subcategoryId: z.string().min(1, 'Subcategoria é obrigatória'),
   description: z.string().min(20, 'Descrição deve ter pelo menos 20 caracteres'),
-  // Campos para vaga simples (um dia)
-  date: z.string().optional(),
-  time: z.string().optional(),
+  // Campos para vaga simples (um dia) - agora obrigatórios temporariamente
+  date: z.string().min(1, 'Data é obrigatória'),
+  time: z.string().min(1, 'Horário é obrigatório'),
   // Campo para múltiplos horários
   schedules: z.array(z.object({
     day: z.string(),
@@ -45,14 +45,6 @@ const createJobSchema = z.object({
   location: z.string().min(5, 'Localização é obrigatória'),
   payment: z.string().min(1, 'Valor é obrigatório'),
   destaque: z.boolean().default(false),
-}).refine((data) => {
-  // Valida que pelo menos um tipo de agendamento foi preenchido
-  const hasSimpleSchedule = data.date && data.time;
-  const hasMultipleSchedules = data.schedules && data.schedules.length > 0;
-  return hasSimpleSchedule || hasMultipleSchedules;
-}, {
-  message: 'É necessário definir pelo menos um horário (data/hora simples ou múltiplos dias)',
-  path: ['schedules']
 });
 
 type CreateJobForm = z.infer<typeof createJobSchema>;
@@ -123,9 +115,12 @@ export default function CreateJob() {
   });
 
   const createJobMutation = useMutation({
-    mutationFn: (data: CreateJobForm) => 
-      apiRequest('POST', '/api/jobs', data),
-    onSuccess: () => {
+    mutationFn: (data: CreateJobForm) => {
+      console.log('🌐 Enviando requisição para API:', data);
+      return apiRequest('POST', '/api/jobs', data);
+    },
+    onSuccess: (response) => {
+      console.log('✅ Sucesso na criação da vaga:', response);
       toast({
         title: "Vaga criada com sucesso!",
         description: "Sua vaga foi publicada e está disponível para candidatos.",
@@ -136,6 +131,7 @@ export default function CreateJob() {
       setLocation('/dashboard');
     },
     onError: (error: any) => {
+      console.log('❌ Erro na criação da vaga:', error);
       toast({
         title: "Erro ao criar vaga",
         description: error.message || "Não foi possível criar a vaga.",
@@ -145,20 +141,23 @@ export default function CreateJob() {
   });
 
   const onSubmit = (data: CreateJobForm) => {
-    console.log('Dados do formulário:', data);
-    console.log('Tipo de agendamento:', scheduleType);
-    console.log('Horários múltiplos:', multipleSchedules);
-    console.log('Erros do formulário:', form.formState.errors);
+    console.log('🚀 Função onSubmit chamada!');
+    console.log('📝 Dados do formulário:', data);
+    console.log('⏰ Tipo de agendamento:', scheduleType);
+    console.log('📅 Horários múltiplos:', multipleSchedules);
+    console.log('❌ Erros do formulário:', form.formState.errors);
+    console.log('✅ Formulário válido?', form.formState.isValid);
     
     // Prepara os dados baseado no tipo de agendamento
     const submitData = {
       ...data,
       schedules: scheduleType === 'multiple' ? multipleSchedules : undefined,
-      // Se for múltiplos dias, limpa date/time
-      ...(scheduleType === 'multiple' && { date: undefined, time: undefined })
+      // Se for múltiplos dias, limpa date/time (temporariamente desabilitado)
+      // ...(scheduleType === 'multiple' && { date: undefined, time: undefined })
     };
     
-    console.log('Dados finais para envio:', submitData);
+    console.log('📤 Dados finais para envio:', submitData);
+    console.log('🔄 Iniciando mutação...');
     createJobMutation.mutate(submitData);
   };
 
