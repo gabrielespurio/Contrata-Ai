@@ -98,6 +98,7 @@ export default function CreateJob() {
       payment: '',
       destaque: false,
     },
+    mode: 'onChange', // Permite validação em tempo real
   });
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -215,6 +216,7 @@ export default function CreateJob() {
                   <Select 
                     value={selectedCategoryId} 
                     onValueChange={(value) => {
+                      console.log('🏷️ Categoria selecionada:', value);
                       setSelectedCategoryId(value);
                       form.setValue('subcategoryId', '');
                     }}
@@ -243,7 +245,10 @@ export default function CreateJob() {
                     <FormItem>
                       <FormLabel>Subcategoria</FormLabel>
                       <Select 
-                        onValueChange={field.onChange} 
+                        onValueChange={(value) => {
+                          console.log('📂 Subcategoria selecionada:', value);
+                          field.onChange(value);
+                        }} 
                         value={field.value}
                         disabled={!selectedCategoryId}
                       >
@@ -384,7 +389,10 @@ export default function CreateJob() {
                     <FormControl>
                       <LocationInput
                         value={field.value}
-                        onChange={(value) => field.onChange(value)}
+                        onChange={(value) => {
+                          console.log('📍 Localização alterada:', value);
+                          field.onChange(value);
+                        }}
                         placeholder="Ex: Rua das Flores, 123 - Centro, São Paulo"
                       />
                     </FormControl>
@@ -407,6 +415,7 @@ export default function CreateJob() {
                         onChange={(e) => {
                           const formatted = formatCurrency(e.target.value);
                           const numericValue = getCurrencyValue(formatted);
+                          console.log('💰 Valor alterado:', numericValue);
                           field.onChange(numericValue);
                         }}
                         onBlur={() => {
@@ -459,6 +468,14 @@ export default function CreateJob() {
                 <Button 
                   type="submit" 
                   disabled={createJobMutation.isPending}
+                  onClick={(e) => {
+                    console.log('🔥 BOTÃO CLICADO!');
+                    console.log('Evento:', e);
+                    console.log('Formulário válido:', form.formState.isValid);
+                    console.log('Erros:', form.formState.errors);
+                    // Força submit manual se necessário
+                    form.handleSubmit(onSubmit)();
+                  }}
                 >
                   {createJobMutation.isPending ? 'Publicando...' : 'Publicar Vaga'}
                 </Button>
