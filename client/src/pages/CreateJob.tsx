@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { LocationInput } from '@/components/LocationInput';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { ArrowLeft, Star } from 'lucide-react';
@@ -156,7 +157,7 @@ export default function CreateJob() {
                       {categoriesLoading ? (
                         <div className="p-2 text-sm text-gray-500">Carregando categorias...</div>
                       ) : (
-                        categories?.map((category) => (
+                        Array.isArray(categories) && categories.map((category: any) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
                           </SelectItem>
@@ -186,7 +187,7 @@ export default function CreateJob() {
                           {subcategoriesLoading ? (
                             <div className="p-2 text-sm text-gray-500">Carregando subcategorias...</div>
                           ) : selectedCategoryId ? (
-                            subcategories?.map((subcategory) => (
+                            Array.isArray(subcategories) && subcategories.map((subcategory: any) => (
                               <SelectItem key={subcategory.id} value={subcategory.id}>
                                 {subcategory.name}
                               </SelectItem>
@@ -257,9 +258,10 @@ export default function CreateJob() {
                   <FormItem>
                     <FormLabel>Localização</FormLabel>
                     <FormControl>
-                      <Input 
+                      <LocationInput
+                        value={field.value}
+                        onChange={(value) => field.onChange(value)}
                         placeholder="Ex: Rua das Flores, 123 - Centro, São Paulo"
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
