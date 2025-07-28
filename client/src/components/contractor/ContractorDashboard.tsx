@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'wouter';
-import { Plus, Briefcase, Users, CheckCircle, Eye, Search, BarChart3, TrendingUp, Calendar, Filter } from 'lucide-react';
+import { Plus, Briefcase, Users, CheckCircle, Eye, Search, BarChart3, TrendingUp, Calendar, Filter, Clock, MapPin, DollarSign, User } from 'lucide-react';
 
 export function ContractorDashboard() {
   const { user } = useUnifiedAuth();
@@ -241,35 +241,78 @@ export function ContractorDashboard() {
                   <p className="mt-2 text-gray-600">Carregando vagas...</p>
                 </div>
               ) : filteredJobs.length > 0 ? (
-                <div className="divide-y divide-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredJobs.map((job: any) => (
-                    <div key={job.id} className="py-6 flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
+                    <Card key={job.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary/20 hover:border-l-primary">
+                      <CardContent className="p-6">
+                        {/* Header with title and badge */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">{job.title}</h3>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Briefcase className="w-4 h-4 mr-2 text-primary" />
+                              <span>{job.subcategory?.category?.name} → {job.subcategory?.name}</span>
+                            </div>
+                          </div>
                           {job.destaque && (
-                            <Badge className="bg-accent/10 text-accent">DESTAQUE</Badge>
+                            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm">
+                              ✨ DESTAQUE
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-gray-600 mb-2">
-                          Categoria: {job.subcategory?.category?.name} → {job.subcategory?.name}
+
+                        {/* Description preview */}
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+                          {job.description}
                         </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>📅 {job.date}</span>
-                          <span>🕐 {job.time}</span>
-                          <span>📍 {job.location}</span>
-                          <span>💰 R$ {job.payment}</span>
+
+                        {/* Job details grid */}
+                        <div className="space-y-3 mb-6">
+                          <div className="flex items-center text-sm">
+                            <div className="flex items-center bg-blue-50 text-blue-700 px-3 py-2 rounded-lg w-full">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              <span className="font-medium">{new Date(job.date).toLocaleDateString('pt-BR')}</span>
+                              <Clock className="w-4 h-4 ml-4 mr-2" />
+                              <span>{job.time}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center text-sm">
+                            <div className="flex items-center bg-green-50 text-green-700 px-3 py-2 rounded-lg w-full">
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              <span className="font-bold text-lg">R$ {parseFloat(job.payment).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center text-sm">
+                            <div className="flex items-center bg-purple-50 text-purple-700 px-3 py-2 rounded-lg w-full">
+                              <MapPin className="w-4 h-4 mr-2" />
+                              <span className="truncate">{job.location}</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Link href={`/vaga/${job.id}`}>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver Detalhes
+
+                        {/* Stats row */}
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-4 bg-gray-50 px-3 py-2 rounded-lg">
+                          <div className="flex items-center">
+                            <User className="w-3 h-3 mr-1" />
+                            <span>0 candidatos</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            <span>Criado em {new Date(job.createdAt).toLocaleDateString('pt-BR')}</span>
+                          </div>
+                        </div>
+
+                        {/* Action button */}
+                        <Link href={`/vaga/${job.id}`} className="block">
+                          <Button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-md hover:shadow-lg transition-all duration-300">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Ver Detalhes Completos
                           </Button>
                         </Link>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               ) : (

@@ -114,17 +114,25 @@ export default function JobDetails({ params }: JobDetailsProps) {
         {/* Job Details */}
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl">{job.title}</CardTitle>
-                  <p className="text-gray-600 mt-1">
-                    {job.subcategory.category.name} → {job.subcategory.name}
-                  </p>
+                  <CardTitle className="text-3xl font-bold text-gray-900">{job.title}</CardTitle>
+                  <div className="flex items-center mt-2 text-gray-600">
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    <span className="text-lg">{job.subcategory.category.name} → {job.subcategory.name}</span>
+                  </div>
                 </div>
-                {job.destaque && (
-                  <Badge className="bg-accent/10 text-accent">DESTAQUE</Badge>
-                )}
+                <div className="flex flex-col items-end space-y-2">
+                  {job.destaque && (
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+                      ✨ DESTAQUE
+                    </Badge>
+                  )}
+                  <div className="text-sm text-gray-500">
+                    Criado em {new Date(job.createdAt).toLocaleDateString('pt-BR')}
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
