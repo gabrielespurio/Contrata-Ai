@@ -38,6 +38,34 @@ export default function CreateJob() {
   const { toast } = useToast();
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
+  // Função para formatar valor em reais
+  const formatCurrency = (value: string): string => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, '');
+    
+    // Se não tem números, retorna vazio
+    if (!numbers) return '';
+    
+    // Converte para number e divide por 100 para ter centavos
+    const amount = parseInt(numbers) / 100;
+    
+    // Formata como moeda brasileira
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  // Função para obter valor numérico da string formatada
+  const getCurrencyValue = (formattedValue: string): string => {
+    // Remove símbolos de moeda e espaços, mantém apenas números e vírgula
+    const numbers = formattedValue.replace(/[^\d,]/g, '');
+    // Converte vírgula para ponto para compatibilidade com number
+    return numbers.replace(',', '.');
+  };
+
   const form = useForm<CreateJobForm>({
     resolver: zodResolver(createJobSchema),
     defaultValues: {
@@ -277,10 +305,22 @@ export default function CreateJob() {
                     <FormLabel>Valor (R$)</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="0.01" 
-                        placeholder="150.00"
-                        {...field}
+                        type="text" 
+                        placeholder="R$ 150,00"
+                        value={field.value ? formatCurrency(field.value) : ''}
+                        onChange={(e) => {
+                          const formatted = formatCurrency(e.target.value);
+                          const numericValue = getCurrencyValue(formatted);
+                          field.onChange(numericValue);
+                        }}
+                        onBlur={() => {
+                          // Garante que o valor final está corretamente formatado
+                          if (field.value) {
+                            const formatted = formatCurrency(field.value);
+                            const numericValue = getCurrencyValue(formatted);
+                            field.onChange(numericValue);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

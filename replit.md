@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Location and Currency Improvements (July 28, 2025)
+- Enhanced location capture system to show proper address instead of raw coordinates
+- Implemented reverse geocoding using OpenStreetMap's Nominatim service to convert GPS coordinates to readable addresses
+- Added interactive mini-map display showing captured location with OpenStreetMap embed
+- Added direct link to Google Maps for precise location viewing
+- Implemented Brazilian currency formatting (Real) for job payment field
+- Created formatCurrency function with proper BRL formatting using Intl.NumberFormat
+- Added real-time currency input masking with automatic decimal placement
+- Improved user experience with visual feedback for location capture and currency input
+
 ### Authentication System Fixed (July 26, 2025)
 - Fixed critical authentication error preventing job creation ("Token not provided")
 - Replaced Clerk authentication with custom JWT authentication system
