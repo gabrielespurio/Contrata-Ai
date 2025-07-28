@@ -28,14 +28,13 @@ interface DaySchedule {
   endTime: string;
 }
 
+// Schema simplificado sem validação condicional complexa
 const createJobSchema = z.object({
   title: z.string().min(5, 'Título deve ter pelo menos 5 caracteres'),
   subcategoryId: z.string().min(1, 'Subcategoria é obrigatória'),
   description: z.string().min(20, 'Descrição deve ter pelo menos 20 caracteres'),
-  // Campos opcionais para vaga simples 
   date: z.string().optional(),
-  time: z.string().optional(),
-  // Campo para múltiplos horários
+  time: z.string().optional(), 
   schedules: z.array(z.object({
     day: z.string(),
     dayName: z.string(),
@@ -45,14 +44,6 @@ const createJobSchema = z.object({
   location: z.string().min(5, 'Localização é obrigatória'),
   payment: z.string().min(1, 'Valor é obrigatório'),
   destaque: z.boolean().default(false),
-}).refine((data) => {
-  // Pelo menos data/hora OU múltiplos horários devem estar preenchidos
-  const hasSimpleSchedule = data.date && data.time;
-  const hasMultipleSchedules = data.schedules && data.schedules.length > 0;
-  return hasSimpleSchedule || hasMultipleSchedules;
-}, {
-  message: 'Preencha data e horário ou configure múltiplos dias',
-  path: ['date']
 });
 
 type CreateJobForm = z.infer<typeof createJobSchema>;
@@ -494,15 +485,67 @@ export default function CreateJob() {
                 <Button 
                   type="submit" 
                   disabled={createJobMutation.isPending}
-                  onClick={(e) => {
-                    console.log('🔥 BOTÃO CLICADO!');
-                    console.log('Evento:', e);
-                    console.log('Formulário válido:', form.formState.isValid);
-                    console.log('Erros:', form.formState.errors);
-                    console.log('Valores atuais:', form.getValues());
-                    // Força submit manual
+                  onClick={async (e) => {
                     e.preventDefault();
-                    form.handleSubmit(onSubmit)();
+                    console.log('🔥 BOTÃO CLICADO!');
+                    
+                    const formValues = form.getValues();
+                    console.log('📝 Valores do formulário:', formValues);
+                    console.log('⏰ Tipo de agendamento:', scheduleType);
+                    
+                    // Validação manual customizada
+                    const errors: any = {};
+                    
+                    if (!formValues.title || formValues.title.length < 5) {
+                      errors.title = 'Título deve ter pelo menos 5 caracteres';
+                    }
+                    
+                    if (!formValues.subcategoryId) {
+                      errors.subcategoryId = 'Subcategoria é obrigatória';
+                    }
+                    
+                    if (!formValues.description || formValues.description.length < 20) {
+                      errors.description = 'Descrição deve ter pelo menos 20 caracteres';
+                    }
+                    
+                    if (!formValues.location || formValues.location.length < 5) {
+                      errors.location = 'Localização é obrigatória';
+                    }
+                    
+                    if (!formValues.payment) {
+                      errors.payment = 'Valor é obrigatório';
+                    }
+                    
+                    // Validação de agendamento
+                    if (scheduleType === 'simple') {
+                      if (!formValues.date || !formValues.time) {
+                        errors.date = 'Data e horário são obrigatórios para vaga específica';
+                      }
+                    } else if (scheduleType === 'multiple') {
+                      if (!multipleSchedules || multipleSchedules.length === 0) {
+                        errors.schedules = 'Configure pelo menos um horário para múltiplos dias';
+                      }
+                    }
+                    
+                    console.log('❌ Erros encontrados:', errors);
+                    
+                    if (Object.keys(errors).length > 0) {
+                      // Mostra erros específicos
+                      Object.keys(errors).forEach(field => {
+                        form.setError(field as any, { message: errors[field] });
+                      });
+                      
+                      toast({
+                        title: "Formulário incompleto",
+                        description: "Verifique os campos destacados em vermelho.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    // Se passou na validação, chama onSubmit
+                    console.log('✅ Validação passou, chamando onSubmit');
+                    onSubmit(formValues);
                   }}
                 >
                   {createJobMutation.isPending ? 'Publicando...' : 'Publicar Vaga'}

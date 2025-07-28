@@ -14,13 +14,9 @@ const createJobSchema = insertJobSchema.extend({
     startTime: z.string(),
     endTime: z.string(),
   })).optional(),
-}).refine((data) => {
-  // Valida que pelo menos um tipo de agendamento foi preenchido
-  const hasSimpleSchedule = data.date && data.time;
-  const hasMultipleSchedules = data.schedules && data.schedules.length > 0;
-  return hasSimpleSchedule || hasMultipleSchedules;
-}, {
-  message: 'É necessário definir pelo menos um horário (data/hora simples ou múltiplos dias)',
+  // Campos opcionais para compatibilidade
+  date: z.string().optional(),
+  time: z.string().optional(),
 });
 
 const jobFiltersSchema = z.object({
@@ -73,14 +69,22 @@ export async function getMyJobs(req: AuthRequest, res: Response) {
 
 export async function createJob(req: AuthRequest, res: Response) {
   try {
+    console.log('🔥 CREATE JOB - dados recebidos:', JSON.stringify(req.body, null, 2));
+    console.log('👤 Usuário:', req.user);
+    
     const body = createJobSchema.parse(req.body);
+    console.log('✅ Dados validados:', JSON.stringify(body, null, 2));
+    
     const userId = req.user!.userId;
     
     // Get user to check if premium
     const user = await storage.getUser(userId);
     if (!user) {
+      console.log('❌ Usuário não encontrado:', userId);
       return res.status(404).json({ message: 'User not found' });
     }
+
+    console.log('👤 Dados do usuário:', user);
 
     // Check job limits for non-premium users
     if (!user.premium) {
@@ -88,6 +92,7 @@ export async function createJob(req: AuthRequest, res: Response) {
       const jobLimit = await storage.getJobLimitForWeek(userId, currentWeek);
       
       if (jobLimit && (jobLimit.jobCount || 0) >= 3) {
+        console.log('❌ Limite semanal atingido');
         return res.status(400).json({ 
           message: 'Weekly job limit reached. Upgrade to premium for unlimited jobs.' 
         });
@@ -101,8 +106,11 @@ export async function createJob(req: AuthRequest, res: Response) {
       clientId: userId,
     };
 
+    console.log('📝 Dados para criação:', JSON.stringify(jobData, null, 2));
+
     // Create job
     const job = await storage.createJob(jobData);
+    console.log('🎉 Vaga criada:', job);
 
     // Update job count for non-premium users
     if (!user.premium) {
@@ -117,10 +125,11 @@ export async function createJob(req: AuthRequest, res: Response) {
     res.status(201).json({ message: 'Job created successfully', job });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.log('❌ Erro de validação:', error.errors);
       return res.status(400).json({ message: 'Validation error', errors: error.errors });
     }
-    console.error('Create job error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('❌ Erro geral:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 }
 
