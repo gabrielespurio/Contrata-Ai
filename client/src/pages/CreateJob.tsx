@@ -32,9 +32,9 @@ const createJobSchema = z.object({
   title: z.string().min(5, 'Título deve ter pelo menos 5 caracteres'),
   subcategoryId: z.string().min(1, 'Subcategoria é obrigatória'),
   description: z.string().min(20, 'Descrição deve ter pelo menos 20 caracteres'),
-  // Campos para vaga simples (um dia) - agora obrigatórios temporariamente
-  date: z.string().min(1, 'Data é obrigatória'),
-  time: z.string().min(1, 'Horário é obrigatório'),
+  // Campos opcionais para vaga simples 
+  date: z.string().optional(),
+  time: z.string().optional(),
   // Campo para múltiplos horários
   schedules: z.array(z.object({
     day: z.string(),
@@ -45,6 +45,14 @@ const createJobSchema = z.object({
   location: z.string().min(5, 'Localização é obrigatória'),
   payment: z.string().min(1, 'Valor é obrigatório'),
   destaque: z.boolean().default(false),
+}).refine((data) => {
+  // Pelo menos data/hora OU múltiplos horários devem estar preenchidos
+  const hasSimpleSchedule = data.date && data.time;
+  const hasMultipleSchedules = data.schedules && data.schedules.length > 0;
+  return hasSimpleSchedule || hasMultipleSchedules;
+}, {
+  message: 'Preencha data e horário ou configure múltiplos dias',
+  path: ['date']
 });
 
 type CreateJobForm = z.infer<typeof createJobSchema>;
@@ -150,12 +158,30 @@ export default function CreateJob() {
     console.log('✅ Formulário válido?', form.formState.isValid);
     
     // Prepara os dados baseado no tipo de agendamento
-    const submitData = {
-      ...data,
-      schedules: scheduleType === 'multiple' ? multipleSchedules : undefined,
-      // Se for múltiplos dias, limpa date/time (temporariamente desabilitado)
-      // ...(scheduleType === 'multiple' && { date: undefined, time: undefined })
-    };
+    let submitData;
+    if (scheduleType === 'multiple') {
+      // Para múltiplos dias, usa schedules e remove date/time
+      submitData = {
+        ...data,
+        schedules: multipleSchedules,
+        date: undefined,
+        time: undefined
+      };
+    } else {
+      // Para dia simples, garante que date/time estão preenchidos
+      if (!data.date || !data.time) {
+        toast({
+          title: "Campos obrigatórios",
+          description: "Para vaga de dia específico, preencha data e horário.",
+          variant: "destructive",
+        });
+        return;
+      }
+      submitData = {
+        ...data,
+        schedules: undefined
+      };
+    }
     
     console.log('📤 Dados finais para envio:', submitData);
     console.log('🔄 Iniciando mutação...');
@@ -473,7 +499,9 @@ export default function CreateJob() {
                     console.log('Evento:', e);
                     console.log('Formulário válido:', form.formState.isValid);
                     console.log('Erros:', form.formState.errors);
-                    // Força submit manual se necessário
+                    console.log('Valores atuais:', form.getValues());
+                    // Força submit manual
+                    e.preventDefault();
                     form.handleSubmit(onSubmit)();
                   }}
                 >
