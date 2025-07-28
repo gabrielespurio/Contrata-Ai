@@ -13,7 +13,7 @@ const signupSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
-  type: z.enum(['freelancer', 'contratante']),
+  type: z.enum(['freelancer', 'contratante']).default('freelancer'), // Temporário, será atualizado no onboarding
   city: z.string().default('São Paulo'),
 });
 

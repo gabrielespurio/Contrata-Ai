@@ -16,7 +16,7 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    type: 'contratante' as 'freelancer' | 'contratante',
+    type: 'freelancer' as 'freelancer' | 'contratante',
     city: 'São Paulo'
   });
   const [isLoading, setIsLoading] = useState(false);
