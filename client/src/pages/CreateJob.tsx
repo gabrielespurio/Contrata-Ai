@@ -145,6 +145,11 @@ export default function CreateJob() {
   });
 
   const onSubmit = (data: CreateJobForm) => {
+    console.log('Dados do formulário:', data);
+    console.log('Tipo de agendamento:', scheduleType);
+    console.log('Horários múltiplos:', multipleSchedules);
+    console.log('Erros do formulário:', form.formState.errors);
+    
     // Prepara os dados baseado no tipo de agendamento
     const submitData = {
       ...data,
@@ -153,6 +158,7 @@ export default function CreateJob() {
       ...(scheduleType === 'multiple' && { date: undefined, time: undefined })
     };
     
+    console.log('Dados finais para envio:', submitData);
     createJobMutation.mutate(submitData);
   };
 
