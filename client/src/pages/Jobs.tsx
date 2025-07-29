@@ -239,13 +239,11 @@ export default function Jobs() {
 
                 {/* Description */}
                 <div className="mb-4">
-                  <p className="text-gray-700 leading-relaxed" style={{
-                    overflow: 'hidden',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical'
-                  }}>
-                    {job.description}
+                  <p className="text-gray-700 leading-relaxed">
+                    {job.description.length > 150 
+                      ? job.description.substring(0, 150) + '...' 
+                      : job.description
+                    }
                   </p>
                   <Link href={`/jobs/${job.id}`}>
                     <span className="text-purple-600 hover:text-purple-800 text-sm font-medium cursor-pointer mt-2 inline-block">
