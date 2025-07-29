@@ -59,7 +59,14 @@ export async function getJobById(req: Request, res: Response) {
 
 export async function getMyJobs(req: AuthRequest, res: Response) {
   try {
+    console.log('🔍 GET MY JOBS - Usuario logado:', req.user);
+    console.log('🔍 GET MY JOBS - Buscando vagas para clientId:', req.user!.userId);
+    
     const jobs = await storage.getJobsByClient(req.user!.userId);
+    
+    console.log('🔍 GET MY JOBS - Vagas encontradas:', jobs.length);
+    console.log('🔍 GET MY JOBS - IDs das vagas:', jobs.map(j => ({ id: j.id, title: j.title, clientId: j.clientId })));
+    
     res.json(jobs);
   } catch (error) {
     console.error('Get my jobs error:', error);
