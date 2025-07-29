@@ -19,15 +19,30 @@ export default function Jobs() {
     date: '',
   });
 
+  // Verificar se é contratante para personalizar a interface
+  const isContractor = user?.type === 'contratante';
+  const jobsQueryKey = isContractor ? ['/api/jobs/my/jobs'] : ['/api/jobs', filters];
+
   const { data: jobs, isLoading } = useQuery({
-    queryKey: ['/api/jobs', filters],
+    queryKey: jobsQueryKey,
     queryFn: () => {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-      return fetch(`/api/jobs?${params.toString()}`).then(res => res.json());
+      if (isContractor) {
+        // Para contratantes, buscar apenas suas vagas
+        return fetch('/api/jobs/my/jobs', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }).then(res => res.json());
+      } else {
+        // Para freelancers, buscar todas as vagas com filtros
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) params.append(key, value);
+        });
+        return fetch(`/api/jobs?${params.toString()}`).then(res => res.json());
+      }
     },
+    enabled: !!user,
   });
 
   const { data: categories } = useQuery({
@@ -72,8 +87,22 @@ export default function Jobs() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Search and Filters */}
-      <Card className="mb-8">
+      {/* Page Title */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">
+          {isContractor ? 'Minhas Vagas' : 'Explorar Vagas'}
+        </h1>
+        <p className="text-gray-600 mt-2">
+          {isContractor 
+            ? 'Gerencie as vagas que você criou' 
+            : 'Encontre oportunidades de trabalho na sua cidade'
+          }
+        </p>
+      </div>
+
+      {/* Search and Filters - Only show for freelancers */}
+      {!isContractor && (
+        <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Search className="w-5 h-5 mr-2" />
@@ -152,7 +181,8 @@ export default function Jobs() {
             </div>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      )}
 
       {/* Job Cards */}
       {isLoading ? (
