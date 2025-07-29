@@ -242,78 +242,131 @@ export function ContractorDashboard() {
                   <p className="mt-2 text-gray-600">Carregando vagas...</p>
                 </div>
               ) : filteredJobs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-8">
                   {filteredJobs.map((job: any) => (
-                    <Card key={job.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary/20 hover:border-l-primary">
-                      <CardContent className="p-6">
-                        {/* Header with title and badge */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">{job.title}</h3>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Briefcase className="w-4 h-4 mr-2 text-primary" />
-                              <span>{job.subcategory?.category?.name} → {job.subcategory?.name}</span>
+                    <Card key={job.id} className="bg-white border border-gray-200 hover:border-primary/30 hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+                      <CardContent className="p-0">
+                        {/* Header Section */}
+                        <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-8 py-6 border-b border-gray-100">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-3">
+                                <h2 className="text-2xl font-bold text-gray-900 line-clamp-1">{job.title}</h2>
+                                {job.destaque && (
+                                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm px-3 py-1">
+                                    ⭐ DESTAQUE
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center text-gray-600 mb-2">
+                                <Briefcase className="w-5 h-5 mr-2 text-primary" />
+                                <span className="font-medium">{job.subcategory?.category?.name}</span>
+                                <span className="mx-2">→</span>
+                                <span>{job.subcategory?.name}</span>
+                              </div>
                             </div>
-                          </div>
-                          {job.destaque && (
-                            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm">
-                              ✨ DESTAQUE
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Description preview */}
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
-                          {job.description}
-                        </p>
-
-                        {/* Job details grid */}
-                        <div className="space-y-3 mb-6">
-                          <div className="flex items-center text-sm">
-                            <div className="flex items-center bg-blue-50 text-blue-700 px-3 py-2 rounded-lg w-full">
-                              <Calendar className="w-4 h-4 mr-2" />
-                              <span className="font-medium">{new Date(job.date).toLocaleDateString('pt-BR')}</span>
-                              <Clock className="w-4 h-4 ml-4 mr-2" />
-                              <span>{job.time}</span>
+                            <div className="text-right">
+                              <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg">
+                                <div className="text-xs text-green-600 font-medium">Valor do Projeto</div>
+                                <div className="text-2xl font-bold">
+                                  R$ {parseFloat(job.payment).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="flex items-center text-sm">
-                            <div className="flex items-center bg-green-50 text-green-700 px-3 py-2 rounded-lg w-full">
-                              <DollarSign className="w-4 h-4 mr-2" />
-                              <span className="font-bold text-lg">R$ {parseFloat(job.payment).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                            </div>
-                          </div>
-
-                          <div className="bg-purple-50 text-purple-700 px-3 py-2 rounded-lg w-full">
-                            <LocationDisplay 
-                              location={job.location} 
-                              className="text-sm" 
-                              showIcon={true}
-                              showMapLink={false}
-                            />
                           </div>
                         </div>
 
-                        {/* Stats row */}
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-4 bg-gray-50 px-3 py-2 rounded-lg">
-                          <div className="flex items-center">
-                            <User className="w-3 h-3 mr-1" />
-                            <span>0 candidatos</span>
+                        {/* Main Content Section */}
+                        <div className="px-8 py-6">
+                          {/* Description */}
+                          <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Descrição do Projeto</h3>
+                            <p className="text-gray-700 leading-relaxed line-clamp-3">
+                              {job.description}
+                            </p>
                           </div>
-                          <div className="flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            <span>Criado em {new Date(job.createdAt).toLocaleDateString('pt-BR')}</span>
+
+                          {/* Job Details Grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            {/* Date and Time */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <div className="flex items-center text-blue-700 mb-2">
+                                <Calendar className="w-5 h-5 mr-2" />
+                                <span className="font-semibold">Data e Horário</span>
+                              </div>
+                              <div className="text-blue-900">
+                                <div className="font-medium">{new Date(job.date).toLocaleDateString('pt-BR', { 
+                                  weekday: 'long', 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })}</div>
+                                <div className="text-sm flex items-center mt-1">
+                                  <Clock className="w-4 h-4 mr-1" />
+                                  às {job.time}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Location */}
+                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                              <div className="flex items-center text-purple-700 mb-2">
+                                <MapPin className="w-5 h-5 mr-2" />
+                                <span className="font-semibold">Localização</span>
+                              </div>
+                              <div className="text-purple-900">
+                                <LocationDisplay 
+                                  location={job.location} 
+                                  className="text-sm font-medium" 
+                                  showIcon={false}
+                                  showMapLink={false}
+                                />
+                                <div className="text-xs text-purple-600 mt-1">
+                                  Serviço presencial
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Status and Stats */}
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center text-gray-700 mb-2">
+                                <BarChart3 className="w-5 h-5 mr-2" />
+                                <span className="font-semibold">Status</span>
+                              </div>
+                              <div className="text-gray-900">
+                                <div className="flex items-center mb-1">
+                                  <User className="w-4 h-4 mr-1 text-green-600" />
+                                  <span className="text-sm font-medium">0 candidatos</span>
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  Publicado em {new Date(job.createdAt).toLocaleDateString('pt-BR')}
+                                </div>
+                                <Badge variant="outline" className="mt-2 text-xs bg-green-100 text-green-700 border-green-300">
+                                  Vaga Ativa
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Prazo de Entrega:</span> 
+                              <span className="ml-1">{job.deadline || 'Não estabelecido'}</span>
+                            </div>
+                            <div className="flex space-x-3">
+                              <Button variant="outline" className="hover:bg-gray-100">
+                                Editar Vaga
+                              </Button>
+                              <Link href={`/vaga/${job.id}`}>
+                                <Button className="bg-primary hover:bg-primary/90 text-white px-6">
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Ver Detalhes
+                                </Button>
+                              </Link>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Action button */}
-                        <Link href={`/vaga/${job.id}`} className="block">
-                          <Button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white shadow-md hover:shadow-lg transition-all duration-300">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Ver Detalhes Completos
-                          </Button>
-                        </Link>
                       </CardContent>
                     </Card>
                   ))}
