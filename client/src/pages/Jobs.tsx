@@ -239,10 +239,11 @@ export default function Jobs() {
 
                 {/* Description */}
                 <div className="mb-4">
-                  <p className="text-gray-700 leading-relaxed overflow-hidden" style={{
+                  <p className="text-gray-700 leading-relaxed" style={{
+                    overflow: 'hidden',
                     display: '-webkit-box',
                     WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical' as const
+                    WebkitBoxOrient: 'vertical'
                   }}>
                     {job.description}
                   </p>
