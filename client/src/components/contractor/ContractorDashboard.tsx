@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'wouter';
 import { Plus, Briefcase, Users, CheckCircle, Eye, Search, BarChart3, TrendingUp, Calendar, Filter, Clock, MapPin, DollarSign, User } from 'lucide-react';
+import { LocationDisplay } from '@/components/LocationDisplay';
 
 export function ContractorDashboard() {
   const { user } = useUnifiedAuth();
@@ -284,11 +285,13 @@ export function ContractorDashboard() {
                             </div>
                           </div>
 
-                          <div className="flex items-center text-sm">
-                            <div className="flex items-center bg-purple-50 text-purple-700 px-3 py-2 rounded-lg w-full">
-                              <MapPin className="w-4 h-4 mr-2" />
-                              <span className="truncate">{job.location}</span>
-                            </div>
+                          <div className="bg-purple-50 text-purple-700 px-3 py-2 rounded-lg w-full">
+                            <LocationDisplay 
+                              location={job.location} 
+                              className="text-sm" 
+                              showIcon={true}
+                              showMapLink={false}
+                            />
                           </div>
                         </div>
 

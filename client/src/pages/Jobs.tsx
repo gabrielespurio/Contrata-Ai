@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'wouter';
 import { Search, MapPin, Calendar, DollarSign, Briefcase, Clock } from 'lucide-react';
+import { LocationDisplay } from '@/components/LocationDisplay';
 
 export default function Jobs() {
   const { user } = useUnifiedAuth();
@@ -216,10 +217,11 @@ export default function Jobs() {
                     <Calendar className="w-4 h-4 mr-2" />
                     {job.date} às {job.time}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {job.location}
-                  </div>
+                  <LocationDisplay 
+                    location={job.location} 
+                    className="text-sm text-gray-500" 
+                    showMapLink={true}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
