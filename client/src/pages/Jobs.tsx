@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'wouter';
-import { Search, MapPin, Calendar, DollarSign, Briefcase, Clock } from 'lucide-react';
+import { Search, MapPin, Calendar, DollarSign, Briefcase, Clock, User } from 'lucide-react';
 import { LocationDisplay } from '@/components/LocationDisplay';
 
 export default function Jobs() {
@@ -192,48 +192,140 @@ export default function Jobs() {
           <p className="mt-4 text-gray-600">Carregando vagas...</p>
         </div>
       ) : jobs && jobs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {jobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-md transition-shadow">
+        <div className="space-y-6">
+          {jobs.map((job: any) => (
+            <Card key={job.id} className="hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-purple-300">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  {job.destaque && (
-                    <Badge className="bg-accent/10 text-accent">DESTAQUE</Badge>
-                  )}
-                  <span className="text-sm text-gray-500">
-                    {new Date(job.createdAt).toLocaleDateString()}
+                {/* Header with title and highlight badge */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 hover:text-purple-700">
+                        <Link href={`/jobs/${job.id}`} className="hover:underline">
+                          {job.title}
+                        </Link>
+                      </h3>
+                      {job.destaque && (
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1">
+                          ✨ DESTAQUE
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500 mb-3">
+                      <span>Publicado há {Math.ceil((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24))} dias</span>
+                      <span className="mx-2">•</span>
+                      <span>Categoria: {job.subcategory.category.name}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-600 mb-1">
+                      R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </div>
+                    <div className="text-xs text-gray-500">valor do projeto</div>
+                  </div>
+                </div>
+
+                {/* Category/Subcategory tag */}
+                <div className="flex items-center mb-4">
+                  <Briefcase className="w-4 h-4 mr-2 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
+                    {job.subcategory.name}
                   </span>
                 </div>
-                
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{job.title}</h3>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{job.description}</p>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    {job.subcategory.category.name} → {job.subcategory.name}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {job.date} às {job.time}
-                  </div>
-                  <LocationDisplay 
-                    location={job.location} 
-                    className="text-sm text-gray-500" 
-                    showMapLink={true}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-xl font-bold text-secondary">
-                    <DollarSign className="w-5 h-5 mr-1" />
-                    R$ {job.payment}
-                  </div>
-                  <Link href={`/vaga/${job.id}`}>
-                    <Button size="sm">
-                      {user?.type === 'contratante' ? 'Ver Detalhes' : 'Candidatar-se'}
-                    </Button>
+
+                {/* Description */}
+                <div className="mb-4">
+                  <p className="text-gray-700 leading-relaxed overflow-hidden" style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical' as const
+                  }}>
+                    {job.description}
+                  </p>
+                  <Link href={`/jobs/${job.id}`}>
+                    <span className="text-purple-600 hover:text-purple-800 text-sm font-medium cursor-pointer mt-2 inline-block">
+                      Ver mais detalhes →
+                    </span>
                   </Link>
+                </div>
+
+                {/* Key details in a clean grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2 text-gray-600" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{job.date}</div>
+                      <div className="text-xs text-gray-500">às {job.time}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <div className="flex items-start">
+                      <MapPin className="w-4 h-4 mr-2 text-gray-600 mt-0.5" />
+                      <LocationDisplay 
+                        location={job.location} 
+                        className="text-sm text-gray-700" 
+                        showIcon={false}
+                        showMapLink={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skills/Tags if available */}
+                {job.subcategory && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      {job.subcategory.category.name}
+                    </span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                      {job.subcategory.name}
+                    </span>
+                  </div>
+                )}
+
+                {/* Footer with client info and action */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                      <User className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {job.client?.name || 'Contratante'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {job.client?.city || 'Localização não informada'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {!isContractor && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Link href={`/jobs/${job.id}`}>
+                          Candidatar-se
+                        </Link>
+                      </Button>
+                    )}
+                    <Link href={`/jobs/${job.id}`}>
+                      <Button 
+                        variant="default" 
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        Ver Detalhes
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>
