@@ -11,17 +11,14 @@ if (!DATABASE_URL) {
 // Remove extra quotes if they exist
 DATABASE_URL = DATABASE_URL.replace(/^['"]|['"]$/g, '');
 
-// Ensure we're always connecting to Neon database
-if (!DATABASE_URL.includes('neon.tech')) {
-  throw new Error("DATABASE_URL must be a Neon database URL (containing 'neon.tech')");
-}
+// For Replit environment, we can use the built-in PostgreSQL database
 
-// Configure PostgreSQL pool specifically for Neon
+// Configure PostgreSQL pool for Replit database
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
-  ssl: {
+  ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
-  },
+  } : false,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
   connectionTimeoutMillis: 2000, // Return an error if connection takes longer than 2 seconds
