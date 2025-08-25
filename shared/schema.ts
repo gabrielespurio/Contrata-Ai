@@ -175,6 +175,7 @@ export const insertSkillSchema = createInsertSchema(skills).omit({
 
 export const insertFreelancerProfileSchema = createInsertSchema(freelancerProfiles).omit({
   id: true,
+  userId: true, // userId comes from authentication, not from request body
   createdAt: true,
   updatedAt: true,
 });
