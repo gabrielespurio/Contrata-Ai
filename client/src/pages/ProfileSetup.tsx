@@ -102,9 +102,9 @@ export default function ProfileSetup() {
   }, [searchTerm, categories]);
 
   const getTotalSteps = () => {
-    if (data.userType === 'freelancer') return 4; // Type -> Personal -> Address -> Categories
+    if (data.userType === 'freelancer') return 6; // Type -> Person Type -> Personal -> Address -> Experience -> Categories
     if (data.userType === 'contratante') return 5; // Type -> Person Type -> Data -> Address -> Categories
-    return 4;
+    return 5;
   };
 
   const handleNext = () => {
@@ -201,28 +201,32 @@ export default function ProfileSetup() {
   const isStepValid = () => {
     switch (currentStep) {
       case 1: return data.userType !== null;
-      case 2: 
-        if (data.userType === 'contratante') return data.personType !== null;
-        if (data.userType === 'freelancer') return data.name.trim() && data.phone.trim();
-        return false;
+      case 2: return data.personType !== null;
       case 3:
-        if (data.userType === 'contratante' && data.personType === 'individual') {
-          return data.fullName?.trim() && data.cpf?.trim() && isValidCPF(data.cpf) && data.phone.trim();
+        if (data.personType === 'individual') {
+          if (data.userType === 'freelancer') {
+            return data.name.trim() && data.cpf?.trim() && isValidCPF(data.cpf) && data.phone.trim();
+          }
+          if (data.userType === 'contratante') {
+            return data.fullName?.trim() && data.cpf?.trim() && isValidCPF(data.cpf) && data.phone.trim();
+          }
         }
-        if (data.userType === 'contratante' && data.personType === 'empresa') {
-          return data.companyName?.trim() && data.cnpj?.trim() && isValidCNPJ(data.cnpj) && 
-                 data.responsibleName?.trim() && data.companySize?.trim() && data.phone.trim();
-        }
-        if (data.userType === 'freelancer') {
-          return data.address.cep.trim() && data.address.city.trim();
+        if (data.personType === 'empresa') {
+          return data.companyName?.trim() && data.cnpj?.trim() && isValidCNPJ(data.cnpj) && data.phone.trim();
         }
         return false;
       case 4:
-        if (data.userType === 'freelancer') return data.selectedCategories.length > 0;
-        if (data.userType === 'contratante') return data.address.cep.trim() && data.address.city.trim();
-        return false;
+        return data.address.cep.trim() && data.address.city.trim();
       case 5:
-        if (data.userType === 'contratante') return data.selectedCategories.length > 0;
+        if (data.userType === 'freelancer') {
+          return data.skills?.trim() && data.experience?.trim();
+        }
+        if (data.userType === 'contratante') {
+          return data.selectedCategories.length > 0;
+        }
+        return false;
+      case 6:
+        if (data.userType === 'freelancer') return data.selectedCategories.length > 0;
         return false;
       default: return false;
     }
@@ -266,10 +270,12 @@ export default function ProfileSetup() {
           <CardHeader>
             <CardTitle>
               {currentStep === 1 && "Escolha seu tipo de usuário"}
-              {currentStep === 2 && (data.userType === 'contratante' ? "Tipo de pessoa" : "Informações pessoais")}
-              {currentStep === 3 && (data.userType === 'contratante' ? "Dados pessoais/empresa" : "Endereço")}
-              {currentStep === 4 && (data.userType === 'freelancer' ? "Áreas de atuação" : "Endereço")}
+              {currentStep === 2 && "Tipo de pessoa"}
+              {currentStep === 3 && "Dados pessoais/empresa"}
+              {currentStep === 4 && "Endereço"}
+              {currentStep === 5 && data.userType === 'freelancer' && "Experiência e habilidades"}
               {currentStep === 5 && data.userType === 'contratante' && "Categorias de interesse"}
+              {currentStep === 6 && data.userType === 'freelancer' && "Áreas de atuação"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -337,6 +343,37 @@ export default function ProfileSetup() {
             )}
 
             {currentStep === 2 && data.userType === 'freelancer' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    data.personType === 'individual' ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => handlePersonTypeSelect('individual')}
+                >
+                  <CardContent className="p-6 text-center">
+                    <User className="w-12 h-12 mx-auto text-primary mb-4" />
+                    <h3 className="font-semibold mb-2">Pessoa Física</h3>
+                    <p className="text-sm text-gray-600">CPF</p>
+                  </CardContent>
+                </Card>
+                
+                <Card 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    data.personType === 'empresa' ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => handlePersonTypeSelect('empresa')}
+                >
+                  <CardContent className="p-6 text-center">
+                    <Building className="w-12 h-12 mx-auto text-primary mb-4" />
+                    <h3 className="font-semibold mb-2">Pessoa Jurídica</h3>
+                    <p className="text-sm text-gray-600">CNPJ</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Step 3 - Dados Pessoais para Freelancer */}
+            {currentStep === 3 && data.userType === 'freelancer' && data.personType === 'individual' && (
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="name">Nome completo</Label>
@@ -348,6 +385,20 @@ export default function ProfileSetup() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="cpf">CPF</Label>
+                  <Input
+                    id="cpf"
+                    value={data.cpf || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, cpf: formatCPF(e.target.value) }))}
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                    className={data.cpf && !isValidCPF(data.cpf) ? 'border-red-500' : ''}
+                  />
+                  {data.cpf && !isValidCPF(data.cpf) && (
+                    <p className="text-red-500 text-sm mt-1">Por favor, insira um CPF válido</p>
+                  )}
+                </div>
+                <div>
                   <Label htmlFor="phone">Telefone</Label>
                   <Input
                     id="phone"
@@ -357,34 +408,48 @@ export default function ProfileSetup() {
                     maxLength={15}
                   />
                 </div>
+              </div>
+            )}
+
+            {currentStep === 3 && data.userType === 'freelancer' && data.personType === 'empresa' && (
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="skills">Principais habilidades (opcional)</Label>
-                  <Textarea
-                    id="skills"
-                    value={data.skills || ''}
-                    onChange={(e) => setData(prev => ({ ...prev, skills: e.target.value }))}
-                    placeholder="Descreva suas principais habilidades e experiências"
-                    rows={3}
+                  <Label htmlFor="companyName">Nome da empresa</Label>
+                  <Input
+                    id="companyName"
+                    value={data.companyName || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, companyName: e.target.value }))}
+                    placeholder="Razão social da empresa"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="experience">Anos de experiência</Label>
-                  <Select value={data.experience || ''} onValueChange={(value) => setData(prev => ({ ...prev, experience: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione sua experiência" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="iniciante">Iniciante (0-1 anos)</SelectItem>
-                      <SelectItem value="junior">Júnior (1-3 anos)</SelectItem>
-                      <SelectItem value="pleno">Pleno (3-5 anos)</SelectItem>
-                      <SelectItem value="senior">Sênior (5+ anos)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Input
+                    id="cnpj"
+                    value={data.cnpj || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
+                    placeholder="00.000.000/0000-00"
+                    maxLength={18}
+                    className={data.cnpj && !isValidCNPJ(data.cnpj) ? 'border-red-500' : ''}
+                  />
+                  {data.cnpj && !isValidCNPJ(data.cnpj) && (
+                    <p className="text-red-500 text-sm mt-1">Por favor, insira um CNPJ válido</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={data.phone}
+                    onChange={(e) => setData(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
+                    placeholder="(11) 99999-9999"
+                    maxLength={15}
+                  />
                 </div>
               </div>
             )}
 
-            {/* Step 3 */}
+            {/* Step 3 - Dados para Contratante */}
             {currentStep === 3 && data.userType === 'contratante' && data.personType === 'individual' && (
               <div className="space-y-4">
                 <div>
@@ -494,8 +559,8 @@ export default function ProfileSetup() {
               </div>
             )}
 
-            {/* Address Step for Freelancer (Step 3) or Contractor (Step 4) */}
-            {((currentStep === 3 && data.userType === 'freelancer') || 
+            {/* Address Step for Freelancer (Step 4) or Contractor (Step 4) */}
+            {((currentStep === 4 && data.userType === 'freelancer') || 
               (currentStep === 4 && data.userType === 'contratante')) && (
               <div className="space-y-4">
                 <div>
@@ -580,8 +645,38 @@ export default function ProfileSetup() {
               </div>
             )}
 
-            {/* Categories Step for Freelancer (Step 4) */}
-            {currentStep === 4 && data.userType === 'freelancer' && (
+            {/* Experience and Skills Step for Freelancer (Step 5) */}
+            {currentStep === 5 && data.userType === 'freelancer' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="skills">Principais habilidades</Label>
+                  <Textarea
+                    id="skills"
+                    value={data.skills || ''}
+                    onChange={(e) => setData(prev => ({ ...prev, skills: e.target.value }))}
+                    placeholder="Descreva suas principais habilidades e competências técnicas"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="experience">Tempo de experiência</Label>
+                  <Select value={data.experience || ''} onValueChange={(value) => setData(prev => ({ ...prev, experience: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione sua experiência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="iniciante">Iniciante (0-1 anos)</SelectItem>
+                      <SelectItem value="junior">Júnior (1-3 anos)</SelectItem>
+                      <SelectItem value="pleno">Pleno (3-5 anos)</SelectItem>
+                      <SelectItem value="senior">Sênior (5+ anos)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Categories Step for Freelancer (Step 6) */}
+            {currentStep === 6 && data.userType === 'freelancer' && (
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="search">Buscar categorias (máximo 3)</Label>
