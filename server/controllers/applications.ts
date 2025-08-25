@@ -6,6 +6,8 @@ import { AuthRequest } from '../middleware/auth';
 
 const createApplicationSchema = insertApplicationSchema.omit({
   freelancerId: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 const updateApplicationSchema = z.object({
@@ -46,7 +48,7 @@ export async function getMyApplications(req: AuthRequest, res: Response) {
 
 export async function createApplication(req: AuthRequest, res: Response) {
   try {
-    const { jobId } = createApplicationSchema.parse(req.body);
+    const { jobId, proposedPrice, proposalDescription, deliveryTime } = createApplicationSchema.parse(req.body);
     const freelancerId = req.user!.userId;
     
     // Check if job exists
@@ -69,6 +71,9 @@ export async function createApplication(req: AuthRequest, res: Response) {
     const application = await storage.createApplication({
       jobId,
       freelancerId,
+      proposedPrice,
+      proposalDescription,
+      deliveryTime,
     });
 
     res.status(201).json({ message: 'Application submitted successfully', application });

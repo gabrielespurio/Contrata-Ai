@@ -20,6 +20,14 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useForm } from 'react-hook-form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 // Componente para Dashboard Overview
 function DashboardOverview() {
@@ -98,27 +106,54 @@ function DashboardOverview() {
 }
 
 // Componente para Explorar Vagas
+// Schema de validação para proposta
+const proposalSchema = z.object({
+  proposedPrice: z.string().min(1, "Valor é obrigatório").refine((val) => {
+    const num = parseFloat(val.replace(/[^\d,]/g, '').replace(',', '.'));
+    return !isNaN(num) && num > 0;
+  }, "Valor deve ser um número válido maior que 0"),
+  proposalDescription: z.string().min(50, "Descrição deve ter pelo menos 50 caracteres"),
+  deliveryTime: z.string().min(1, "Prazo de entrega é obrigatório"),
+});
+
 function ExplorarVagas() {
   const { user } = useUnifiedAuth();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
   
   const { data: jobs = [] } = useQuery({
     queryKey: ['/api/jobs']
   });
 
+  const form = useForm<z.infer<typeof proposalSchema>>({
+    resolver: zodResolver(proposalSchema),
+    defaultValues: {
+      proposedPrice: '',
+      proposalDescription: '',
+      deliveryTime: '',
+    },
+  });
+
   // Mutation para fazer candidatura
   const applyMutation = useMutation({
-    mutationFn: (jobId: string) => 
-      apiRequest('POST', '/api/applications', { jobId }),
+    mutationFn: (proposalData: { 
+      jobId: string; 
+      proposedPrice: string; 
+      proposalDescription: string; 
+      deliveryTime: string; 
+    }) => apiRequest('POST', '/api/applications', proposalData),
     onSuccess: () => {
       toast({
         title: "Proposta enviada!",
         description: "Sua proposta foi enviada com sucesso.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+      setIsProposalModalOpen(false);
+      form.reset();
     },
     onError: (error: any) => {
       toast({
@@ -129,10 +164,38 @@ function ExplorarVagas() {
     },
   });
 
-  const handleApply = (jobId: string) => {
+  const handleOpenProposalModal = (job: any) => {
     if (user?.type === 'freelancer') {
-      applyMutation.mutate(jobId);
+      setSelectedJob(job);
+      setIsProposalModalOpen(true);
     }
+  };
+
+  const handleSubmitProposal = (values: z.infer<typeof proposalSchema>) => {
+    if (selectedJob) {
+      // Remove formatação do valor antes de enviar
+      const cleanPrice = values.proposedPrice.replace(/[^\d,]/g, '').replace(',', '.');
+      
+      applyMutation.mutate({
+        jobId: selectedJob.id,
+        proposedPrice: cleanPrice,
+        proposalDescription: values.proposalDescription,
+        deliveryTime: values.deliveryTime,
+      });
+    }
+  };
+
+  const formatCurrency = (value: string) => {
+    // Remove tudo que não é dígito
+    const cleanValue = value.replace(/\D/g, '');
+    
+    // Converte para número e formata
+    const numericValue = parseInt(cleanValue) / 100;
+    
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(numericValue || 0);
   };
 
   const { data: categories = [] } = useQuery({
@@ -305,12 +368,11 @@ function ExplorarVagas() {
                             })}
                           </div>
                           <Button 
-                            onClick={() => handleApply(job.id)}
-                            disabled={applyMutation.isPending}
+                            onClick={() => handleOpenProposalModal(job)}
                             className={job.destaque ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
                             variant={job.destaque ? "default" : "outline"}
                           >
-                            {applyMutation.isPending ? 'Enviando...' : 'Fazer uma proposta'}
+                            Fazer uma proposta
                           </Button>
                         </div>
                       </div>
@@ -321,6 +383,117 @@ function ExplorarVagas() {
             </div>
           </div>
         </div>
+
+        {/* Modal de Proposta */}
+        <Dialog open={isProposalModalOpen} onOpenChange={setIsProposalModalOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Enviar Proposta</DialogTitle>
+              {selectedJob && (
+                <div className="text-sm text-gray-600">
+                  <p><strong>Vaga:</strong> {selectedJob.title}</p>
+                  <p><strong>Valor da vaga:</strong> R$ {parseFloat(selectedJob.payment).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}</p>
+                </div>
+              )}
+            </DialogHeader>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmitProposal)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="proposedPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor da sua proposta *</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="R$ 0,00"
+                          onChange={(e) => {
+                            const formatted = formatCurrency(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                          className="text-lg font-semibold text-green-600"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="deliveryTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prazo de entrega *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o prazo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="no-mesmo-dia">No mesmo dia</SelectItem>
+                          <SelectItem value="1-dia">Em 1 dia</SelectItem>
+                          <SelectItem value="2-3-dias">Em 2-3 dias</SelectItem>
+                          <SelectItem value="1-semana">Em 1 semana</SelectItem>
+                          <SelectItem value="2-semanas">Em 2 semanas</SelectItem>
+                          <SelectItem value="1-mes">Em 1 mês</SelectItem>
+                          <SelectItem value="personalizado">Prazo personalizado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="proposalDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição da proposta *</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Descreva como você pode ajudar com este projeto. Inclua sua experiência relevante, abordagem e qualquer diferencial que você oferece..."
+                          className="min-h-[120px]"
+                        />
+                      </FormControl>
+                      <div className="text-xs text-gray-500">
+                        {field.value?.length || 0}/500 caracteres (mínimo 50)
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsProposalModalOpen(false)}
+                    disabled={applyMutation.isPending}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={applyMutation.isPending}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  >
+                    {applyMutation.isPending ? 'Enviando...' : 'Enviar Proposta'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
