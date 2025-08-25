@@ -11,7 +11,10 @@ if (!DATABASE_URL) {
 // Remove extra quotes if they exist
 DATABASE_URL = DATABASE_URL.replace(/^['"]|['"]$/g, '');
 
-// For Replit environment, we can use the built-in PostgreSQL database
+// Ensure we're connecting to a Neon database
+if (!DATABASE_URL.includes('neon.tech')) {
+  throw new Error("DATABASE_URL must be a Neon database URL (containing 'neon.tech')");
+}
 
 // Configure PostgreSQL pool for Replit database
 export const pool = new Pool({ 
