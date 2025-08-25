@@ -13,6 +13,6 @@ DATABASE_URL = DATABASE_URL.replace(/^['"]|['"]$/g, '');
 
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
-  ssl: false // Disable SSL for local development
+  ssl: DATABASE_URL.includes('neon.tech') ? { rejectUnauthorized: false } : false
 });
 export const db = drizzle(pool, { schema });
