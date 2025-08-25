@@ -13,6 +13,7 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import Home from "@/pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ElegantRegister from "./pages/ElegantRegister";
 import Dashboard from "@/pages/Dashboard";
 import Jobs from "@/pages/Jobs";
 import JobDetails from "@/pages/JobDetails";
@@ -27,6 +28,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/elegant-register" component={ElegantRegister} />
         <Route path="/profile-setup" component={ProfileSetup} />
         
         <Route path="/dashboard">
