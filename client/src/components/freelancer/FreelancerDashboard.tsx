@@ -117,10 +117,6 @@ function ExplorarVagas() {
     'Desenvolvimento Web', 'React', 'JavaScript', 'Python'
   ];
 
-  const formatTimeAgo = (date: string) => {
-    // Placeholder para formatação de tempo
-    return 'há 2 horas';
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -291,9 +287,11 @@ function ExplorarVagas() {
                   <p className="text-gray-500">Nenhuma vaga disponível no momento.</p>
                 </Card>
               ) : (
-                <>
-                  {/* Exemplo de vaga destacada baseada no Workana */}
-                  <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                (jobs as any[]).map((job: any, index: number) => (
+                  <Card 
+                    key={job.id} 
+                    className={`${job.destaque ? 'border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50' : 'border border-gray-200 hover:shadow-md'} transition-shadow`}
+                  >
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -303,117 +301,55 @@ function ExplorarVagas() {
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">
-                                Editor de Vídeo para TikTok
+                                {job.title}
                               </h3>
                               <p className="text-sm text-gray-600">
-                                Publicado: {formatTimeAgo('')} • Propostas: 13 • Prazo de Entrega: 27/01/2025
+                                Publicado: há {Math.ceil((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24))} dias • 
+                                Data: {new Date(job.date).toLocaleDateString('pt-BR')} • 
+                                Horário: {job.time}
                               </p>
                             </div>
                           </div>
                           
                           <p className="text-gray-700 mb-4 leading-relaxed">
-                            Preciso de um bom editor de vídeo que tenha experiência em edição voltada para rede sociais, 
-                            tenho umas fotos e vídeos com uma pessoa querida e quero uma edit para postar no tiktok, pago bem!
+                            {job.description}
                           </p>
                           
                           <div className="space-y-2 mb-4">
-                            <p className="text-sm"><span className="font-medium">Categoria:</span> Design e Multimídia</p>
-                            <p className="text-sm"><span className="font-medium">Subcategoria:</span> Outros</p>
-                            <p className="text-sm"><span className="font-medium">Tamanho do projeto:</span> Pequeno</p>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            <Badge variant="secondary">Design Gráfico</Badge>
-                            <Badge variant="secondary">Adobe Illustrator</Badge>
-                            <Badge variant="secondary">Adobe Photoshop</Badge>
-                            <Badge variant="secondary">Ilustração</Badge>
+                            <p className="text-sm"><span className="font-medium">Categoria:</span> {job.subcategory.category.name}</p>
+                            <p className="text-sm"><span className="font-medium">Subcategoria:</span> {job.subcategory.name}</p>
+                            <p className="text-sm"><span className="font-medium">Local:</span> {job.location}</p>
                           </div>
                           
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                               <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs">
-                                M
+                                {job.client.name.charAt(0)}
                               </div>
-                              <span>M. F. D. M.</span>
-                              <img src="/api/placeholder/16/16" alt="Brasil" className="w-4 h-4" />
-                              <span>Brasil</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-gray-300" />
+                              <span>{job.client.name}</span>
+                              <span>• {job.client.city}</span>
                             </div>
                           </div>
                         </div>
                         
                         <div className="text-right ml-6">
-                          <div className="text-2xl font-bold text-green-600 mb-2">R$ 280 - 600</div>
-                          <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                          <div className="text-2xl font-bold text-green-600 mb-2">
+                            R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}
+                          </div>
+                          <Button 
+                            className={job.destaque ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
+                            variant={job.destaque ? "default" : "outline"}
+                          >
                             Fazer uma proposta
                           </Button>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-
-                  {/* Segunda vaga exemplo */}
-                  <Card className="border border-gray-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            Projeto de Interiores e Executivo para obra - Espaço Dpx
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            Publicado: há 11 horas • Propostas: 9 • Prazo de Entrega: 04/08/2025
-                          </p>
-                          
-                          <p className="text-gray-700 mb-4 leading-relaxed">
-                            Preciso inicialmente de um profissional para fazer os projetos executivos de uma obra que já está em andamento.
-                            O layout já está definido, preciso dos projetos de: locação dos pontos de iluminação, tomadas, 
-                            interruptores. Quadro de esquadrias, cortes esquemáticos e planta de forro.
-                          </p>
-                          
-                          <div className="space-y-1 mb-4">
-                            <p className="text-sm"><span className="font-medium">Categoria:</span> Engenharia e Manufatura</p>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            <Badge variant="secondary">Arquitetura</Badge>
-                            <Badge variant="secondary">Design de Interiores</Badge>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs">
-                                T
-                              </div>
-                              <span>T. D.</span>
-                              <img src="/api/placeholder/16/16" alt="Brasil" className="w-4 h-4" />
-                              <span>Brasil</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-yellow-400" />
-                              <Star className="h-4 w-4 text-gray-300" />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="text-right ml-6">
-                          <div className="text-2xl font-bold text-green-600 mb-2">R$ 280 - 600</div>
-                          <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50">
-                            Fazer uma proposta
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </>
+                ))
               )}
             </div>
           </div>
