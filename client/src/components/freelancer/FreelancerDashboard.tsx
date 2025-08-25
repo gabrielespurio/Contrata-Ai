@@ -100,8 +100,6 @@ function ExplorarVagas() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<string>('');
-  const [workType, setWorkType] = useState<string>('todos');
   
   const { data: jobs = [] } = useQuery({
     queryKey: ['/api/jobs']
@@ -200,63 +198,6 @@ function ExplorarVagas() {
               </CardContent>
             </Card>
 
-            {/* Modalidade de trabalho */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Modalidade de trabalho</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Button 
-                    variant={workType === 'todos' ? 'default' : 'outline'} 
-                    size="sm"
-                    onClick={() => setWorkType('todos')}
-                    className="text-xs"
-                  >
-                    Todos
-                  </Button>
-                  <Button 
-                    variant={workType === 'fixo' ? 'default' : 'outline'} 
-                    size="sm"
-                    onClick={() => setWorkType('fixo')}
-                    className="text-xs"
-                  >
-                    Preço fixo
-                  </Button>
-                  <Button 
-                    variant={workType === 'hora' ? 'default' : 'outline'} 
-                    size="sm"
-                    onClick={() => setWorkType('hora')}
-                    className="text-xs"
-                  >
-                    Por hora
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Idioma */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Idioma</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Button variant="default" size="sm" className="text-xs">
-                    Todos
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-xs">
-                    English
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-xs bg-blue-50 text-blue-600">
-                    Português
-                  </Button>
-                </div>
-                <Button variant="outline" size="sm" className="text-xs">
-                  Español
-                </Button>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Main Content */}
