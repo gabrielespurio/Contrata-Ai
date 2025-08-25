@@ -13,8 +13,8 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
 
   useEffect(() => {
     // Redirect to onboarding if user needs it and not already there
-    if (!isLoading && user && needsOnboarding && window.location.pathname !== '/onboarding') {
-      setLocation('/onboarding');
+    if (!isLoading && user && needsOnboarding && window.location.pathname !== '/profile-setup') {
+      setLocation('/profile-setup');
     }
   }, [user, isLoading, needsOnboarding, setLocation]);
 
@@ -36,8 +36,8 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
   }
 
   // If user needs onboarding, don't show protected content
-  if (needsOnboarding && window.location.pathname !== '/onboarding') {
-    return <Redirect to="/onboarding" />;
+  if (needsOnboarding && window.location.pathname !== '/profile-setup') {
+    return <Redirect to="/profile-setup" />;
   }
 
   // Redirect if user type doesn't match required type
