@@ -126,13 +126,7 @@ function ExplorarVagas() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Encontre trabalho</h1>
           <div className="flex gap-4 text-sm">
             <button className="text-blue-600 border-b-2 border-blue-600 pb-2 px-1">
-              Encontre projetos
-            </button>
-            <button className="text-gray-500 pb-2 px-1">
-              Projetos com minhas habilidades
-            </button>
-            <button className="text-gray-500 pb-2 px-1">
-              Plano de assinatura
+              Encontre serviços
             </button>
             <button className="text-gray-500 pb-2 px-1">
               Meus clientes favoritos
