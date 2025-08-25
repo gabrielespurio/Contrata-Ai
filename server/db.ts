@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// Get DATABASE_URL from environment variables
+// Get DATABASE_URL from environment variables - Must be Neon database
 let DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
@@ -11,8 +11,20 @@ if (!DATABASE_URL) {
 // Remove extra quotes if they exist
 DATABASE_URL = DATABASE_URL.replace(/^['"]|['"]$/g, '');
 
+// Ensure we're always connecting to Neon database
+if (!DATABASE_URL.includes('neon.tech')) {
+  throw new Error("DATABASE_URL must be a Neon database URL (containing 'neon.tech')");
+}
+
+// Configure PostgreSQL pool specifically for Neon
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
-  ssl: DATABASE_URL.includes('neon.tech') ? { rejectUnauthorized: false } : false
+  ssl: {
+    rejectUnauthorized: false
+  },
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error if connection takes longer than 2 seconds
 });
+
 export const db = drizzle(pool, { schema });
