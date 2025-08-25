@@ -25,8 +25,8 @@ interface ProfileData {
   website?: string;
   phone: string;
   city: string;
-  skills?: string;
-  experience?: string;
+  selectedSkills: string[];
+  experiences: Experience[];
   address: {
     cep: string;
     street: string;
@@ -36,6 +36,13 @@ interface ProfileData {
     state: string;
   };
   selectedCategories: string[];
+}
+
+interface Experience {
+  title: string;
+  company: string;
+  duration: string;
+  description: string;
 }
 
 export default function ProfileSetup() {
@@ -48,6 +55,9 @@ export default function ProfileSetup() {
   const [categories, setCategories] = useState<any[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [skills, setSkills] = useState<any[]>([]);
+  const [filteredSkills, setFilteredSkills] = useState<any[]>([]);
+  const [skillSearchTerm, setSkillSearchTerm] = useState('');
   
   const [data, setData] = useState<ProfileData>({
     userType: null,
@@ -55,6 +65,8 @@ export default function ProfileSetup() {
     name: user?.name || '',
     phone: '',
     city: '',
+    selectedSkills: [],
+    experiences: [{ title: '', company: '', duration: '', description: '' }],
     address: {
       cep: '',
       street: '',
@@ -73,19 +85,26 @@ export default function ProfileSetup() {
     }
   }, [user, setLocation]);
 
-  // Load categories on mount
+  // Load categories and skills on mount
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/api/categories');
-        const categoriesData = await response.json();
+        const [categoriesRes, skillsRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/skills')
+        ]);
+        const categoriesData = await categoriesRes.json();
+        const skillsData = await skillsRes.json();
+        
         setCategories(categoriesData);
         setFilteredCategories(categoriesData);
+        setSkills(skillsData);
+        setFilteredSkills(skillsData);
       } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
+        console.error('Erro ao carregar dados:', error);
       }
     };
-    loadCategories();
+    loadData();
   }, []);
 
   // Filter categories based on search term
@@ -100,6 +119,20 @@ export default function ProfileSetup() {
       setFilteredCategories(categories);
     }
   }, [searchTerm, categories]);
+
+  // Filter skills based on search term
+  useEffect(() => {
+    if (skillSearchTerm) {
+      setFilteredSkills(
+        skills.filter(skill => 
+          skill.name.toLowerCase().includes(skillSearchTerm.toLowerCase()) ||
+          skill.category.toLowerCase().includes(skillSearchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredSkills(skills);
+    }
+  }, [skillSearchTerm, skills]);
 
   const getTotalSteps = () => {
     if (data.userType === 'freelancer') return 6; // Type -> Person Type -> Personal -> Address -> Experience -> Categories
@@ -168,6 +201,47 @@ export default function ProfileSetup() {
         selectedCategories: [...prev.selectedCategories, categoryId]
       }));
     }
+  };
+
+  const handleSkillToggle = (skillId: string) => {
+    if (data.selectedSkills.includes(skillId)) {
+      // Remove skill
+      setData(prev => ({
+        ...prev,
+        selectedSkills: prev.selectedSkills.filter(id => id !== skillId)
+      }));
+    } else if (data.selectedSkills.length < 3) {
+      // Adiciona skill (máximo 3)
+      setData(prev => ({
+        ...prev,
+        selectedSkills: [...prev.selectedSkills, skillId]
+      }));
+    }
+  };
+
+  const addExperience = () => {
+    setData(prev => ({
+      ...prev,
+      experiences: [...prev.experiences, { title: '', company: '', duration: '', description: '' }]
+    }));
+  };
+
+  const removeExperience = (index: number) => {
+    if (data.experiences.length > 1) { // Manter pelo menos uma experiência
+      setData(prev => ({
+        ...prev,
+        experiences: prev.experiences.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const updateExperience = (index: number, field: keyof Experience, value: string) => {
+    setData(prev => ({
+      ...prev,
+      experiences: prev.experiences.map((exp, i) => 
+        i === index ? { ...exp, [field]: value } : exp
+      )
+    }));
   };
 
 
@@ -247,7 +321,7 @@ export default function ProfileSetup() {
         return data.address.cep.trim() && data.address.city.trim();
       case 5:
         if (data.userType === 'freelancer') {
-          return data.skills?.trim() && data.experience?.trim();
+          return data.selectedSkills.length > 0 && data.experiences.length > 0 && data.experiences.every(exp => exp.title && exp.company && exp.duration);
         }
         if (data.userType === 'contratante') {
           return data.selectedCategories.length > 0;
@@ -675,30 +749,140 @@ export default function ProfileSetup() {
 
             {/* Experience and Skills Step for Freelancer (Step 5) */}
             {currentStep === 5 && data.userType === 'freelancer' && (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="skills">Principais habilidades</Label>
-                  <Textarea
-                    id="skills"
-                    value={data.skills || ''}
-                    onChange={(e) => setData(prev => ({ ...prev, skills: e.target.value }))}
-                    placeholder="Descreva suas principais habilidades e competências técnicas"
-                    rows={3}
-                  />
+              <div className="space-y-6">
+                {/* Skills Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Principais habilidades</h3>
+                  <div>
+                    <Label htmlFor="skill-search">Buscar habilidades (máximo 3)</Label>
+                    <Input
+                      id="skill-search"
+                      value={skillSearchTerm}
+                      onChange={(e) => setSkillSearchTerm(e.target.value)}
+                      placeholder="Digite para buscar habilidades..."
+                    />
+                  </div>
+                  
+                  {data.selectedSkills.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Habilidades selecionadas:</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {data.selectedSkills.map(skillId => {
+                          const skill = skills.find(s => s.id === skillId);
+                          return skill ? (
+                            <Badge key={skillId} variant="secondary" className="flex items-center gap-1">
+                              {skill.name}
+                              <X 
+                                size={14} 
+                                className="cursor-pointer hover:text-red-500" 
+                                onClick={() => handleSkillToggle(skillId)}
+                              />
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="max-h-40 overflow-y-auto space-y-2">
+                    {Object.entries(
+                      filteredSkills
+                        .filter(skill => !data.selectedSkills.includes(skill.id))
+                        .reduce((acc, skill) => {
+                          if (!acc[skill.category]) acc[skill.category] = [];
+                          acc[skill.category].push(skill);
+                          return acc;
+                        }, {} as Record<string, any[]>)
+                    ).map(([category, skillsInCategory]) => (
+                      <div key={category}>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">{category}</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {skillsInCategory.map(skill => (
+                            <div
+                              key={skill.id}
+                              onClick={() => handleSkillToggle(skill.id)}
+                              className={`p-2 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 text-sm ${
+                                data.selectedSkills.length >= 3 
+                                  ? 'opacity-50 cursor-not-allowed' 
+                                  : 'hover:border-primary'
+                              }`}
+                            >
+                              {skill.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="experience">Tempo de experiência</Label>
-                  <Select value={data.experience || ''} onValueChange={(value) => setData(prev => ({ ...prev, experience: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione sua experiência" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="iniciante">Iniciante (0-1 anos)</SelectItem>
-                      <SelectItem value="junior">Júnior (1-3 anos)</SelectItem>
-                      <SelectItem value="pleno">Pleno (3-5 anos)</SelectItem>
-                      <SelectItem value="senior">Sênior (5+ anos)</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+                {/* Experience Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Experiências profissionais</h3>
+                    <Button type="button" variant="outline" size="sm" onClick={addExperience}>
+                      + Adicionar experiência
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {data.experiences.map((experience, index) => (
+                      <div key={index} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-medium">Experiência {index + 1}</h4>
+                          {data.experiences.length > 1 && (
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => removeExperience(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X size={16} />
+                            </Button>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label>Cargo/Função *</Label>
+                            <Input
+                              value={experience.title}
+                              onChange={(e) => updateExperience(index, 'title', e.target.value)}
+                              placeholder="Ex: Garçom, Bartender"
+                            />
+                          </div>
+                          <div>
+                            <Label>Empresa *</Label>
+                            <Input
+                              value={experience.company}
+                              onChange={(e) => updateExperience(index, 'company', e.target.value)}
+                              placeholder="Ex: Bar do João"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label>Período *</Label>
+                          <Input
+                            value={experience.duration}
+                            onChange={(e) => updateExperience(index, 'duration', e.target.value)}
+                            placeholder="Ex: Jan 2022 - Dez 2023"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label>Descrição</Label>
+                          <Textarea
+                            value={experience.description}
+                            onChange={(e) => updateExperience(index, 'description', e.target.value)}
+                            placeholder="Descreva suas principais responsabilidades..."
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

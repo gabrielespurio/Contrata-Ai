@@ -59,6 +59,12 @@ export const jobLimits = pgTable("job_limits", {
   jobCount: integer("job_count").default(0),
 });
 
+export const skills = pgTable("skills", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // e.g., "técnica", "interpessoal", "idiomas"
+});
+
 export const freelancerProfiles = pgTable("freelancer_profiles", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id).notNull().unique(),
@@ -67,10 +73,10 @@ export const freelancerProfiles = pgTable("freelancer_profiles", {
   cnpj: text("cnpj"),
   companyName: text("company_name"),
   phone: text("phone").notNull(),
-  skills: text("skills"),
-  experience: text("experience"),
   address: text("address"), // JSON string with full address
   selectedCategories: text("selected_categories"), // JSON array of category IDs
+  selectedSkills: text("selected_skills"), // JSON array of skill IDs (max 3)
+  experiences: text("experiences"), // JSON array of experience objects
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -84,6 +90,10 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   subcategories: many(subcategories),
+}));
+
+export const skillsRelations = relations(skills, ({ many }) => ({
+  // No direct relations needed for now
 }));
 
 export const subcategoriesRelations = relations(subcategories, ({ one, many }) => ({
@@ -159,6 +169,10 @@ export const insertJobLimitSchema = createInsertSchema(jobLimits).omit({
   id: true,
 });
 
+export const insertSkillSchema = createInsertSchema(skills).omit({
+  id: true,
+});
+
 export const insertFreelancerProfileSchema = createInsertSchema(freelancerProfiles).omit({
   id: true,
   createdAt: true,
@@ -178,5 +192,7 @@ export type Application = typeof applications.$inferSelect;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type JobLimit = typeof jobLimits.$inferSelect;
 export type InsertJobLimit = z.infer<typeof insertJobLimitSchema>;
+export type Skill = typeof skills.$inferSelect;
+export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type FreelancerProfile = typeof freelancerProfiles.$inferSelect;
 export type InsertFreelancerProfile = z.infer<typeof insertFreelancerProfileSchema>;

@@ -53,6 +53,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/categories', getCategories);
   app.get('/api/subcategories', getSubcategories);
 
+  // Skills
+  app.get('/api/skills', async (req, res) => {
+    try {
+      const skills = await storage.getSkills();
+      res.json(skills);
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Application routes
   app.get('/api/applications/job/:jobId', authenticateToken, requireUserType('contratante'), getApplicationsByJob);
   app.get('/api/applications/my', authenticateToken, requireUserType('freelancer'), getMyApplications);

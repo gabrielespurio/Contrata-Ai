@@ -6,6 +6,7 @@ import {
   applications, 
   jobLimits,
   freelancerProfiles,
+  skills,
   type User, 
   type InsertUser,
   type Category,
@@ -19,7 +20,8 @@ import {
   type JobLimit,
   type InsertJobLimit,
   type FreelancerProfile,
-  type InsertFreelancerProfile
+  type InsertFreelancerProfile,
+  type Skill
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql } from "drizzle-orm";
@@ -35,6 +37,9 @@ export interface IStorage {
   // Category operations
   getCategories(): Promise<Category[]>;
   getSubcategories(): Promise<Subcategory[]>;
+
+  // Skill operations
+  getSkills(): Promise<Skill[]>;
   getSubcategoriesByCategory(categoryId: string): Promise<Subcategory[]>;
   createCategory(category: InsertCategory): Promise<Category>;
   createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory>;
@@ -107,6 +112,10 @@ export class DatabaseStorage implements IStorage {
 
   async getSubcategories(): Promise<Subcategory[]> {
     return await db.select().from(subcategories).orderBy(asc(subcategories.name));
+  }
+
+  async getSkills(): Promise<Skill[]> {
+    return await db.select().from(skills).orderBy(asc(skills.category), asc(skills.name));
   }
 
   async getSubcategoriesByCategory(categoryId: string): Promise<Subcategory[]> {
