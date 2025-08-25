@@ -127,6 +127,24 @@ export async function getProfile(req: Request, res: Response) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
+    // Check if user has completed onboarding by checking if they have a profile
+    let needsOnboarding = true;
+    
+    try {
+      if (user.type === 'freelancer') {
+        const profile = await storage.getFreelancerProfile(userId);
+        needsOnboarding = !profile;
+      } else if (user.type === 'contratante') {
+        // For now, assume contractors don't need additional profile
+        // This can be expanded later if contractor profiles are added
+        needsOnboarding = false;
+      }
+    } catch (error) {
+      console.error('Error checking profile completion:', error);
+      // If we can't check, assume onboarding is needed for safety
+      needsOnboarding = true;
+    }
+
     res.json({
       id: user.id,
       name: user.name,
@@ -135,7 +153,7 @@ export async function getProfile(req: Request, res: Response) {
       city: user.city,
       premium: user.premium,
       destaque: user.destaque,
-      needsOnboarding: false
+      needsOnboarding
     });
   } catch (error) {
     console.error('Get profile error:', error);

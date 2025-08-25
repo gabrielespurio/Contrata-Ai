@@ -122,8 +122,20 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
         savedType: data.user.type
       });
       
-      // Atualiza o usuário com os dados salvos no banco
-      setUser(data.user);
+      // Recarrega o perfil completo do usuário para garantir que needsOnboarding seja atualizado
+      const profileResponse = await fetch('/api/auth/profile', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      
+      if (profileResponse.ok) {
+        const updatedUserData = await profileResponse.json();
+        setUser(updatedUserData);
+      } else {
+        // Fallback para os dados retornados pelo complete-onboarding
+        setUser(data.user);
+      }
     }
   };
 
