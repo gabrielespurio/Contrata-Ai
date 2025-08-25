@@ -9,13 +9,6 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password"),
   type: text("type").notNull().$type<"freelancer" | "contratante">(),
-  personType: text("person_type").$type<"individual" | "empresa">(),
-  cpf: text("cpf"),
-  cnpj: text("cnpj"),
-  companyName: text("company_name"),
-  phone: text("phone"),
-  skills: text("skills"),
-  experience: text("experience"),
   city: text("city").notNull(),
   premium: boolean("premium").default(false),
   destaque: boolean("destaque").default(false),
@@ -64,6 +57,22 @@ export const jobLimits = pgTable("job_limits", {
   userId: uuid("user_id").references(() => users.id),
   weekNumber: integer("week_number").notNull(),
   jobCount: integer("job_count").default(0),
+});
+
+export const freelancerProfiles = pgTable("freelancer_profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id).notNull().unique(),
+  personType: text("person_type").notNull().$type<"individual" | "empresa">(),
+  cpf: text("cpf"),
+  cnpj: text("cnpj"),
+  companyName: text("company_name"),
+  phone: text("phone").notNull(),
+  skills: text("skills"),
+  experience: text("experience"),
+  address: text("address"), // JSON string with full address
+  selectedCategories: text("selected_categories"), // JSON array of category IDs
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Relations
@@ -115,6 +124,13 @@ export const jobLimitsRelations = relations(jobLimits, ({ one }) => ({
   }),
 }));
 
+export const freelancerProfilesRelations = relations(freelancerProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [freelancerProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -143,6 +159,12 @@ export const insertJobLimitSchema = createInsertSchema(jobLimits).omit({
   id: true,
 });
 
+export const insertFreelancerProfileSchema = createInsertSchema(freelancerProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -156,3 +178,5 @@ export type Application = typeof applications.$inferSelect;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type JobLimit = typeof jobLimits.$inferSelect;
 export type InsertJobLimit = z.infer<typeof insertJobLimitSchema>;
+export type FreelancerProfile = typeof freelancerProfiles.$inferSelect;
+export type InsertFreelancerProfile = z.infer<typeof insertFreelancerProfileSchema>;

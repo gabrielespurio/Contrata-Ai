@@ -5,6 +5,7 @@ import {
   jobs, 
   applications, 
   jobLimits,
+  freelancerProfiles,
   type User, 
   type InsertUser,
   type Category,
@@ -16,7 +17,9 @@ import {
   type Application,
   type InsertApplication,
   type JobLimit,
-  type InsertJobLimit
+  type InsertJobLimit,
+  type FreelancerProfile,
+  type InsertFreelancerProfile
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql } from "drizzle-orm";
@@ -55,6 +58,11 @@ export interface IStorage {
   getJobLimitForWeek(userId: string, weekNumber: number): Promise<JobLimit | undefined>;
   createOrUpdateJobLimit(limit: InsertJobLimit): Promise<JobLimit>;
   getCurrentWeekNumber(): number;
+
+  // Freelancer profiles
+  getFreelancerProfile(userId: string): Promise<FreelancerProfile | undefined>;
+  createFreelancerProfile(profile: InsertFreelancerProfile): Promise<FreelancerProfile>;
+  updateFreelancerProfile(userId: string, updates: Partial<FreelancerProfile>): Promise<FreelancerProfile>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -302,6 +310,34 @@ export class DatabaseStorage implements IStorage {
     const diff = now.getTime() - start.getTime();
     const oneWeek = 1000 * 60 * 60 * 24 * 7;
     return Math.floor(diff / oneWeek);
+  }
+
+  async getFreelancerProfile(userId: string): Promise<FreelancerProfile | undefined> {
+    const [result] = await db
+      .select()
+      .from(freelancerProfiles)
+      .where(eq(freelancerProfiles.userId, userId));
+    return result || undefined;
+  }
+
+  async createFreelancerProfile(profile: InsertFreelancerProfile): Promise<FreelancerProfile> {
+    const [result] = await db
+      .insert(freelancerProfiles)
+      .values([{
+        ...profile,
+        personType: profile.personType as "individual" | "empresa"
+      }])
+      .returning();
+    return result;
+  }
+
+  async updateFreelancerProfile(userId: string, updates: Partial<FreelancerProfile>): Promise<FreelancerProfile> {
+    const [result] = await db
+      .update(freelancerProfiles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(freelancerProfiles.userId, userId))
+      .returning();
+    return result;
   }
 }
 

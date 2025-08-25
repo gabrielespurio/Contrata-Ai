@@ -175,7 +175,35 @@ export default function ProfileSetup() {
   const handleFinish = async () => {
     setIsLoading(true);
     try {
-      // For the simple auth system, use completeOnboarding
+      if (data.userType === 'freelancer') {
+        // Save freelancer profile data
+        const profileData = {
+          personType: data.personType!,
+          phone: data.phone,
+          cpf: data.cpf || null,
+          cnpj: data.cnpj || null,
+          companyName: data.companyName || null,
+          skills: data.skills || null,
+          experience: data.experience || null,
+          address: JSON.stringify(data.address),
+          selectedCategories: JSON.stringify(data.selectedCategories)
+        };
+
+        const response = await fetch('/api/freelancer-profiles', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(profileData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao salvar perfil de freelancer');
+        }
+      }
+
+      // Complete onboarding
       if (completeOnboarding) {
         await completeOnboarding(data);
       }

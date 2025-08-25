@@ -24,6 +24,11 @@ import {
   purchaseHighlight, 
   getStats 
 } from "./controllers/users";
+import {
+  createFreelancerProfile,
+  getFreelancerProfile,
+  updateFreelancerProfile
+} from "./controllers/freelancerProfiles";
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -59,6 +64,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/users/upgrade', authenticateToken, upgradeToPremium);
   app.post('/api/users/highlight', authenticateToken, purchaseHighlight);
   app.get('/api/users/stats', authenticateToken, getStats);
+
+  // Freelancer profile routes
+  app.post('/api/freelancer-profiles', authenticateToken, requireUserType('freelancer'), createFreelancerProfile);
+  app.get('/api/freelancer-profiles', authenticateToken, requireUserType('freelancer'), getFreelancerProfile);
+  app.patch('/api/freelancer-profiles', authenticateToken, requireUserType('freelancer'), updateFreelancerProfile);
 
   const httpServer = createServer(app);
   return httpServer;
