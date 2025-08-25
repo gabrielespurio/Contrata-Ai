@@ -6,10 +6,13 @@ import * as schema from "@shared/schema";
 neonConfig.webSocketConstructor = ws;
 
 // Get DATABASE_URL from environment variables (Neon database)
-const DATABASE_URL = process.env.DATABASE_URL;
+let DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
 }
+
+// Remove extra quotes if they exist
+DATABASE_URL = DATABASE_URL.replace(/^['"]|['"]$/g, '');
 
 export const pool = new Pool({ connectionString: DATABASE_URL });
 export const db = drizzle({ client: pool, schema });
