@@ -1,11 +1,8 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
-
-// Get DATABASE_URL from environment variables (Neon database)
+// Get DATABASE_URL from environment variables
 let DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
@@ -14,5 +11,8 @@ if (!DATABASE_URL) {
 // Remove extra quotes if they exist
 DATABASE_URL = DATABASE_URL.replace(/^['"]|['"]$/g, '');
 
-export const pool = new Pool({ connectionString: DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+export const pool = new Pool({ 
+  connectionString: DATABASE_URL,
+  ssl: false // Disable SSL for local development
+});
+export const db = drizzle(pool, { schema });
