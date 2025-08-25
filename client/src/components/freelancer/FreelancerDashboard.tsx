@@ -16,8 +16,10 @@ import {
   TrendingUp,
   Eye
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useUnifiedAuth } from '@/hooks/useAuth';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 // Componente para Dashboard Overview
 function DashboardOverview() {
@@ -97,6 +99,8 @@ function DashboardOverview() {
 
 // Componente para Explorar Vagas
 function ExplorarVagas() {
+  const { user } = useUnifiedAuth();
+  const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -104,6 +108,32 @@ function ExplorarVagas() {
   const { data: jobs = [] } = useQuery({
     queryKey: ['/api/jobs']
   });
+
+  // Mutation para fazer candidatura
+  const applyMutation = useMutation({
+    mutationFn: (jobId: string) => 
+      apiRequest('POST', '/api/applications', { jobId }),
+    onSuccess: () => {
+      toast({
+        title: "Proposta enviada!",
+        description: "Sua proposta foi enviada com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao enviar proposta",
+        description: error.message || "Não foi possível enviar sua proposta.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleApply = (jobId: string) => {
+    if (user?.type === 'freelancer') {
+      applyMutation.mutate(jobId);
+    }
+  };
 
   const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories']
@@ -275,10 +305,12 @@ function ExplorarVagas() {
                             })}
                           </div>
                           <Button 
+                            onClick={() => handleApply(job.id)}
+                            disabled={applyMutation.isPending}
                             className={job.destaque ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
                             variant={job.destaque ? "default" : "outline"}
                           >
-                            Fazer uma proposta
+                            {applyMutation.isPending ? 'Enviando...' : 'Fazer uma proposta'}
                           </Button>
                         </div>
                       </div>
