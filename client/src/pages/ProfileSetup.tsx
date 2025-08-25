@@ -863,12 +863,18 @@ export default function ProfileSetup() {
                         </div>
                         
                         <div>
-                          <Label>Período *</Label>
-                          <Input
-                            value={experience.duration}
-                            onChange={(e) => updateExperience(index, 'duration', e.target.value)}
-                            placeholder="Ex: Jan 2022 - Dez 2023"
-                          />
+                          <Label>Tempo de experiência *</Label>
+                          <Select value={experience.duration} onValueChange={(value) => updateExperience(index, 'duration', value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o tempo de experiência" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="menos de 1 ano">menos de 1 ano</SelectItem>
+                              <SelectItem value="de 1 ano a 3 anos">de 1 ano a 3 anos</SelectItem>
+                              <SelectItem value="de 3 a 5 anos">de 3 a 5 anos</SelectItem>
+                              <SelectItem value="+5 de anos">+5 de anos</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         
                         <div>
