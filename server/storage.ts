@@ -7,6 +7,7 @@ import {
   jobLimits,
   freelancerProfiles,
   skills,
+  notifications,
   type User, 
   type InsertUser,
   type Category,
@@ -21,7 +22,9 @@ import {
   type InsertJobLimit,
   type FreelancerProfile,
   type InsertFreelancerProfile,
-  type Skill
+  type Skill,
+  type Notification,
+  type InsertNotification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql } from "drizzle-orm";
@@ -50,6 +53,7 @@ export interface IStorage {
   getJobsByClient(clientId: string): Promise<(Job & { subcategory: Subcategory & { category: Category } })[]>;
   createJob(job: InsertJob): Promise<Job>;
   updateJob(id: string, updates: Partial<Job>): Promise<Job>;
+  markJobAsFilled(id: string): Promise<Job>;
   deleteJob(id: string): Promise<void>;
 
   // Application operations
@@ -68,6 +72,11 @@ export interface IStorage {
   getFreelancerProfile(userId: string): Promise<FreelancerProfile | undefined>;
   createFreelancerProfile(profile: InsertFreelancerProfile): Promise<FreelancerProfile>;
   updateFreelancerProfile(userId: string, updates: Partial<FreelancerProfile>): Promise<FreelancerProfile>;
+
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<Notification>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -149,6 +158,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(jobs.clientId, users.id))
       .leftJoin(subcategories, eq(jobs.subcategoryId, subcategories.id))
       .leftJoin(categories, eq(subcategories.categoryId, categories.id))
+      .where(eq(jobs.filled, false)) // Só mostra vagas não preenchidas
       .orderBy(desc(jobs.destaque), desc(jobs.createdAt));
 
     const result = await query;
@@ -213,6 +223,15 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db
       .update(jobs)
       .set(updates)
+      .where(eq(jobs.id, id))
+      .returning();
+    return result;
+  }
+
+  async markJobAsFilled(id: string): Promise<Job> {
+    const [result] = await db
+      .update(jobs)
+      .set({ filled: true })
       .where(eq(jobs.id, id))
       .returning();
     return result;
@@ -345,6 +364,32 @@ export class DatabaseStorage implements IStorage {
       .update(freelancerProfiles)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(freelancerProfiles.userId, userId))
+      .returning();
+    return result;
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [result] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
+    return result;
+  }
+
+  async getNotifications(userId: string): Promise<Notification[]> {
+    const result = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+    return result;
+  }
+
+  async markNotificationAsRead(id: string): Promise<Notification> {
+    const [result] = await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id))
       .returning();
     return result;
   }

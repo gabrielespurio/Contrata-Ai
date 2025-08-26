@@ -41,6 +41,7 @@ export const jobs = pgTable("jobs", {
   location: text("location").notNull(),
   payment: numeric("payment").notNull(),
   destaque: boolean("destaque").default(false),
+  filled: boolean("filled").default(false), // Marca se a vaga foi preenchida
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -83,11 +84,24 @@ export const freelancerProfiles = pgTable("freelancer_profiles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull().$type<"application_accepted" | "application_rejected" | "new_application">(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  jobId: uuid("job_id").references(() => jobs.id),
+  applicationId: uuid("application_id").references(() => applications.id),
+  read: boolean("read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   jobs: many(jobs),
   applications: many(applications),
   jobLimits: many(jobLimits),
+  notifications: many(notifications),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -143,6 +157,21 @@ export const freelancerProfilesRelations = relations(freelancerProfiles, ({ one 
   }),
 }));
 
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  job: one(jobs, {
+    fields: [notifications.jobId],
+    references: [jobs.id],
+  }),
+  application: one(applications, {
+    fields: [notifications.applicationId],
+    references: [applications.id],
+  }),
+}));
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -182,6 +211,11 @@ export const insertFreelancerProfileSchema = createInsertSchema(freelancerProfil
   updatedAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -199,3 +233,5 @@ export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type FreelancerProfile = typeof freelancerProfiles.$inferSelect;
 export type InsertFreelancerProfile = z.infer<typeof insertFreelancerProfileSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

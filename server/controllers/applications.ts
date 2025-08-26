@@ -90,7 +90,37 @@ export async function updateApplicationStatus(req: AuthRequest, res: Response) {
     const { id } = req.params;
     const { status } = updateApplicationSchema.parse(req.body);
     
+    // Atualiza o status da application
     const application = await storage.updateApplicationStatus(id, status);
+    
+    // Se a proposta foi aceita
+    if (status === 'accepted') {
+      // Busca os detalhes da application para pegar as informações
+      const applicationDetails = await storage.getApplicationsByJob(application.jobId);
+      const acceptedApp = applicationDetails.find(app => app.id === id);
+      
+      if (acceptedApp) {
+        // Marca a vaga como preenchida
+        await storage.markJobAsFilled(application.jobId);
+        
+        // Busca detalhes da vaga para a notificação
+        const job = await storage.getJobById(application.jobId);
+        
+        if (job) {
+          // Cria notificação para o freelancer
+          await storage.createNotification({
+            userId: acceptedApp.freelancer.id,
+            type: 'application_accepted',
+            title: 'Proposta Aceita! 🎉',
+            message: `Sua proposta para "${job.title}" foi aceita! Entre em contato com o contratante para combinar os detalhes.`,
+            jobId: application.jobId,
+            applicationId: application.id,
+            read: false
+          });
+        }
+      }
+    }
+    
     res.json({ message: 'Application status updated successfully', application });
   } catch (error) {
     if (error instanceof z.ZodError) {

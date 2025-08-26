@@ -18,6 +18,10 @@ import {
   createApplication, 
   updateApplicationStatus 
 } from "./controllers/applications";
+import {
+  getNotifications,
+  markNotificationAsRead
+} from "./controllers/notifications";
 import { 
   updateProfile, 
   upgradeToPremium, 
@@ -69,6 +73,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/applications/my', authenticateToken, requireUserType('freelancer'), getMyApplications);
   app.post('/api/applications', authenticateToken, requireUserType('freelancer'), createApplication);
   app.patch('/api/applications/:id/status', authenticateToken, requireUserType('contratante'), updateApplicationStatus);
+
+  // Notification routes
+  app.get('/api/notifications', authenticateToken, getNotifications);
+  app.patch('/api/notifications/:id/read', authenticateToken, markNotificationAsRead);
 
   // User routes
   app.patch('/api/users/profile', authenticateToken, updateProfile);
