@@ -50,7 +50,6 @@ export const applications = pgTable("applications", {
   freelancerId: uuid("freelancer_id").references(() => users.id),
   proposedPrice: numeric("proposed_price", { precision: 10, scale: 2 }).notNull(),
   proposalDescription: text("proposal_description").notNull(),
-  deliveryTime: text("delivery_time").notNull(),
   status: text("status").default("pending").$type<"pending" | "accepted" | "rejected">(),
   createdAt: timestamp("created_at").defaultNow(),
 });

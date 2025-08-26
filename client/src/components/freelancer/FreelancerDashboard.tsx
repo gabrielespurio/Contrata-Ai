@@ -113,7 +113,6 @@ const proposalSchema = z.object({
     return !isNaN(num) && num > 0;
   }, "Valor deve ser um número válido maior que 0"),
   proposalDescription: z.string().min(50, "Descrição deve ter pelo menos 50 caracteres"),
-  deliveryTime: z.string().min(1, "Prazo de entrega é obrigatório"),
 });
 
 function ExplorarVagas() {
@@ -134,7 +133,6 @@ function ExplorarVagas() {
     defaultValues: {
       proposedPrice: '',
       proposalDescription: '',
-      deliveryTime: '',
     },
   });
 
@@ -144,7 +142,6 @@ function ExplorarVagas() {
       jobId: string; 
       proposedPrice: string; 
       proposalDescription: string; 
-      deliveryTime: string; 
     }) => apiRequest('POST', '/api/applications', proposalData),
     onSuccess: () => {
       toast({
@@ -180,7 +177,6 @@ function ExplorarVagas() {
         jobId: selectedJob.id,
         proposedPrice: cleanPrice,
         proposalDescription: values.proposalDescription,
-        deliveryTime: values.deliveryTime,
       });
     }
   };
@@ -424,32 +420,6 @@ function ExplorarVagas() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="deliveryTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prazo de entrega *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o prazo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="no-mesmo-dia">No mesmo dia</SelectItem>
-                          <SelectItem value="1-dia">Em 1 dia</SelectItem>
-                          <SelectItem value="2-3-dias">Em 2-3 dias</SelectItem>
-                          <SelectItem value="1-semana">Em 1 semana</SelectItem>
-                          <SelectItem value="2-semanas">Em 2 semanas</SelectItem>
-                          <SelectItem value="1-mes">Em 1 mês</SelectItem>
-                          <SelectItem value="personalizado">Prazo personalizado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}

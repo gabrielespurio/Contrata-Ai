@@ -48,7 +48,7 @@ export async function getMyApplications(req: AuthRequest, res: Response) {
 
 export async function createApplication(req: AuthRequest, res: Response) {
   try {
-    const { jobId, proposedPrice, proposalDescription, deliveryTime } = createApplicationSchema.parse(req.body);
+    const { jobId, proposedPrice, proposalDescription } = createApplicationSchema.parse(req.body);
     const freelancerId = req.user!.userId;
     
     // Check if job exists
@@ -73,7 +73,6 @@ export async function createApplication(req: AuthRequest, res: Response) {
       freelancerId,
       proposedPrice,
       proposalDescription,
-      deliveryTime,
     });
 
     res.status(201).json({ message: 'Application submitted successfully', application });
