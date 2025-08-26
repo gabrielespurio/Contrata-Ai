@@ -1,20 +1,22 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUnifiedAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'wouter';
-import { Plus, Briefcase, Users, CheckCircle, Eye, Search, BarChart3, TrendingUp, Calendar, Filter, Clock, MapPin, DollarSign, User } from 'lucide-react';
+import { Plus, Briefcase, Users, CheckCircle, Eye, Search, BarChart3, TrendingUp, Calendar, Filter, Clock, MapPin, DollarSign, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { LocationDisplay } from '@/components/LocationDisplay';
 
 export function ContractorDashboard() {
   const { user } = useUnifiedAuth();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/users/stats'],
@@ -44,6 +46,16 @@ export function ContractorDashboard() {
     const matchesSearch = !searchTerm || job.title?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Paginação
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset página quando filtros mudam
+  const resetPage = () => {
+    if (currentPage > 1) setCurrentPage(1);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -206,12 +218,18 @@ export function ContractorDashboard() {
                     <Input
                       placeholder="Buscar vagas..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        resetPage();
+                      }}
                       className="pl-10"
                     />
                   </div>
                 </div>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select value={selectedCategory} onValueChange={(value) => {
+                  setSelectedCategory(value);
+                  resetPage();
+                }}>
                   <SelectTrigger className="w-full sm:w-48">
                     <SelectValue placeholder="Todas as categorias" />
                   </SelectTrigger>
@@ -230,10 +248,23 @@ export function ContractorDashboard() {
 
           {/* Jobs List */}
           <Card>
-            <CardHeader>
-              <CardTitle>
-                Suas Vagas ({filteredJobs.length})
-              </CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>
+                  Suas Vagas ({filteredJobs.length})
+                </CardTitle>
+                <CardDescription>
+                  {filteredJobs.length > 0 && (
+                    `Exibindo ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredJobs.length)} de ${filteredJobs.length} vagas`
+                  )}
+                </CardDescription>
+              </div>
+              <Link href="/criar-vaga">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Vaga
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               {jobsLoading ? (
@@ -242,147 +273,166 @@ export function ContractorDashboard() {
                   <p className="mt-2 text-gray-600">Carregando vagas...</p>
                 </div>
               ) : filteredJobs.length > 0 ? (
-                <div className="space-y-8">
-                  {filteredJobs.map((job: any) => (
-                    <Card key={job.id} className="bg-white border border-gray-200 hover:border-primary/30 hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-                      <CardContent className="p-0">
-                        {/* Header Section */}
-                        <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-8 py-6 border-b border-gray-100">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-3">
-                                <h2 className="text-2xl font-bold text-gray-900 line-clamp-1">{job.title}</h2>
-                                {job.destaque && (
-                                  <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm px-3 py-1">
-                                    ⭐ DESTAQUE
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="flex items-center text-gray-600 mb-2">
-                                <Briefcase className="w-5 h-5 mr-2 text-primary" />
-                                <span className="font-medium">{job.subcategory?.category?.name}</span>
-                                <span className="mx-2">→</span>
-                                <span>{job.subcategory?.name}</span>
-                              </div>
+                <>
+                  {/* Jobs Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+                    {paginatedJobs.map((job: any) => (
+                      <Card key={job.id} className="bg-white border border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-300 rounded-lg overflow-hidden group">
+                        <CardContent className="p-0">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-4 py-3 border-b border-gray-100">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
+                                {job.title}
+                              </h3>
+                              {job.destaque && (
+                                <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-1 ml-2">
+                                  ⭐
+                                </Badge>
+                              )}
                             </div>
-                            <div className="text-right">
-                              <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg">
-                                <div className="text-xs text-green-600 font-medium">Valor do Projeto</div>
-                                <div className="text-2xl font-bold">
-                                  R$ {parseFloat(job.payment).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                                </div>
-                              </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Briefcase className="w-4 h-4 mr-1 text-primary" />
+                              <span className="truncate">{job.subcategory?.name}</span>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Main Content Section */}
-                        <div className="px-8 py-6">
-                          {/* Description */}
-                          <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Descrição do Projeto</h3>
-                            <p className="text-gray-700 leading-relaxed line-clamp-3">
-                              {job.description}
-                            </p>
-                          </div>
-
-                          {/* Job Details Grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            {/* Date and Time */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                              <div className="flex items-center text-blue-700 mb-2">
-                                <Calendar className="w-5 h-5 mr-2" />
-                                <span className="font-semibold">Data e Horário</span>
-                              </div>
-                              <div className="text-blue-900">
-                                <div className="font-medium">{new Date(job.date).toLocaleDateString('pt-BR', { 
-                                  weekday: 'long', 
-                                  year: 'numeric', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })}</div>
-                                <div className="text-sm flex items-center mt-1">
-                                  <Clock className="w-4 h-4 mr-1" />
-                                  às {job.time}
-                                </div>
+                          {/* Content */}
+                          <div className="p-4 space-y-3">
+                            {/* Payment */}
+                            <div className="text-center bg-green-50 border border-green-200 rounded-lg p-3">
+                              <div className="text-xs text-green-600 font-medium">Valor</div>
+                              <div className="text-xl font-bold text-green-800">
+                                R$ {parseFloat(job.payment).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                               </div>
                             </div>
 
-                            {/* Location */}
-                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                              <div className="flex items-center text-purple-700 mb-2">
-                                <MapPin className="w-5 h-5 mr-2" />
-                                <span className="font-semibold">Localização</span>
+                            {/* Date & Location */}
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center text-gray-600">
+                                <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+                                <span>{new Date(job.date).toLocaleDateString('pt-BR')}</span>
+                                <Clock className="w-4 h-4 ml-2 mr-1 text-blue-600" />
+                                <span>{job.time}</span>
                               </div>
-                              <div className="text-purple-900">
+                              <div className="flex items-start text-gray-600">
+                                <MapPin className="w-4 h-4 mr-2 mt-0.5 text-purple-600 flex-shrink-0" />
                                 <LocationDisplay 
                                   location={job.location} 
-                                  className="text-sm font-medium" 
+                                  className="text-sm line-clamp-1" 
                                   showIcon={false}
                                   showMapLink={false}
                                 />
-                                <div className="text-xs text-purple-600 mt-1">
-                                  Serviço presencial
-                                </div>
                               </div>
                             </div>
 
-                            {/* Status and Stats */}
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-center text-gray-700 mb-2">
-                                <BarChart3 className="w-5 h-5 mr-2" />
-                                <span className="font-semibold">Status</span>
+                            {/* Description */}
+                            <p className="text-sm text-gray-700 line-clamp-2">
+                              {job.description}
+                            </p>
+
+                            {/* Stats */}
+                            <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                              <div className="flex items-center">
+                                <User className="w-3 h-3 mr-1 text-green-600" />
+                                <span>0 candidatos</span>
                               </div>
-                              <div className="text-gray-900">
-                                <div className="flex items-center mb-1">
-                                  <User className="w-4 h-4 mr-1 text-green-600" />
-                                  <span className="text-sm font-medium">0 candidatos</span>
-                                </div>
-                                <div className="text-xs text-gray-600">
-                                  Publicado em {new Date(job.createdAt).toLocaleDateString('pt-BR')}
-                                </div>
-                                <Badge variant="outline" className="mt-2 text-xs bg-green-100 text-green-700 border-green-300">
-                                  Vaga Ativa
-                                </Badge>
-                              </div>
+                              <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-300">
+                                Ativa
+                              </Badge>
                             </div>
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <div className="text-sm text-gray-600">
-                              <span className="font-medium">Prazo de Entrega:</span> 
-                              <span className="ml-1">{job.deadline || 'Não estabelecido'}</span>
-                            </div>
-                            <div className="flex space-x-3">
-                              <Button variant="outline" className="hover:bg-gray-100">
-                                Editar Vaga
+                          {/* Actions */}
+                          <div className="px-4 pb-4">
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm" className="flex-1 text-xs">
+                                Editar
                               </Button>
-                              <Link href={`/vaga/${job.id}`}>
-                                <Button className="bg-primary hover:bg-primary/90 text-white px-6">
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  Ver Detalhes
+                              <Link href={`/vaga/${job.id}`} className="flex-1">
+                                <Button size="sm" className="w-full text-xs">
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  Detalhes
                                 </Button>
                               </Link>
                             </div>
                           </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">
+                        Página {currentPage} de {totalPages}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Anterior
+                        </Button>
+                        <div className="flex space-x-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(page => 
+                              page === 1 || 
+                              page === totalPages || 
+                              Math.abs(page - currentPage) <= 1
+                            )
+                            .map((page, index, arr) => (
+                              <React.Fragment key={page}>
+                                {index > 0 && arr[index - 1] !== page - 1 && (
+                                  <span className="px-2 py-1 text-sm text-gray-400">...</span>
+                                )}
+                                <Button 
+                                  variant={currentPage === page ? "default" : "outline"} 
+                                  size="sm" 
+                                  className="w-8 h-8 p-0"
+                                  onClick={() => setCurrentPage(page)}
+                                >
+                                  {page}
+                                </Button>
+                              </React.Fragment>
+                            ))
+                          }
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                        >
+                          Próxima
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : (
-                <div className="text-center py-8">
-                  <Filter className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">
+                <div className="text-center py-12">
+                  <Filter className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
                     {(selectedCategory && selectedCategory !== 'all') || searchTerm 
-                      ? 'Nenhuma vaga encontrada com os filtros aplicados.' 
-                      : 'Você ainda não criou nenhuma vaga.'
+                      ? 'Nenhuma vaga encontrada' 
+                      : 'Nenhuma vaga criada'
+                    }
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {(selectedCategory && selectedCategory !== 'all') || searchTerm 
+                      ? 'Tente ajustar os filtros ou limpe a busca para ver mais resultados.' 
+                      : 'Comece criando sua primeira vaga para encontrar freelancers qualificados.'
                     }
                   </p>
                   {(!selectedCategory || selectedCategory === 'all') && !searchTerm && (
                     <Link href="/criar-vaga">
-                      <Button className="mt-4">
+                      <Button>
                         <Plus className="w-4 h-4 mr-2" />
                         Criar Primeira Vaga
                       </Button>
