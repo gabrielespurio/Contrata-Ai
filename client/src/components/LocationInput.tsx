@@ -162,7 +162,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
           
           toast({
             title: "Localização obtida!",
-            description: "Sua localização atual foi capturada com sucesso."
+            description: `${address}. Se não estiver correto, você pode editar manualmente.`
           });
           
         } catch (error) {

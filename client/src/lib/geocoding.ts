@@ -1,59 +1,81 @@
 // Função para converter coordenadas GPS em endereço legível
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=pt-BR`
-    );
-    
-    if (!response.ok) {
-      throw new Error('Erro na geocodificação');
-    }
-    
-    const data = await response.json();
-    
-    if (!data || !data.address) {
-      return `GPS: ${lat}, ${lng}`;
-    }
-    
-    const address = data.address;
-    
-    // Extrair componentes do endereço
-    const road = address.road || address.street || '';
-    const houseNumber = address.house_number || '';
-    const neighbourhood = address.neighbourhood || address.suburb || address.quarter || '';
-    const city = address.city || address.town || address.village || '';
-    const state = address.state || '';
-    
-    // Montar endereço formatado
-    let formattedAddress = '';
-    
-    if (road) {
-      formattedAddress += road;
-      if (houseNumber) {
-        formattedAddress += `, ${houseNumber}`;
+    // Tentar múltiplos serviços para maior precisão
+    const services = [
+      // OpenStreetMap Nominatim (gratuito)
+      {
+        url: `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=pt-BR&zoom=18`,
+        headers: { 'User-Agent': 'ContrataAI/1.0' }
+      },
+      // Serviço alternativo se necessário
+      {
+        url: `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=pt&zoom=16`,
+        headers: { 'User-Agent': 'ContrataAI/1.0' }
+      }
+    ];
+
+    for (const service of services) {
+      try {
+        const response = await fetch(service.url, { headers: service.headers });
+        
+        if (!response.ok) continue;
+        
+        const data = await response.json();
+        
+        if (!data || !data.address) continue;
+        
+        const address = data.address;
+        console.log('Dados de geocodificação:', address); // Para debug
+        
+        // Extrair componentes do endereço com prioridade para dados brasileiros
+        const road = address.road || address.street || address.pedestrian || '';
+        const houseNumber = address.house_number || '';
+        const neighbourhood = address.neighbourhood || address.suburb || address.quarter || address.residential || '';
+        const city = address.city || address.town || address.village || address.municipality || '';
+        const state = address.state || address.state_district || '';
+        
+        // Montar endereço formatado
+        const parts = [];
+        
+        if (road) {
+          if (houseNumber) {
+            parts.push(`${road}, ${houseNumber}`);
+          } else {
+            parts.push(road);
+          }
+        }
+        
+        if (neighbourhood) {
+          parts.push(neighbourhood);
+        }
+        
+        if (city) {
+          parts.push(city);
+        }
+        
+        if (state) {
+          parts.push(state);
+        }
+        
+        const formattedAddress = parts.join(' - ');
+        
+        if (formattedAddress.length > 10) { // Validação mínima de qualidade
+          return formattedAddress;
+        }
+        
+      } catch (serviceError) {
+        console.log('Erro no serviço de geocodificação:', serviceError);
+        continue;
       }
     }
     
-    if (neighbourhood && formattedAddress) {
-      formattedAddress += ` - ${neighbourhood}`;
-    } else if (neighbourhood) {
-      formattedAddress = neighbourhood;
-    }
+    // Fallback para coordenadas se nenhum serviço funcionou
+    return `GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     
-    if (city && formattedAddress) {
-      formattedAddress += `, ${city}`;
-    } else if (city) {
-      formattedAddress = city;
-    }
-    
-    if (state && formattedAddress) {
-      formattedAddress += ` - ${state}`;
-    }
-    
-    return formattedAddress || `GPS: ${lat}, ${lng}`;
   } catch (error) {
     console.error('Erro na geocodificação reversa:', error);
-    return `GPS: ${lat}, ${lng}`;
+    return `GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
   }
 }
 
