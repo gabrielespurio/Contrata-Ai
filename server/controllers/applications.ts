@@ -90,10 +90,6 @@ export async function updateApplicationStatus(req: AuthRequest, res: Response) {
     const { id } = req.params;
     const { status } = updateApplicationSchema.parse(req.body);
     
-    // Get application with job details
-    const applications = await storage.getApplicationsByJob(''); // We need to get the application first
-    // This is a limitation of our current storage interface - we need to refactor this
-    
     const application = await storage.updateApplicationStatus(id, status);
     res.json({ message: 'Application status updated successfully', application });
   } catch (error) {
