@@ -21,8 +21,7 @@ if (!DATABASE_URL.includes('neon.tech')) {
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,
-    sslmode: 'require'
+    rejectUnauthorized: false
   },
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
