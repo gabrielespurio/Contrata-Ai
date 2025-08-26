@@ -27,7 +27,7 @@ import {
   type InsertNotification
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { eq, and, desc, asc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -193,21 +193,40 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getJobsByClient(clientId: string): Promise<(Job & { subcategory: Subcategory & { category: Category } })[]> {
+  async getJobsByClient(clientId: string): Promise<(Job & { subcategory: Subcategory & { category: Category }; applicationsCount: number })[]> {
     const result = await db
-      .select()
+      .select({
+        ...jobs,
+        subcategory: subcategories,
+        category: categories,
+        applicationsCount: count(applications.id)
+      })
       .from(jobs)
       .leftJoin(subcategories, eq(jobs.subcategoryId, subcategories.id))
       .leftJoin(categories, eq(subcategories.categoryId, categories.id))
+      .leftJoin(applications, eq(applications.jobId, jobs.id))
       .where(eq(jobs.clientId, clientId))
+      .groupBy(jobs.id, subcategories.id, categories.id)
       .orderBy(desc(jobs.createdAt));
 
     return result.map(row => ({
-      ...row.jobs,
+      id: row.id,
+      clientId: row.clientId,
+      subcategoryId: row.subcategoryId,
+      title: row.title,
+      description: row.description,
+      date: row.date,
+      time: row.time,
+      location: row.location,
+      payment: row.payment,
+      destaque: row.destaque,
+      filled: row.filled,
+      createdAt: row.createdAt,
       subcategory: {
-        ...row.subcategories!,
-        category: row.categories!
-      }
+        ...row.subcategory!,
+        category: row.category!
+      },
+      applicationsCount: Number(row.applicationsCount) || 0
     }));
   }
 

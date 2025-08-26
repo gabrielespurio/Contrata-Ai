@@ -335,7 +335,7 @@ export function ContractorDashboard() {
                             <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
                               <div className="flex items-center">
                                 <User className="w-3 h-3 mr-1 text-green-600" />
-                                <span>0 candidatos</span>
+                                <span>{job.applicationsCount || 0} candidato{(job.applicationsCount || 0) !== 1 ? 's' : ''}</span>
                               </div>
                               <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-300">
                                 Ativa
