@@ -110,193 +110,224 @@ export default function JobDetails({ params }: JobDetailsProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Job Details */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-3xl font-bold text-gray-900">{job.title}</CardTitle>
-                  <div className="flex items-center mt-2 text-gray-600">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    <span className="text-lg">{job.subcategory.category.name} → {job.subcategory.name}</span>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
+                {job.destaque && (
+                  <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg px-3 py-1">
+                    ✨ DESTAQUE
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center text-gray-600 mb-4">
+                <Briefcase className="w-5 h-5 mr-2" />
+                <span className="text-lg font-medium">{job.subcategory.category.name} → {job.subcategory.name}</span>
+              </div>
+              
+              <div className="text-sm text-gray-500 mb-6">
+                Publicado em {new Date(job.createdAt).toLocaleDateString('pt-BR')} por {job.client.name}
+              </div>
+              
+              <div className="prose max-w-none">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Descrição</h3>
+                <p className="text-gray-700 leading-relaxed">{job.description}</p>
+              </div>
+            </div>
+            
+            <div className="lg:w-80">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+                <div className="text-center mb-4">
+                  <div className="text-3xl font-bold text-green-600 mb-1">
+                    R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </div>
+                  <div className="text-sm text-green-700">Valor do serviço</div>
+                </div>
+                
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center text-gray-700">
+                    <Calendar className="w-4 h-4 mr-3 text-green-600" />
+                    <span className="font-medium">{job.date}</span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="w-4 h-4 mr-3 text-green-600" />
+                    <span className="font-medium">{job.time}</span>
+                  </div>
+                  <div className="flex items-start text-gray-700">
+                    <MapPin className="w-4 h-4 mr-3 text-green-600 mt-0.5" />
+                    <LocationDisplay 
+                      location={job.location} 
+                      className="text-gray-700 font-medium" 
+                      showIcon={false}
+                      showMapLink={true}
+                    />
                   </div>
                 </div>
-                <div className="flex flex-col items-end space-y-2">
-                  {job.destaque && (
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
-                      ✨ DESTAQUE
-                    </Badge>
-                  )}
-                  <div className="text-sm text-gray-500">
-                    Criado em {new Date(job.createdAt).toLocaleDateString('pt-BR')}
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="font-semibold mb-2">Descrição</h3>
-                <p className="text-gray-700">{job.description}</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center text-gray-600">
-                  <Calendar className="w-5 h-5 mr-3" />
-                  <span>{job.date}</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Clock className="w-5 h-5 mr-3" />
-                  <span>{job.time}</span>
-                </div>
-                <LocationDisplay 
-                  location={job.location} 
-                  className="text-gray-600" 
-                  showMapLink={true}
-                />
-                <div className="flex items-center text-gray-600">
-                  <DollarSign className="w-5 h-5 mr-3" />
-                  <span className="font-semibold text-secondary text-lg">R$ {job.payment}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center text-gray-600">
-                <User className="w-5 h-5 mr-3" />
-                <span>Publicado por {job.client.name}</span>
-              </div>
-              
-              {user?.type === 'freelancer' && (
-                <div className="pt-4 border-t">
+                
+                {user?.type === 'freelancer' && (
                   <Button 
                     onClick={handleApply}
                     disabled={applyMutation.isPending}
-                    className="w-full"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 font-semibold"
                   >
-                    {applyMutation.isPending ? 'Enviando...' : 'Candidatar-se'}
+                    {applyMutation.isPending ? 'Enviando...' : 'Candidatar-se à Vaga'}
                   </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Client Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Sobre o Contratante</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-3 mb-4">
-                <Avatar>
-                  <AvatarFallback>
-                    {job.client.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{job.client.name}</p>
-                  <p className="text-sm text-gray-600">{job.client.city}</p>
-                </div>
-              </div>
-              {job.client.premium && (
-                <Badge className="bg-primary/10 text-primary">Premium</Badge>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Applications (for contractors) */}
-          {user?.type === 'contratante' && user.id === job.clientId && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Candidatos</CardTitle>
+          <div className="lg:col-span-1">
+            <Card className="shadow-sm border border-gray-200">
+              <CardHeader className="bg-gray-50 border-b">
+                <CardTitle className="text-lg text-gray-900">Sobre o Contratante</CardTitle>
               </CardHeader>
-              <CardContent>
-                {applicationsLoading ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4 mb-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback className="bg-purple-100 text-purple-600 font-bold text-xl">
+                      {job.client.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-lg text-gray-900">{job.client.name}</p>
+                    <p className="text-gray-600 flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {job.client.city}
+                    </p>
                   </div>
-                ) : applications && applications.length > 0 ? (
-                  <div className="space-y-4">
-                    {applications.map((application) => (
-                      <div key={application.id} className="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition-shadow">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-4 flex-1">
-                            <Avatar className="h-12 w-12">
-                              <AvatarFallback className="bg-purple-100 text-purple-600 font-semibold">
-                                {application.freelancer.name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-semibold text-gray-900 text-lg">{application.freelancer.name}</p>
-                                  <p className="text-sm text-gray-500 mt-1">📍 {application.freelancer.city}</p>
-                                </div>
-                              </div>
-                              {application.proposalDescription && (
-                                <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                                  <p className="text-sm text-gray-700 leading-relaxed">{application.proposalDescription}</p>
-                                </div>
-                              )}
-                              {application.proposedPrice && (
-                                <div className="mt-2">
-                                  <span className="text-lg font-bold text-green-600">
-                                    R$ {parseFloat(application.proposedPrice).toLocaleString('pt-BR', {
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2
-                                    })}
-                                  </span>
-                                  <span className="text-sm text-gray-500 ml-2">proposta</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2 ml-4">
-                            {application.status === 'pending' && (
-                              <div className="flex flex-col space-y-2">
-                                <Button
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
-                                  onClick={() => handleUpdateApplication(application.id, 'accepted')}
-                                  disabled={updateApplicationMutation.isPending}
-                                >
-                                  <CheckCircle className="w-4 h-4 mr-2" />
-                                  Aceitar
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  className="px-4 py-2"
-                                  onClick={() => handleUpdateApplication(application.id, 'rejected')}
-                                  disabled={updateApplicationMutation.isPending}
-                                >
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Rejeitar
-                                </Button>
-                              </div>
-                            )}
-                            {application.status === 'accepted' && (
-                              <Badge className="bg-green-100 text-green-800 px-3 py-1 text-sm">✓ Aceito</Badge>
-                            )}
-                            {application.status === 'rejected' && (
-                              <Badge variant="destructive" className="px-3 py-1 text-sm">✗ Rejeitado</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-600 text-center py-4">
-                    Nenhuma candidatura ainda.
-                  </p>
+                </div>
+                {job.client.premium && (
+                  <Badge className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border border-purple-200">
+                    👑 Premium
+                  </Badge>
                 )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* Applications (for contractors) */}
+          {user?.type === 'contratante' && user.id === job.clientId && (
+            <div className="lg:col-span-2">
+              <Card className="shadow-sm border border-gray-200">
+                <CardHeader className="bg-gray-50 border-b">
+                  <CardTitle className="text-lg text-gray-900 flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Candidatos ({applications?.length || 0})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {applicationsLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Carregando candidatos...</p>
+                    </div>
+                  ) : applications && applications.length > 0 ? (
+                    <div className="space-y-6">
+                      {applications.map((application) => (
+                        <div key={application.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all duration-200">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                            <div className="flex items-start space-x-4 flex-1">
+                              <Avatar className="h-14 w-14">
+                                <AvatarFallback className="bg-purple-100 text-purple-600 font-bold text-lg">
+                                  {application.freelancer.name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="mb-3">
+                                  <h3 className="font-bold text-xl text-gray-900 mb-1">{application.freelancer.name}</h3>
+                                  <p className="text-gray-600 flex items-center">
+                                    <MapPin className="w-4 h-4 mr-1" />
+                                    {application.freelancer.city}
+                                  </p>
+                                </div>
+                                
+                                {application.proposalDescription && (
+                                  <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    <h4 className="font-semibold text-gray-800 mb-2">Proposta:</h4>
+                                    <p className="text-gray-700 leading-relaxed">{application.proposalDescription}</p>
+                                  </div>
+                                )}
+                                
+                                {application.proposedPrice && (
+                                  <div className="mb-4">
+                                    <div className="inline-flex items-center bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                                      <DollarSign className="w-5 h-5 text-green-600 mr-2" />
+                                      <span className="text-xl font-bold text-green-600">
+                                        R$ {parseFloat(application.proposedPrice).toLocaleString('pt-BR', {
+                                          minimumFractionDigits: 2,
+                                          maximumFractionDigits: 2
+                                        })}
+                                      </span>
+                                      <span className="text-sm text-green-700 ml-2">proposta</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex sm:flex-col gap-3">
+                              {application.status === 'pending' && (
+                                <>
+                                  <Button
+                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 font-semibold"
+                                    onClick={() => handleUpdateApplication(application.id, 'accepted')}
+                                    disabled={updateApplicationMutation.isPending}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Aceitar
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    className="px-6 py-2 font-semibold"
+                                    onClick={() => handleUpdateApplication(application.id, 'rejected')}
+                                    disabled={updateApplicationMutation.isPending}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-2" />
+                                    Rejeitar
+                                  </Button>
+                                </>
+                              )}
+                              {application.status === 'accepted' && (
+                                <Badge className="bg-green-100 text-green-800 px-4 py-2 text-sm font-semibold">
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  Aceito
+                                </Badge>
+                              )}
+                              {application.status === 'rejected' && (
+                                <Badge variant="destructive" className="px-4 py-2 text-sm font-semibold">
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Rejeitado
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum candidato ainda</h3>
+                      <p className="text-gray-600">
+                        Os freelancers interessados aparecerão aqui quando se candidatarem.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>
