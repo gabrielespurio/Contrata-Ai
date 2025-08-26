@@ -125,7 +125,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
   };
 
 
-  // Get current GPS location
+  // Get current GPS location with high accuracy
   const getCurrentLocation = () => {
     if (!('geolocation' in navigator)) {
       toast({
@@ -138,9 +138,19 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
 
     setIsLoadingLocation(true);
 
+    // Configurações para maior precisão
+    const options = {
+      enableHighAccuracy: true,     // Usa GPS em vez de rede/WiFi
+      timeout: 20000,               // 20 segundos de timeout
+      maximumAge: 0                 // Não aceita cache, força nova leitura
+    };
+
+    console.log('🔍 Solicitando localização com alta precisão...');
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const { latitude, longitude } = position.coords;
+        const { latitude, longitude, accuracy } = position.coords;
+        console.log(`📍 Localização obtida: Lat=${latitude}, Lng=${longitude}, Precisão=${accuracy}m`);
         
         try {
           // Get readable address from coordinates
@@ -166,7 +176,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
           
           toast({
             title: "Localização obtida!",
-            description: `${address}. Se não estiver correto, você pode editar manualmente.`
+            description: `${address} (Precisão: ${Math.round(accuracy)}m). Se não estiver correto, você pode editar manualmente.`
           });
           
         } catch (error) {
@@ -182,18 +192,20 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
       },
       (error) => {
         setIsLoadingLocation(false);
+        console.error('❌ Erro na geolocalização:', error);
+        
         let message = "Não foi possível obter sua localização.";
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            message = "Permissão de localização negada. Ative a localização nas configurações do navegador.";
+            message = "Permissão de localização negada. Ative a localização nas configurações do navegador e permita acesso ao GPS.";
             setLocationPermission('denied');
             break;
           case error.POSITION_UNAVAILABLE:
-            message = "Localização indisponível no momento.";
+            message = "Localização GPS indisponível. Verifique se o GPS está ativado no dispositivo.";
             break;
           case error.TIMEOUT:
-            message = "Tempo esgotado para obter localização.";
+            message = "Tempo esgotado para obter localização GPS. Tente novamente ou use endereço manual.";
             break;
         }
         
@@ -203,11 +215,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
           variant: "destructive"
         });
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
+      options  // Usa as opções de alta precisão definidas acima
     );
   };
 
