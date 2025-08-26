@@ -337,8 +337,15 @@ export function ContractorDashboard() {
                                 <User className="w-3 h-3 mr-1 text-green-600" />
                                 <span>{job.applicationsCount || 0} candidato{(job.applicationsCount || 0) !== 1 ? 's' : ''}</span>
                               </div>
-                              <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-300">
-                                Ativa
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${
+                                  job.filled 
+                                    ? 'bg-blue-100 text-blue-700 border-blue-300' 
+                                    : 'bg-green-100 text-green-700 border-green-300'
+                                }`}
+                              >
+                                {job.filled ? 'Preenchida' : 'Ativa'}
                               </Badge>
                             </div>
                           </div>
