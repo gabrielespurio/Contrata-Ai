@@ -49,6 +49,9 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
     longitude: number;
     address: string;
   } | null>(null);
+  
+  // Editable GPS address
+  const [editableGpsAddress, setEditableGpsAddress] = useState('');
 
   // Check geolocation permission on mount
   useEffect(() => {
@@ -150,6 +153,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
           };
           
           setGpsLocation(gpsData);
+          setEditableGpsAddress(address);
           
           const locationData: LocationData = {
             type: 'gps',
@@ -326,12 +330,39 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
 
                 {gpsLocation ? (
                   <div className="space-y-4">
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg space-y-3">
                       <div className="flex items-center gap-2 text-green-700">
                         <CheckCircle className="w-4 h-4" />
                         <span className="text-sm font-medium">Localização capturada!</span>
                       </div>
-                      <p className="text-sm text-green-600 mt-1">{gpsLocation.address}</p>
+                      
+                      <div>
+                        <Label htmlFor="gps-address" className="text-sm text-green-700">
+                          Endereço detectado (você pode editar se estiver incorreto):
+                        </Label>
+                        <Input
+                          id="gps-address"
+                          value={editableGpsAddress}
+                          onChange={(e) => {
+                            const newAddress = e.target.value;
+                            setEditableGpsAddress(newAddress);
+                            
+                            const locationData: LocationData = {
+                              type: 'gps',
+                              formattedAddress: newAddress,
+                              latitude: gpsLocation.latitude,
+                              longitude: gpsLocation.longitude
+                            };
+                            
+                            onChange(newAddress, locationData);
+                          }}
+                          placeholder="Edite o endereço se necessário"
+                          className="bg-white border-green-300 focus:border-green-500 mt-1"
+                        />
+                        <p className="text-xs text-green-600 mt-1">
+                          Coordenadas: {gpsLocation.latitude.toFixed(6)}, {gpsLocation.longitude.toFixed(6)}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Mini Map Display */}
