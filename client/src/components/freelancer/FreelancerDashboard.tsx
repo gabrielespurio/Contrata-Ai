@@ -112,7 +112,7 @@ const proposalSchema = z.object({
     const num = parseFloat(val.replace(/[^\d,]/g, '').replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, "Valor deve ser um número válido maior que 0"),
-  proposalDescription: z.string().min(50, "Descrição deve ter pelo menos 50 caracteres"),
+  proposalDescription: z.string().min(20, "Descrição deve ter pelo menos 20 caracteres"),
 });
 
 function ExplorarVagas() {
@@ -435,7 +435,7 @@ function ExplorarVagas() {
                         />
                       </FormControl>
                       <div className="text-xs text-gray-500">
-                        {field.value?.length || 0}/500 caracteres (mínimo 50)
+                        {field.value?.length || 0}/500 caracteres (mínimo 20)
                       </div>
                       <FormMessage />
                     </FormItem>
