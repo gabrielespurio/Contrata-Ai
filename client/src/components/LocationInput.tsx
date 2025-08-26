@@ -57,7 +57,14 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.permissions?.query({ name: 'geolocation' }).then((result) => {
+        console.log('🔐 Status da permissão de localização:', result.state);
         setLocationPermission(result.state);
+        
+        // Monitora mudanças na permissão
+        result.onchange = () => {
+          console.log('🔄 Permissão de localização alterada para:', result.state);
+          setLocationPermission(result.state);
+        };
       });
     }
   }, []);
@@ -442,10 +449,34 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
                 )}
 
                 {locationPermission === 'denied' && (
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-700">
-                      <strong>Permissão negada:</strong> Para usar sua localização, ative a permissão 
-                      de localização nas configurações do navegador e recarregue a página.
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <h4 className="text-sm font-semibold text-red-700 mb-2">🚫 Permissão de localização bloqueada</h4>
+                    <p className="text-sm text-red-600 mb-3">
+                      Para obter sua localização real, você precisa desbloquear a permissão:
+                    </p>
+                    <ol className="text-xs text-red-600 space-y-1 mb-3">
+                      <li>1. Clique no ícone de cadeado/localização na barra de endereços</li>
+                      <li>2. Altere "Localização" de "Bloqueado" para "Permitir"</li>
+                      <li>3. Recarregue a página (F5 ou Ctrl+R)</li>
+                      <li>4. Tente capturar a localização novamente</li>
+                    </ol>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => window.location.reload()}
+                      className="text-red-600 border-red-300"
+                    >
+                      🔄 Recarregar Página
+                    </Button>
+                  </div>
+                )}
+                
+                {locationPermission === 'prompt' && !gpsLocation && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-700">
+                      <strong>💡 Dica:</strong> Quando clicar em "Obter Minha Localização", 
+                      o navegador deve solicitar permissão. Se não solicitar, verifique se a localização 
+                      não está bloqueada no ícone da barra de endereços.
                     </p>
                   </div>
                 )}
