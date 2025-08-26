@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, Navigation, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { reverseGeocode } from '@/lib/geocoding';
 
 interface LocationData {
   type: 'manual' | 'gps';
@@ -120,46 +121,6 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
     }
   };
 
-  // Reverse geocode coordinates to get address (temporarily simplified to avoid CORS)
-  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-    try {
-      // Temporarily returning coordinates to avoid CORS issues
-      return `Localização GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      
-      // Using Nominatim (OpenStreetMap) reverse geocoding service - free and no API key required
-      /* const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-        {
-          headers: {
-            'User-Agent': 'Contrata-AI-App' // Required by Nominatim
-          }
-        }
-      );
-      
-      const data = await response.json();
-      
-      if (data && data.display_name) {
-        // Extract meaningful parts from the address
-        const address = data.address;
-        const parts = [];
-        
-        if (address.road) parts.push(address.road);
-        if (address.house_number) parts.push(address.house_number);
-        if (address.neighbourhood || address.suburb) parts.push(address.neighbourhood || address.suburb);
-        if (address.city || address.town || address.village) parts.push(address.city || address.town || address.village);
-        if (address.state) parts.push(address.state);
-        
-        // return parts.length > 0 ? parts.join(', ') : data.display_name;
-      // }
-      
-      // Fallback to coordinates if no address found
-      // return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-      // */
-    } catch (error) {
-      console.error('Erro na geocodificação reversa:', error);
-      return `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-    }
-  };
 
   // Get current GPS location
   const getCurrentLocation = () => {

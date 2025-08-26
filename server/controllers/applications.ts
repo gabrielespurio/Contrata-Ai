@@ -95,17 +95,13 @@ export async function updateApplicationStatus(req: AuthRequest, res: Response) {
     
     // Se a proposta foi aceita
     if (status === 'accepted') {
-      console.log('🎯 PROPOSTA ACEITA - Marcando vaga como preenchida:', application.jobId);
-      
       // Busca os detalhes da application para pegar as informações
       const applicationDetails = await storage.getApplicationsByJob(application.jobId);
       const acceptedApp = applicationDetails.find(app => app.id === id);
       
       if (acceptedApp) {
         // Marca a vaga como preenchida
-        console.log('🎯 MARCANDO VAGA COMO PREENCHIDA - JobId:', application.jobId);
-        const updatedJob = await storage.markJobAsFilled(application.jobId);
-        console.log('✅ VAGA MARCADA COMO PREENCHIDA:', updatedJob);
+        await storage.markJobAsFilled(application.jobId);
         
         // Busca detalhes da vaga para a notificação
         const job = await storage.getJobById(application.jobId);
