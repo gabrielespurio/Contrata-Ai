@@ -221,46 +221,71 @@ export default function JobDetails({ params }: JobDetailsProps) {
                 ) : applications && applications.length > 0 ? (
                   <div className="space-y-4">
                     {applications.map((application) => (
-                      <div key={application.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <Avatar>
-                            <AvatarFallback>
-                              {application.freelancer.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{application.freelancer.name}</p>
-                            <p className="text-sm text-gray-600">{application.freelancer.city}</p>
+                      <div key={application.id} className="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition-shadow">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <Avatar className="h-12 w-12">
+                              <AvatarFallback className="bg-purple-100 text-purple-600 font-semibold">
+                                {application.freelancer.name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold text-gray-900 text-lg">{application.freelancer.name}</p>
+                                  <p className="text-sm text-gray-500 mt-1">📍 {application.freelancer.city}</p>
+                                </div>
+                              </div>
+                              {application.proposalDescription && (
+                                <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                                  <p className="text-sm text-gray-700 leading-relaxed">{application.proposalDescription}</p>
+                                </div>
+                              )}
+                              {application.proposedPrice && (
+                                <div className="mt-2">
+                                  <span className="text-lg font-bold text-green-600">
+                                    R$ {parseFloat(application.proposedPrice).toLocaleString('pt-BR', {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2
+                                    })}
+                                  </span>
+                                  <span className="text-sm text-gray-500 ml-2">proposta</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {application.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleUpdateApplication(application.id, 'accepted')}
-                                disabled={updateApplicationMutation.isPending}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Aceitar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleUpdateApplication(application.id, 'rejected')}
-                                disabled={updateApplicationMutation.isPending}
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Rejeitar
-                              </Button>
-                            </>
-                          )}
-                          {application.status === 'accepted' && (
-                            <Badge className="bg-green-100 text-green-800">Aceito</Badge>
-                          )}
-                          {application.status === 'rejected' && (
-                            <Badge variant="destructive">Rejeitado</Badge>
-                          )}
+                          
+                          <div className="flex items-center space-x-2 ml-4">
+                            {application.status === 'pending' && (
+                              <div className="flex flex-col space-y-2">
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
+                                  onClick={() => handleUpdateApplication(application.id, 'accepted')}
+                                  disabled={updateApplicationMutation.isPending}
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  Aceitar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="px-4 py-2"
+                                  onClick={() => handleUpdateApplication(application.id, 'rejected')}
+                                  disabled={updateApplicationMutation.isPending}
+                                >
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Rejeitar
+                                </Button>
+                              </div>
+                            )}
+                            {application.status === 'accepted' && (
+                              <Badge className="bg-green-100 text-green-800 px-3 py-1 text-sm">✓ Aceito</Badge>
+                            )}
+                            {application.status === 'rejected' && (
+                              <Badge variant="destructive" className="px-3 py-1 text-sm">✗ Rejeitado</Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
