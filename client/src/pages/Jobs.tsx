@@ -35,7 +35,7 @@ export default function Jobs() {
           }
         }).then(res => res.json());
       } else {
-        // Para freelancers, buscar todas as vagas com filtros
+        // Para freelancers ou visitantes, buscar todas as vagas com filtros
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
           if (value) params.append(key, value);
@@ -43,7 +43,8 @@ export default function Jobs() {
         return fetch(`/api/jobs?${params.toString()}`).then(res => res.json());
       }
     },
-    enabled: !!user,
+    // Vagas públicas devem ser visíveis para todos, só requer login para contratantes
+    enabled: isContractor ? !!user : true,
   });
 
   const { data: categories } = useQuery({
