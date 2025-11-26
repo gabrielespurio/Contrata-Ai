@@ -257,8 +257,8 @@ export default function ProfileSetup() {
           cpf: data.cpf || null,
           cnpj: data.cnpj || null,
           companyName: data.companyName || null,
-          skills: data.skills || null,
-          experience: data.experience || null,
+          selectedSkills: JSON.stringify(data.selectedSkills),
+          experiences: JSON.stringify(data.experiences),
           address: JSON.stringify(data.address),
           selectedCategories: JSON.stringify(data.selectedCategories)
         };

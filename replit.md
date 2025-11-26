@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Onboarding Redirect Fix and Database Security (November 26, 2025)
+- Fixed critical bug where freelancers were redirected back to profile setup after completing onboarding
+- Root cause: Race condition between state update and page redirect in React context
+- Solution: Immediately update needsOnboarding state after API success, before async profile refresh
+- Removed hardcoded database credentials from server/db.ts for security
+- Database connection now properly uses DATABASE_URL from Replit Secrets
+- Enhanced error handling in getProfile endpoint with better logging
+
 ### Migration to Replit Environment - Job Creation Fix (July 28, 2025)
 - Successfully completed final migration from Replit Agent to Replit environment
 - Fixed critical database error preventing job creation (missing required 'date' field)

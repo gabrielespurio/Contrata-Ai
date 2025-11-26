@@ -122,19 +122,30 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
         savedType: data.user.type
       });
       
-      // Recarrega o perfil completo do usuário para garantir que needsOnboarding seja atualizado
-      const profileResponse = await fetch('/api/auth/profile', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      // IMPORTANTE: Atualiza o estado IMEDIATAMENTE para prevenir redirecionamento de volta
+      // Isso evita race condition entre o redirect e a atualização do estado
+      setUser(prev => prev ? {
+        ...prev,
+        type: profileData.userType,
+        city: profileData.address?.city || profileData.city || prev.city,
+        needsOnboarding: false
+      } : null);
       
-      if (profileResponse.ok) {
-        const updatedUserData = await profileResponse.json();
-        setUser(updatedUserData);
-      } else {
-        // Fallback para os dados retornados pelo complete-onboarding
-        setUser(data.user);
+      // Depois, recarrega o perfil completo em background (opcional, para garantir sincronia)
+      try {
+        const profileResponse = await fetch('/api/auth/profile', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        
+        if (profileResponse.ok) {
+          const updatedUserData = await profileResponse.json();
+          // Só atualiza se ainda tiver perfil (usuário não fez logout)
+          setUser(updatedUserData);
+        }
+      } catch (error) {
+        console.log('Background profile refresh failed, but onboarding is complete:', error);
       }
     }
   };
