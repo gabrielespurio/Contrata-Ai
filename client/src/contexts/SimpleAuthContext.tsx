@@ -122,8 +122,13 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
         savedType: data.user.type
       });
       
-      // IMPORTANTE: Atualiza o estado IMEDIATAMENTE para prevenir redirecionamento de volta
-      // Isso evita race condition entre o redirect e a atualização do estado
+      // IMPORTANTE: Salva o novo token com o tipo de usuário atualizado
+      // Isso é necessário para que as permissões funcionem corretamente
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      
+      // Atualiza o estado IMEDIATAMENTE para prevenir redirecionamento de volta
       setUser(prev => prev ? {
         ...prev,
         type: profileData.userType,

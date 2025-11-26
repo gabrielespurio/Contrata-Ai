@@ -185,8 +185,12 @@ export async function completeOnboarding(req: Request, res: Response) {
     
     const user = await storage.updateUser(userId, updateData);
     
+    // Generate a new token with the updated user type
+    const token = generateToken(user.id, user.email, user.type);
+    
     res.json({
       message: 'Onboarding completed successfully',
+      token, // Return new token with updated user type
       user: {
         id: user.id,
         name: user.name,
