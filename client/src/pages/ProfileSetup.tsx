@@ -787,17 +787,17 @@ export default function ProfileSetup() {
                   <div className="max-h-40 overflow-y-auto space-y-2">
                     {Object.entries(
                       filteredSkills
-                        .filter(skill => !data.selectedSkills.includes(skill.id))
-                        .reduce((acc, skill) => {
+                        .filter((skill: any) => !data.selectedSkills.includes(skill.id))
+                        .reduce((acc: Record<string, any[]>, skill: any) => {
                           if (!acc[skill.category]) acc[skill.category] = [];
                           acc[skill.category].push(skill);
                           return acc;
                         }, {} as Record<string, any[]>)
-                    ).map(([category, skillsInCategory]) => (
+                    ).map(([category, skillsInCategory]: [string, any[]]) => (
                       <div key={category}>
                         <h4 className="text-sm font-medium text-gray-700 mb-2">{category}</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {skillsInCategory.map(skill => (
+                          {skillsInCategory.map((skill: any) => (
                             <div
                               key={skill.id}
                               onClick={() => handleSkillToggle(skill.id)}

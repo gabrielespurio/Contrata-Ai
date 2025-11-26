@@ -1,14 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'contrata-ai-secret-key-2025';
 
+export interface AuthUser {
+  userId: string;
+  email: string;
+  type: 'freelancer' | 'contratante';
+}
+
 export interface AuthRequest extends Request {
-  user?: {
-    userId: string;
-    email: string;
-    type: 'freelancer' | 'contratante';
-  };
+  user?: AuthUser;
 }
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
