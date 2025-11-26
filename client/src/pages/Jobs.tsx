@@ -214,8 +214,12 @@ export default function Jobs() {
                     </div>
                     <div className="flex items-center text-sm text-gray-500 mb-3">
                       <span>Publicado há {Math.ceil((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24))} dias</span>
-                      <span className="mx-2">•</span>
-                      <span>Categoria: {job.subcategory.category.name}</span>
+                      {job.subcategory?.category?.name && (
+                        <>
+                          <span className="mx-2">•</span>
+                          <span>Categoria: {job.subcategory.category.name}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   
@@ -231,12 +235,14 @@ export default function Jobs() {
                 </div>
 
                 {/* Category/Subcategory tag */}
-                <div className="flex items-center mb-4">
-                  <Briefcase className="w-4 h-4 mr-2 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
-                    {job.subcategory.name}
-                  </span>
-                </div>
+                {job.subcategory && (
+                  <div className="flex items-center mb-4">
+                    <Briefcase className="w-4 h-4 mr-2 text-purple-600" />
+                    <span className="text-sm font-medium text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
+                      {job.subcategory.name}
+                    </span>
+                  </div>
+                )}
 
                 {/* Description */}
                 <div className="mb-4">
@@ -279,9 +285,11 @@ export default function Jobs() {
                 {/* Skills/Tags if available */}
                 {job.subcategory && (
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      {job.subcategory.category.name}
-                    </span>
+                    {job.subcategory.category && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {job.subcategory.category.name}
+                      </span>
+                    )}
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                       {job.subcategory.name}
                     </span>

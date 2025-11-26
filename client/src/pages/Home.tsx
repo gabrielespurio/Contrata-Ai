@@ -63,32 +63,27 @@ export default function Home() {
     return <Link href="/dashboard" />;
   }
 
-  const categoryIcons = {
-    'Eventos & Gastronomia': Coffee,
-    'Fotografia & Vídeo': Camera,
-    'Reformas & Reparos': Wrench,
-    'Tecnologia & Design': Laptop,
-    'Música & Entretenimento': Music,
-    'Educação & Idiomas': Book,
-    'Serviços Domésticos': HomeIcon,
-    'Automotivo & Transporte': Car,
-    'Assistência Técnica': Smartphone,
-    'Consultoria': Building2,
+  const categoryIcons: Record<string, any> = {
     'Eventos': Utensils,
-    'Saúde': Heart,
-    'Moda e Beleza': Palette,
-    'Aulas': GraduationCap,
-    'Design e Tecnologia': Monitor,
-    'Reformas e Reparos': Hammer
+    'Gastronomia': Coffee,
+    'Serviços Gerais': Wrench,
+    'Construção & Reparos': Hammer,
+    'Automotivo & Mecânica': Car,
+    'Limpeza': HomeIcon,
+    'Saúde e Bem-estar': Heart,
+    'Beleza & Cuidados Pessoais': Palette,
+    'Logística & Transporte': CarIcon,
+    'Administração & Atendimento': Building2,
+    'Aulas': GraduationCap
   };
 
   const popularServices = [
-    'Garçom para Eventos',
+    'Garçom / Garçonete',
     'Fotógrafo',
-    'Barista',
+    'Cozinheiro',
     'DJ',
-    'Segurança',
-    'Limpeza'
+    'Diarista',
+    'Pedreiro'
   ];
 
   return (
