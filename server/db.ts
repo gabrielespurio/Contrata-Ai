@@ -2,14 +2,8 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// Get DATABASE_URL from environment variables - prioritize Neon database
+// Get DATABASE_URL from environment variables (stored securely in Replit Secrets)
 let DATABASE_URL = process.env.DATABASE_URL;
-
-// Use Neon database URL if provided
-const NEON_DATABASE_URL = "postgresql://neondb_owner:npg_BqzVv5d6KntG@ep-falling-snow-acibggbo-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
-
-// Prefer Neon database if available
-DATABASE_URL = NEON_DATABASE_URL || DATABASE_URL;
 
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required. Please set it to your database URL.");
