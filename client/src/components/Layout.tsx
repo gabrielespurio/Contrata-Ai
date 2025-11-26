@@ -10,12 +10,15 @@ import {
 import { User, Settings, LogOut } from 'lucide-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   
-  // Always use Clerk authentication
-
   // Use unified auth hook
   const { user, signOut } = useUnifiedAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    setLocation('/');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,7 +61,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         Configurações
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={signOut}>
+                    <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sair
                     </DropdownMenuItem>
