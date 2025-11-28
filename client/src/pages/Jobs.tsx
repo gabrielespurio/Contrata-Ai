@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'wouter';
-import { Search, MapPin, Calendar, Briefcase, Clock, User } from 'lucide-react';
+import { Search, MapPin, Calendar, Briefcase, User } from 'lucide-react';
 
 export default function Jobs() {
   const { user } = useUnifiedAuth();
@@ -85,9 +85,17 @@ export default function Jobs() {
     if (!location) return 'Local não informado';
     const parts = location.split(',');
     if (parts.length >= 2) {
-      return parts.slice(0, 2).join(',').trim();
+      return parts.slice(0, 2).join(', ').trim();
     }
-    return location.length > 30 ? location.substring(0, 30) + '...' : location;
+    return location.length > 25 ? location.substring(0, 25) + '...' : location;
+  };
+
+  const formatDateTime = (date: string, time: string) => {
+    if (!date) return 'Data não informada';
+    const dateObj = new Date(date);
+    const day = dateObj.getDate();
+    const month = dateObj.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+    return `${day} ${month}, ${time || '00:00'}h`;
   };
 
   return (
@@ -199,12 +207,15 @@ export default function Jobs() {
             <div 
               key={job.id} 
               className="rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
-              style={{
-                background: 'linear-gradient(135deg, #1e3a5f 0%, #3b82a0 50%, #5ba3c0 100%)'
-              }}
               data-testid={`card-job-${job.id}`}
             >
-              <div className="p-5">
+              {/* Header Section - Blue Gradient */}
+              <div 
+                className="p-5 pb-4"
+                style={{
+                  background: 'linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #4a90a8 100%)'
+                }}
+              >
                 <div className="flex items-start justify-between mb-3">
                   <Badge 
                     className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-md border-0"
@@ -223,80 +234,98 @@ export default function Jobs() {
                 </div>
 
                 <Link href={`/jobs/${job.id}`}>
-                  <h3 className="text-xl font-bold text-white mb-4 leading-tight cursor-pointer hover:text-blue-200 transition-colors" data-testid={`text-job-title-${job.id}`}>
+                  <h3 
+                    className="text-2xl font-bold text-white leading-tight cursor-pointer hover:text-blue-200 transition-colors"
+                    data-testid={`text-job-title-${job.id}`}
+                  >
                     {job.title}
                   </h3>
                 </Link>
+              </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <div className="text-orange-400 text-xs font-bold mb-1 flex items-center gap-1">
-                      <Briefcase className="w-3 h-3" />
-                      TIPO
+              {/* Content Section - Cream/Beige Background */}
+              <div 
+                className="p-5"
+                style={{
+                  background: 'linear-gradient(180deg, #f5e6d3 0%, #ede0d0 100%)'
+                }}
+              >
+                {/* TIPO and FUNCAO with Description */}
+                <div className="flex gap-4 mb-4">
+                  {/* Left - Labels */}
+                  <div className="flex-shrink-0 space-y-3">
+                    <div className="bg-white/60 rounded-lg px-3 py-2 border border-orange-200">
+                      <div className="text-orange-500 text-xs font-bold flex items-center gap-1">
+                        <Briefcase className="w-3 h-3" />
+                        TIPO
+                      </div>
+                      <div className="text-gray-800 text-sm font-semibold">
+                        {job.subcategory?.category?.name || 'Evento'}
+                      </div>
                     </div>
-                    <div className="text-white text-sm font-semibold">
-                      {job.subcategory?.category?.name || 'Geral'}
+                    <div className="bg-white/60 rounded-lg px-3 py-2 border border-orange-200">
+                      <div className="text-orange-500 text-xs font-bold flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        FUNCAO
+                      </div>
+                      <div className="text-gray-800 text-sm font-semibold">
+                        {job.subcategory?.name || 'Freelancer'}
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <div className="text-orange-400 text-xs font-bold mb-1 flex items-center gap-1">
-                      <User className="w-3 h-3" />
-                      FUNCAO
-                    </div>
-                    <div className="text-white text-sm font-semibold">
-                      {job.subcategory?.name || 'Freelancer'}
-                    </div>
+                  
+                  {/* Right - Description */}
+                  <div className="flex-1">
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {job.description.length > 150 
+                        ? job.description.substring(0, 150) + '...' 
+                        : job.description
+                      }
+                    </p>
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <p className="text-blue-100 text-sm leading-relaxed line-clamp-3">
-                    {job.description.length > 120 
-                      ? job.description.substring(0, 120) + '...' 
-                      : job.description
-                    }
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="flex items-center text-blue-100">
-                    <MapPin className="w-4 h-4 mr-2 text-orange-400 flex-shrink-0" />
-                    <span className="text-xs truncate">
+                {/* Location and Date */}
+                <div className="flex items-center justify-between py-3 border-t border-orange-200/50">
+                  <div className="flex items-center text-gray-700">
+                    <MapPin className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
+                    <span className="text-sm">
                       {formatLocation(job.location)}
                     </span>
                   </div>
-                  <div className="flex items-center text-blue-100">
-                    <Calendar className="w-4 h-4 mr-2 text-orange-400 flex-shrink-0" />
-                    <span className="text-xs">
-                      {job.date}, {job.time}
+                  <div className="flex items-center text-gray-700">
+                    <Calendar className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
+                    <span className="text-sm">
+                      {formatDateTime(job.date, job.time)}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/20">
+                {/* Footer - User Info and Button */}
+                <div className="flex items-center justify-between pt-3 border-t border-orange-200/50">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mr-2">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                      <User className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <div className="text-white text-sm font-medium">
+                      <div className="text-gray-800 text-sm font-semibold">
                         {job.client?.name || 'Contratante'}
                       </div>
-                      <div className="text-blue-200 text-xs">
+                      <div className="text-gray-500 text-xs">
                         {job.client?.city || 'Brasil'}
                       </div>
                     </div>
                   </div>
+                  
+                  <Link href={`/jobs/${job.id}`}>
+                    <Button 
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-lg transition-colors"
+                      data-testid={`button-apply-${job.id}`}
+                    >
+                      {isContractor ? 'VER DETALHES' : 'CANDIDATAR-SE'}
+                    </Button>
+                  </Link>
                 </div>
-
-                <Link href={`/jobs/${job.id}`}>
-                  <Button 
-                    className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition-colors"
-                    data-testid={`button-apply-${job.id}`}
-                  >
-                    {isContractor ? 'VER DETALHES' : 'CANDIDATAR-SE'}
-                  </Button>
-                </Link>
               </div>
             </div>
           ))}
