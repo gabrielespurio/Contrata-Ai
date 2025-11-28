@@ -6,9 +6,10 @@ interface JobCardProps {
   job: any;
   showApplyButton?: boolean;
   showEditButton?: boolean;
+  onApply?: () => void;
 }
 
-export function JobCard({ job, showApplyButton = true, showEditButton = false }: JobCardProps) {
+export function JobCard({ job, showApplyButton = true, showEditButton = false, onApply }: JobCardProps) {
   const formatLocation = (location: string) => {
     if (!location) return 'Local não informado';
     if (location.includes('GPS:') || location.includes('-2')) {
@@ -119,14 +120,24 @@ export function JobCard({ job, showApplyButton = true, showEditButton = false }:
           
           <div className="flex flex-col gap-1.5 flex-shrink-0">
             {showApplyButton && (
-              <Link href={`/jobs/${job.id}`}>
+              onApply ? (
                 <Button 
+                  onClick={onApply}
                   className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-1 h-8 rounded-md transition-colors w-full"
                   data-testid={`button-apply-${job.id}`}
                 >
                   CANDIDATAR-SE
                 </Button>
-              </Link>
+              ) : (
+                <Link href={`/jobs/${job.id}`}>
+                  <Button 
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-1 h-8 rounded-md transition-colors w-full"
+                    data-testid={`button-apply-${job.id}`}
+                  >
+                    CANDIDATAR-SE
+                  </Button>
+                </Link>
+              )
             )}
             {showEditButton && (
               <Link href={`/editar-vaga/${job.id}`}>

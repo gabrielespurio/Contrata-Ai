@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Eye
 } from 'lucide-react';
+import { JobCard } from '@/components/JobCard';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -304,76 +305,20 @@ function ExplorarVagas() {
             </div>
 
             {/* Vagas */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(jobs as any[]).length === 0 ? (
-                <Card className="p-8 text-center">
+                <Card className="p-8 text-center col-span-full">
                   <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500">Nenhuma vaga disponível no momento.</p>
                 </Card>
               ) : (
-                (jobs as any[]).map((job: any, index: number) => (
-                  <Card 
+                (jobs as any[]).map((job: any) => (
+                  <JobCard 
                     key={job.id} 
-                    className={`${job.destaque ? 'border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50' : 'border border-gray-200 hover:shadow-md'} transition-shadow`}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
-                              <User className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {job.title}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                Publicado: há {Math.ceil((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24))} dias • 
-                                Data: {new Date(job.date).toLocaleDateString('pt-BR')} • 
-                                Horário: {job.time}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <p className="text-gray-700 mb-4 leading-relaxed">
-                            {job.description}
-                          </p>
-                          
-                          <div className="space-y-2 mb-4">
-                            <p className="text-sm"><span className="font-medium">Categoria:</span> {job.subcategory.category.name}</p>
-                            <p className="text-sm"><span className="font-medium">Subcategoria:</span> {job.subcategory.name}</p>
-                            <p className="text-sm"><span className="font-medium">Local:</span> {job.location}</p>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs">
-                                {job.client.name.charAt(0)}
-                              </div>
-                              <span>{job.client.name}</span>
-                              <span>• {job.client.city}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="text-right ml-6">
-                          <div className="text-2xl font-bold text-green-600 mb-2">
-                            R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2
-                            })}
-                          </div>
-                          <Button 
-                            onClick={() => handleOpenProposalModal(job)}
-                            className={job.destaque ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
-                            variant={job.destaque ? "default" : "outline"}
-                          >
-                            Fazer uma proposta
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    job={job} 
+                    showApplyButton={true}
+                    onApply={() => handleOpenProposalModal(job)}
+                  />
                 ))
               )}
             </div>
