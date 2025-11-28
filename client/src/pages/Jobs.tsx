@@ -262,17 +262,17 @@ export default function Jobs() {
                   </p>
                 </div>
 
-                {/* Location and Date Row */}
-                <div className="flex items-start justify-between gap-4 py-3 border-t border-gray-100">
-                  <div className="flex items-start gap-2 flex-1">
+                {/* Location and Date Row - Fixed height */}
+                <div className="flex items-start justify-between gap-4 py-3 border-t border-gray-100 h-16">
+                  <div className="flex items-start gap-2 flex-1 overflow-hidden">
                     <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-600 text-xs leading-tight">
+                    <span className="text-gray-600 text-xs leading-tight line-clamp-2">
                       {formatLocation(job.location)}
                     </span>
                   </div>
                   <div className="flex items-start gap-2 flex-shrink-0">
                     <Clock className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-600 text-xs leading-tight">
+                    <span className="text-gray-600 text-xs leading-tight whitespace-nowrap">
                       {formatDateTime(job.date, job.time)}
                     </span>
                   </div>
