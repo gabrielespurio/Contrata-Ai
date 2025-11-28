@@ -83,19 +83,23 @@ export default function Jobs() {
 
   const formatLocation = (location: string) => {
     if (!location) return 'Local não informado';
-    const parts = location.split(',');
-    if (parts.length >= 2) {
-      return parts.slice(0, 2).join(', ').trim();
+    if (location.includes('GPS:') || location.includes('-')) {
+      const parts = location.split(',');
+      if (parts.length >= 1) {
+        return parts[0].trim().substring(0, 22) + (parts[0].length > 22 ? '...' : '');
+      }
     }
-    return location.length > 25 ? location.substring(0, 25) + '...' : location;
+    return location.length > 25 ? location.substring(0, 22) + '...' : location;
   };
 
   const formatDateTime = (date: string, time: string) => {
     if (!date) return 'Data não informada';
     const dateObj = new Date(date);
     const day = dateObj.getDate();
-    const month = dateObj.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-    return `${day} ${month}, ${time || '00:00'}h`;
+    const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    const month = months[dateObj.getMonth()];
+    const timeStr = time || '00:00';
+    return `${day} ${month}, ${timeStr}h`;
   };
 
   return (
@@ -206,36 +210,37 @@ export default function Jobs() {
           {jobs.map((job: any) => (
             <div 
               key={job.id} 
-              className="rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+              className="rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+              style={{ background: '#e8f4f8' }}
               data-testid={`card-job-${job.id}`}
             >
               {/* Header Section - Blue Gradient */}
               <div 
-                className="p-5 pb-4"
+                className="px-5 pt-5 pb-4"
                 style={{
-                  background: 'linear-gradient(135deg, #1a4a6e 0%, #2d6a8a 50%, #4a90a8 100%)'
+                  background: 'linear-gradient(135deg, #1a5276 0%, #2980b9 40%, #5dade2 100%)'
                 }}
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-4">
                   <Badge 
-                    className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-md border-0"
+                    className="bg-orange-500 hover:bg-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-md border-0 shadow-sm"
                   >
                     VAGA RAPIDA
                   </Badge>
                   <div className="text-right">
-                    <div className="text-xl font-bold text-orange-400">
+                    <div className="text-2xl font-bold text-orange-400">
                       R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       })}
                     </div>
-                    <div className="text-xs text-blue-200">valor do projeto</div>
+                    <div className="text-xs text-blue-100 opacity-90">valor do projeto</div>
                   </div>
                 </div>
 
                 <Link href={`/jobs/${job.id}`}>
                   <h3 
-                    className="text-2xl font-bold text-white leading-tight cursor-pointer hover:text-blue-200 transition-colors"
+                    className="text-xl font-bold text-white leading-snug cursor-pointer hover:text-blue-100 transition-colors"
                     data-testid={`text-job-title-${job.id}`}
                   >
                     {job.title}
@@ -243,75 +248,73 @@ export default function Jobs() {
                 </Link>
               </div>
 
-              {/* Content Section - Cream/Beige Background */}
+              {/* Content Section - Light Background */}
               <div 
-                className="p-5"
-                style={{
-                  background: 'linear-gradient(180deg, #f5e6d3 0%, #ede0d0 100%)'
-                }}
+                className="px-5 py-4"
+                style={{ background: '#faf5ef' }}
               >
-                {/* TIPO and FUNCAO with Description */}
-                <div className="flex gap-4 mb-4">
-                  {/* Left - Labels */}
-                  <div className="flex-shrink-0 space-y-3">
-                    <div className="bg-white/60 rounded-lg px-3 py-2 border border-orange-200">
-                      <div className="text-orange-500 text-xs font-bold flex items-center gap-1">
-                        <Briefcase className="w-3 h-3" />
-                        TIPO
+                {/* TIPO, FUNCAO and Description Row */}
+                <div className="flex gap-3 mb-4">
+                  {/* Left Column - TIPO and FUNCAO */}
+                  <div className="flex-shrink-0 w-[120px] space-y-2">
+                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-100">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <Briefcase className="w-3 h-3 text-orange-500" />
+                        <span className="text-orange-500 text-[10px] font-bold uppercase">Tipo</span>
                       </div>
-                      <div className="text-gray-800 text-sm font-semibold">
+                      <div className="text-gray-800 text-sm font-semibold leading-tight">
                         {job.subcategory?.category?.name || 'Evento'}
                       </div>
                     </div>
-                    <div className="bg-white/60 rounded-lg px-3 py-2 border border-orange-200">
-                      <div className="text-orange-500 text-xs font-bold flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        FUNCAO
+                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-100">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <User className="w-3 h-3 text-orange-500" />
+                        <span className="text-orange-500 text-[10px] font-bold uppercase">Funcao</span>
                       </div>
-                      <div className="text-gray-800 text-sm font-semibold">
+                      <div className="text-gray-800 text-sm font-semibold leading-tight">
                         {job.subcategory?.name || 'Freelancer'}
                       </div>
                     </div>
                   </div>
                   
-                  {/* Right - Description */}
-                  <div className="flex-1">
-                    <p className="text-gray-700 text-sm leading-relaxed">
-                      {job.description.length > 150 
-                        ? job.description.substring(0, 150) + '...' 
+                  {/* Right Column - Description */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {job.description.length > 120 
+                        ? job.description.substring(0, 120) + '...' 
                         : job.description
                       }
                     </p>
                   </div>
                 </div>
 
-                {/* Location and Date */}
-                <div className="flex items-center justify-between py-3 border-t border-orange-200/50">
-                  <div className="flex items-center text-gray-700">
-                    <MapPin className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
-                    <span className="text-sm">
+                {/* Location and Date Row */}
+                <div className="flex items-center gap-4 py-3 border-t border-gray-200">
+                  <div className="flex items-center flex-1 min-w-0">
+                    <MapPin className="w-4 h-4 text-[#2980b9] flex-shrink-0 mr-2" />
+                    <span className="text-gray-700 text-sm truncate">
                       {formatLocation(job.location)}
                     </span>
                   </div>
-                  <div className="flex items-center text-gray-700">
-                    <Calendar className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
-                    <span className="text-sm">
+                  <div className="flex items-center flex-shrink-0">
+                    <Calendar className="w-4 h-4 text-[#2980b9] flex-shrink-0 mr-2" />
+                    <span className="text-gray-700 text-sm whitespace-nowrap">
                       {formatDateTime(job.date, job.time)}
                     </span>
                   </div>
                 </div>
 
                 {/* Footer - User Info and Button */}
-                <div className="flex items-center justify-between pt-3 border-t border-orange-200/50">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-                      <User className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                  <div className="flex items-center min-w-0">
+                    <div className="w-9 h-9 bg-[#2980b9] rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                      <User className="w-4 h-4 text-white" />
                     </div>
-                    <div>
-                      <div className="text-gray-800 text-sm font-semibold">
+                    <div className="min-w-0">
+                      <div className="text-gray-800 text-sm font-semibold truncate">
                         {job.client?.name || 'Contratante'}
                       </div>
-                      <div className="text-gray-500 text-xs">
+                      <div className="text-gray-500 text-xs truncate">
                         {job.client?.city || 'Brasil'}
                       </div>
                     </div>
@@ -319,7 +322,7 @@ export default function Jobs() {
                   
                   <Link href={`/jobs/${job.id}`}>
                     <Button 
-                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-lg transition-colors"
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-5 py-2 rounded-lg transition-colors shadow-sm flex-shrink-0"
                       data-testid={`button-apply-${job.id}`}
                     >
                       {isContractor ? 'VER DETALHES' : 'CANDIDATAR-SE'}
