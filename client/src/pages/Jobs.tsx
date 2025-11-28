@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'wouter';
-import { Search, MapPin, Calendar, DollarSign, Briefcase, Clock, User } from 'lucide-react';
-import { LocationDisplay } from '@/components/LocationDisplay';
+import { Search, MapPin, Calendar, Briefcase, Clock, User } from 'lucide-react';
 
 export default function Jobs() {
   const { user } = useUnifiedAuth();
@@ -20,7 +19,6 @@ export default function Jobs() {
     date: '',
   });
 
-  // Verificar se é contratante para personalizar a interface
   const isContractor = user?.type === 'contratante';
   const jobsQueryKey = isContractor ? ['/api/jobs/my/jobs'] : ['/api/jobs', filters];
 
@@ -28,14 +26,12 @@ export default function Jobs() {
     queryKey: jobsQueryKey,
     queryFn: () => {
       if (isContractor) {
-        // Para contratantes, buscar apenas suas vagas
         return fetch('/api/jobs/my/jobs', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         }).then(res => res.json());
       } else {
-        // Para freelancers ou visitantes, buscar todas as vagas com filtros
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
           if (value) params.append(key, value);
@@ -43,7 +39,6 @@ export default function Jobs() {
         return fetch(`/api/jobs?${params.toString()}`).then(res => res.json());
       }
     },
-    // Vagas públicas devem ser visíveis para todos, só requer login para contratantes
     enabled: isContractor ? !!user : true,
   });
 
@@ -61,7 +56,6 @@ export default function Jobs() {
     enabled: !!filters.categoryId,
   });
 
-  // Ensure data is arrays to prevent rendering issues
   const safeCategories = Array.isArray(categories) ? categories : [];
   const safeSubcategories = Array.isArray(subcategories) ? subcategories : [];
 
@@ -87,14 +81,22 @@ export default function Jobs() {
     'Manaus',
   ];
 
+  const formatLocation = (location: string) => {
+    if (!location) return 'Local não informado';
+    const parts = location.split(',');
+    if (parts.length >= 2) {
+      return parts.slice(0, 2).join(',').trim();
+    }
+    return location.length > 30 ? location.substring(0, 30) + '...' : location;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page Title */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           {isContractor ? 'Minhas Vagas' : 'Explorar Vagas'}
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
           {isContractor 
             ? 'Gerencie as vagas que você criou' 
             : 'Encontre oportunidades de trabalho na sua cidade'
@@ -102,13 +104,12 @@ export default function Jobs() {
         </p>
       </div>
 
-      {/* Search and Filters - Only show for freelancers */}
       {!isContractor && (
         <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Search className="w-5 h-5 mr-2" />
-            {user?.type === 'contratante' ? 'Minhas Vagas' : 'Explorar Vagas'}
+          <CardTitle className="flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Explorar Vagas
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -116,7 +117,7 @@ export default function Jobs() {
             <div>
               <Label htmlFor="city">Cidade</Label>
               <Select value={filters.city || 'all'} onValueChange={(value) => handleFilterChange('city', value)}>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-city">
                   <SelectValue placeholder="Todas as cidades" />
                 </SelectTrigger>
                 <SelectContent>
@@ -133,7 +134,7 @@ export default function Jobs() {
             <div>
               <Label htmlFor="category">Categoria</Label>
               <Select value={filters.categoryId || 'all'} onValueChange={(value) => handleFilterChange('categoryId', value)}>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-category">
                   <SelectValue placeholder="Todas as categorias" />
                 </SelectTrigger>
                 <SelectContent>
@@ -156,7 +157,7 @@ export default function Jobs() {
                 onValueChange={(value) => handleFilterChange('subcategoryId', value)}
                 disabled={!filters.categoryId}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-subcategory">
                   <SelectValue placeholder="Todas as subcategorias" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,6 +180,7 @@ export default function Jobs() {
                 type="date"
                 value={filters.date}
                 onChange={(e) => handleFilterChange('date', e.target.value)}
+                data-testid="input-date"
               />
             </div>
           </div>
@@ -186,171 +188,131 @@ export default function Jobs() {
         </Card>
       )}
 
-      {/* Job Cards */}
       {isLoading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando vagas...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Carregando vagas...</p>
         </div>
       ) : jobs && jobs.length > 0 ? (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobs.map((job: any) => (
-            <Card key={job.id} className="hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-purple-300">
-              <CardContent className="p-6">
-                {/* Header with title and highlight badge */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900 hover:text-purple-700">
-                        <Link href={`/jobs/${job.id}`} className="hover:underline">
-                          {job.title}
-                        </Link>
-                      </h3>
-                      {job.destaque && (
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1">
-                          ✨ DESTAQUE
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-500 mb-3">
-                      <span>Publicado há {Math.ceil((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24))} dias</span>
-                      {job.subcategory?.category?.name && (
-                        <>
-                          <span className="mx-2">•</span>
-                          <span>Categoria: {job.subcategory.category.name}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  
+            <div 
+              key={job.id} 
+              className="rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+              style={{
+                background: 'linear-gradient(135deg, #1e3a5f 0%, #3b82a0 50%, #5ba3c0 100%)'
+              }}
+              data-testid={`card-job-${job.id}`}
+            >
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <Badge 
+                    className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-md border-0"
+                  >
+                    VAGA RAPIDA
+                  </Badge>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-green-600 mb-1">
+                    <div className="text-xl font-bold text-orange-400">
                       R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       })}
                     </div>
-                    <div className="text-xs text-gray-500">valor do projeto</div>
+                    <div className="text-xs text-blue-200">valor do projeto</div>
                   </div>
                 </div>
 
-                {/* Category/Subcategory tag */}
-                {job.subcategory && (
-                  <div className="flex items-center mb-4">
-                    <Briefcase className="w-4 h-4 mr-2 text-purple-600" />
-                    <span className="text-sm font-medium text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
-                      {job.subcategory.name}
-                    </span>
-                  </div>
-                )}
+                <Link href={`/jobs/${job.id}`}>
+                  <h3 className="text-xl font-bold text-white mb-4 leading-tight cursor-pointer hover:text-blue-200 transition-colors" data-testid={`text-job-title-${job.id}`}>
+                    {job.title}
+                  </h3>
+                </Link>
 
-                {/* Description */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-orange-400 text-xs font-bold mb-1 flex items-center gap-1">
+                      <Briefcase className="w-3 h-3" />
+                      TIPO
+                    </div>
+                    <div className="text-white text-sm font-semibold">
+                      {job.subcategory?.category?.name || 'Geral'}
+                    </div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-orange-400 text-xs font-bold mb-1 flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      FUNCAO
+                    </div>
+                    <div className="text-white text-sm font-semibold">
+                      {job.subcategory?.name || 'Freelancer'}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mb-4">
-                  <p className="text-gray-700 leading-relaxed">
-                    {job.description.length > 150 
-                      ? job.description.substring(0, 150) + '...' 
+                  <p className="text-blue-100 text-sm leading-relaxed line-clamp-3">
+                    {job.description.length > 120 
+                      ? job.description.substring(0, 120) + '...' 
                       : job.description
                     }
                   </p>
-                  <Link href={`/jobs/${job.id}`}>
-                    <span className="text-purple-600 hover:text-purple-800 text-sm font-medium cursor-pointer mt-2 inline-block">
-                      Ver mais detalhes →
-                    </span>
-                  </Link>
                 </div>
 
-                {/* Key details in a clean grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2 text-gray-600" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{job.date}</div>
-                      <div className="text-xs text-gray-500">às {job.time}</div>
-                    </div>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="flex items-center text-blue-100">
+                    <MapPin className="w-4 h-4 mr-2 text-orange-400 flex-shrink-0" />
+                    <span className="text-xs truncate">
+                      {formatLocation(job.location)}
+                    </span>
                   </div>
-                  
-                  <div className="md:col-span-2">
-                    <div className="flex items-start">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-600 mt-0.5" />
-                      <LocationDisplay 
-                        location={job.location} 
-                        className="text-sm text-gray-700" 
-                        showIcon={false}
-                        showMapLink={true}
-                      />
-                    </div>
+                  <div className="flex items-center text-blue-100">
+                    <Calendar className="w-4 h-4 mr-2 text-orange-400 flex-shrink-0" />
+                    <span className="text-xs">
+                      {job.date}, {job.time}
+                    </span>
                   </div>
                 </div>
 
-                {/* Skills/Tags if available */}
-                {job.subcategory && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {job.subcategory.category && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        {job.subcategory.category.name}
-                      </span>
-                    )}
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      {job.subcategory.name}
-                    </span>
-                  </div>
-                )}
-
-                {/* Footer with client info and action */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between pt-4 border-t border-white/20">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                      <User className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mr-2">
+                      <User className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-white text-sm font-medium">
                         {job.client?.name || 'Contratante'}
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {job.client?.city || 'Localização não informada'}
+                      <div className="text-blue-200 text-xs">
+                        {job.client?.city || 'Brasil'}
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {!isContractor && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                      >
-                        <Link href={`/jobs/${job.id}`}>
-                          Candidatar-se
-                        </Link>
-                      </Button>
-                    )}
-                    <Link href={`/jobs/${job.id}`}>
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700"
-                      >
-                        Ver Detalhes
-                      </Button>
-                    </Link>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <Link href={`/jobs/${job.id}`}>
+                  <Button 
+                    className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition-colors"
+                    data-testid={`button-apply-${job.id}`}
+                  >
+                    {isContractor ? 'VER DETALHES' : 'CANDIDATAR-SE'}
+                  </Button>
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       ) : (
         <div className="text-center py-12">
           <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma vaga encontrada</h3>
-          <p className="text-gray-600">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Nenhuma vaga encontrada</h3>
+          <p className="text-gray-600 dark:text-gray-400">
             {user?.type === 'contratante' 
               ? 'Você ainda não criou nenhuma vaga.' 
               : 'Tente ajustar os filtros ou volte mais tarde.'}
           </p>
           {user?.type === 'contratante' && (
             <Link href="/criar-vaga">
-              <Button className="mt-4">Criar Nova Vaga</Button>
+              <Button className="mt-4" data-testid="button-create-job">Criar Nova Vaga</Button>
             </Link>
           )}
         </div>
