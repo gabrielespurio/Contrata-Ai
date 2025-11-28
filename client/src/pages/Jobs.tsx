@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'wouter';
-import { Search, MapPin, Clock, Briefcase, User, ArrowRight, CircleDollarSign } from 'lucide-react';
+import { Search, MapPin, Clock, Briefcase, User, CircleDollarSign } from 'lucide-react';
 
 export default function Jobs() {
   const { user } = useUnifiedAuth();
@@ -209,14 +209,14 @@ export default function Jobs() {
               className="rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.01] bg-white border border-gray-200"
               data-testid={`card-job-${job.id}`}
             >
-              {/* Header - Blue gradient with title and price */}
-              <div 
-                className="px-5 py-4"
-                style={{
-                  background: 'linear-gradient(135deg, #1a5276 0%, #2980b9 50%, #5dade2 100%)'
-                }}
-              >
-                <div className="flex items-center justify-between gap-3">
+              {/* Header - Blue gradient with title and orange price section */}
+              <div className="flex">
+                <div 
+                  className="flex-1 px-5 py-4"
+                  style={{
+                    background: 'linear-gradient(135deg, #1a5276 0%, #2980b9 50%, #5dade2 100%)'
+                  }}
+                >
                   <Link href={`/jobs/${job.id}`}>
                     <h3 
                       className="text-lg font-bold text-white leading-snug cursor-pointer hover:text-blue-100 transition-colors"
@@ -225,19 +225,19 @@ export default function Jobs() {
                       {job.title}
                     </h3>
                   </Link>
-                  
-                  <div className="text-right flex-shrink-0">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xl font-bold text-white">
-                        R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                      </span>
-                      <CircleDollarSign className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div className="text-xs text-blue-100">valor do projeto</div>
+                </div>
+                
+                <div className="bg-orange-500 px-4 py-4 flex flex-col items-end justify-center flex-shrink-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xl font-bold text-white">
+                      R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </span>
+                    <CircleDollarSign className="w-5 h-5 text-white" />
                   </div>
+                  <div className="text-xs text-orange-100">valor do serviço</div>
                 </div>
               </div>
 
@@ -255,23 +255,12 @@ export default function Jobs() {
                   <span className="text-gray-700 text-sm">{job.subcategory?.name || 'Garçom/Garçonete'}</span>
                 </div>
 
-                {/* Description Box */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {job.description.length > 150 
-                      ? job.description.substring(0, 150) + '...' 
-                      : job.description
-                    }
+                {/* Description Box - Fixed height */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3 h-20 overflow-hidden">
+                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                    {job.description}
                   </p>
                 </div>
-
-                {/* Ver mais detalhes link */}
-                <Link href={`/jobs/${job.id}`}>
-                  <div className="flex items-center gap-1 text-blue-600 hover:text-blue-700 cursor-pointer mb-4">
-                    <ArrowRight className="w-4 h-4" />
-                    <span className="text-sm underline">Ver mais detalhes</span>
-                  </div>
-                </Link>
 
                 {/* Location and Date Row */}
                 <div className="flex items-start justify-between gap-4 py-3 border-t border-gray-100">
