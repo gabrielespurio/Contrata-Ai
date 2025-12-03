@@ -41,7 +41,7 @@ export function JobCard({ job, showApplyButton = true, showEditButton = false, o
             background: 'linear-gradient(135deg, #1a5276 0%, #2980b9 50%, #5dade2 100%)'
           }}
         >
-          <Link href={`/jobs/${job.id}`}>
+          <Link href={`/vaga/${job.id}`}>
             <h3 
               className="text-lg font-bold text-white leading-snug cursor-pointer hover:text-blue-100 transition-colors line-clamp-2"
               data-testid={`text-job-title-${job.id}`}
@@ -129,7 +129,7 @@ export function JobCard({ job, showApplyButton = true, showEditButton = false, o
                   CANDIDATAR-SE
                 </Button>
               ) : (
-                <Link href={`/jobs/${job.id}`}>
+                <Link href={`/vaga/${job.id}`}>
                   <Button 
                     className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-1 h-8 rounded-md transition-colors w-full"
                     data-testid={`button-apply-${job.id}`}
@@ -150,7 +150,7 @@ export function JobCard({ job, showApplyButton = true, showEditButton = false, o
                 </Button>
               </Link>
             )}
-            <Link href={`/jobs/${job.id}`}>
+            <Link href={`/vaga/${job.id}`}>
               <Button 
                 variant="outline"
                 className="border-orange-500 text-orange-500 hover:bg-orange-50 font-bold text-xs px-4 py-1 h-8 rounded-md transition-colors w-full"
