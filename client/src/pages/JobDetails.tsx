@@ -1,16 +1,26 @@
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { LocationDisplay } from '@/components/LocationDisplay';
 import { 
   MapPin, 
   Calendar, 
-  Clock, 
   Briefcase, 
   User, 
   CheckCircle,
@@ -36,6 +46,9 @@ interface JobDetailsProps {
 export default function JobDetails({ params }: JobDetailsProps) {
   const { user } = useUnifiedAuth();
   const { toast } = useToast();
+  const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
+  const [proposedPrice, setProposedPrice] = useState('');
+  const [proposalDescription, setProposalDescription] = useState('');
   
   const { data: job, isLoading } = useQuery({
     queryKey: ['/api/jobs', params.id],
@@ -47,13 +60,16 @@ export default function JobDetails({ params }: JobDetailsProps) {
   });
 
   const applyMutation = useMutation({
-    mutationFn: (jobId: string) => 
-      apiRequest('POST', '/api/applications', { jobId }),
+    mutationFn: (data: { jobId: string; proposedPrice: string; proposalDescription: string }) => 
+      apiRequest('POST', '/api/applications', data),
     onSuccess: () => {
       toast({
         title: "Candidatura enviada!",
         description: "Sua candidatura foi enviada com sucesso.",
       });
+      setIsApplyDialogOpen(false);
+      setProposedPrice('');
+      setProposalDescription('');
       queryClient.invalidateQueries({ queryKey: ['/api/applications'] });
     },
     onError: (error: any) => {
@@ -124,17 +140,32 @@ export default function JobDetails({ params }: JobDetailsProps) {
     );
   }
 
-  const handleApply = () => {
-    if (user?.type === 'freelancer') {
-      applyMutation.mutate(params.id);
+  const handleOpenApplyDialog = () => {
+    setProposedPrice((job as any).payment || '');
+    setIsApplyDialogOpen(true);
+  };
+
+  const handleSubmitApplication = () => {
+    if (!proposedPrice || !proposalDescription) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha o valor da proposta e a descrição.",
+        variant: "destructive",
+      });
+      return;
     }
+    applyMutation.mutate({
+      jobId: params.id,
+      proposedPrice,
+      proposalDescription,
+    });
   };
 
   const handleUpdateApplication = (applicationId: string, status: string) => {
     updateApplicationMutation.mutate({ applicationId, status });
   };
 
-  const categoryName = job.subcategory?.category?.name || 'Serviços';
+  const categoryName = (job as any).subcategory?.category?.name || 'Serviços';
   const IconComponent = categoryIcons[categoryName] || Briefcase;
 
   return (
@@ -154,14 +185,14 @@ export default function JobDetails({ params }: JobDetailsProps) {
                     <div className="w-16 h-16 rounded-xl bg-white border-2 border-primary/20 flex items-center justify-center mb-3 shadow-sm">
                       <IconComponent className="w-8 h-8 text-primary" />
                     </div>
-                    <span className="text-sm font-medium text-gray-600 text-center">{job.subcategory?.name || 'Serviço'}</span>
+                    <span className="text-sm font-medium text-gray-600 text-center">{(job as any).subcategory?.name || 'Serviço'}</span>
                   </div>
                   
                   {/* Job Info Section */}
                   <div className="flex-1 p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
-                      {job.destaque && (
+                      <h1 className="text-2xl font-bold text-gray-900">{(job as any).title}</h1>
+                      {(job as any).destaque && (
                         <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm">
                           DESTAQUE
                         </Badge>
@@ -170,18 +201,18 @@ export default function JobDetails({ params }: JobDetailsProps) {
                     
                     <div className="mb-4">
                       <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Descrição</h3>
-                      <p className="text-gray-700 leading-relaxed">{job.description}</p>
+                      <p className="text-gray-700 leading-relaxed">{(job as any).description}</p>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-6 text-gray-600">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-primary" />
-                        <span className="text-sm">{job.date ? new Date(job.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Data não informada'}</span>
+                        <span className="text-sm">{(job as any).date ? new Date((job as any).date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Data não informada'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-primary" />
                         <LocationDisplay 
-                          location={job.location} 
+                          location={(job as any).location} 
                           className="text-sm text-gray-600" 
                           showIcon={false}
                           showMapLink={false}
@@ -200,7 +231,7 @@ export default function JobDetails({ params }: JobDetailsProps) {
               <CardContent className="p-6 flex flex-col items-center justify-center h-full">
                 <span className="text-sm font-medium text-green-700 mb-2">Valor do Serviço:</span>
                 <div className="text-4xl font-bold text-green-600 mb-4">
-                  R$ {parseFloat(job.payment).toLocaleString('pt-BR', {
+                  R$ {parseFloat((job as any).payment).toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}
@@ -208,12 +239,11 @@ export default function JobDetails({ params }: JobDetailsProps) {
                 
                 {user?.type === 'freelancer' && (
                   <Button 
-                    onClick={handleApply}
-                    disabled={applyMutation.isPending}
+                    onClick={handleOpenApplyDialog}
                     className="w-full bg-green-600 hover:bg-green-700 text-white py-3 font-semibold mt-2"
                     data-testid="button-apply"
                   >
-                    {applyMutation.isPending ? 'Enviando...' : 'Candidatar-se'}
+                    Candidatar-se
                   </Button>
                 )}
               </CardContent>
@@ -234,15 +264,15 @@ export default function JobDetails({ params }: JobDetailsProps) {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-14 w-14">
                     <AvatarFallback className="bg-gray-200 text-gray-600 font-semibold text-lg">
-                      {job.client?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'U'}
+                      {(job as any).client?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold text-gray-900">{job.client?.name || 'Contratante'}</p>
-                    {job.client?.company && (
-                      <p className="text-sm text-gray-600">Empresa: {job.client.company}</p>
+                    <p className="font-semibold text-gray-900">{(job as any).client?.name || 'Contratante'}</p>
+                    {(job as any).client?.company && (
+                      <p className="text-sm text-gray-600">Empresa: {(job as any).client.company}</p>
                     )}
-                    <p className="text-sm text-gray-500">Desde: {new Date(job.client?.createdAt || Date.now()).getFullYear()}</p>
+                    <p className="text-sm text-gray-500">Desde: {new Date((job as any).client?.createdAt || Date.now()).getFullYear()}</p>
                   </div>
                 </div>
               </CardContent>
@@ -250,7 +280,7 @@ export default function JobDetails({ params }: JobDetailsProps) {
           </div>
 
           {/* Right - Candidates (for contractors) */}
-          {user?.type === 'contratante' && user.id === job.clientId && (
+          {user?.type === 'contratante' && user.id === (job as any).clientId && (
             <div className="lg:col-span-2">
               <Card className="border border-gray-200 shadow-sm">
                 <CardHeader className="pb-4">
@@ -262,9 +292,9 @@ export default function JobDetails({ params }: JobDetailsProps) {
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
                       <p className="text-gray-600">Carregando candidatos...</p>
                     </div>
-                  ) : applications && applications.length > 0 ? (
+                  ) : applications && (applications as any[]).length > 0 ? (
                     <div className="space-y-4">
-                      {applications.map((application: any) => (
+                      {(applications as any[]).map((application: any) => (
                         <div 
                           key={application.id} 
                           className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg hover:border-gray-200 transition-colors"
@@ -284,7 +314,7 @@ export default function JobDetails({ params }: JobDetailsProps) {
                                   R$ {application.proposedPrice ? parseFloat(application.proposedPrice).toLocaleString('pt-BR', {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2
-                                  }) : parseFloat(job.payment).toLocaleString('pt-BR', {
+                                  }) : parseFloat((job as any).payment).toLocaleString('pt-BR', {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2
                                   })}
@@ -357,6 +387,63 @@ export default function JobDetails({ params }: JobDetailsProps) {
           )}
         </div>
       </div>
+
+      {/* Apply Dialog */}
+      <Dialog open={isApplyDialogOpen} onOpenChange={setIsApplyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enviar Proposta</DialogTitle>
+            <DialogDescription>
+              Preencha os dados da sua proposta para esta vaga.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="proposedPrice">Valor da Proposta (R$)</Label>
+              <Input
+                id="proposedPrice"
+                type="number"
+                step="0.01"
+                placeholder="Ex: 150.00"
+                value={proposedPrice}
+                onChange={(e) => setProposedPrice(e.target.value)}
+                data-testid="input-proposed-price"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="proposalDescription">Descrição da Proposta</Label>
+              <Textarea
+                id="proposalDescription"
+                placeholder="Descreva sua experiência e por que você é o profissional ideal para este serviço..."
+                rows={4}
+                value={proposalDescription}
+                onChange={(e) => setProposalDescription(e.target.value)}
+                data-testid="input-proposal-description"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsApplyDialogOpen(false)}
+              data-testid="button-cancel-apply"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmitApplication}
+              disabled={applyMutation.isPending}
+              className="bg-green-600 hover:bg-green-700"
+              data-testid="button-submit-apply"
+            >
+              {applyMutation.isPending ? 'Enviando...' : 'Enviar Proposta'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
