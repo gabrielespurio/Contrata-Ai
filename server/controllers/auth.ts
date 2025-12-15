@@ -127,23 +127,9 @@ export async function getProfile(req: Request, res: Response) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
-    // Check if user has completed onboarding by checking if they have a profile
-    let needsOnboarding = false; // Default to false - only set true if explicitly needed
-    
-    try {
-      if (user.type === 'freelancer') {
-        const profile = await storage.getFreelancerProfile(userId);
-        needsOnboarding = !profile;
-        console.log(`Profile check for freelancer ${userId}: profile exists = ${!!profile}, needsOnboarding = ${needsOnboarding}`);
-      } else if (user.type === 'contratante') {
-        // Contractors don't need additional profile
-        needsOnboarding = false;
-      }
-    } catch (error) {
-      console.error('Error checking profile completion:', error);
-      // If we can't check, don't force onboarding - assume it's complete
-      needsOnboarding = false;
-    }
+    // Users who already have a type defined don't need onboarding
+    // They can complete their profile later if needed
+    const needsOnboarding = !user.type;
 
     res.json({
       id: user.id,
