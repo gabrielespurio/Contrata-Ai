@@ -1,4 +1,4 @@
-import { Link } from 'wouter';
+import { Link, Redirect } from 'wouter';
 import { useUnifiedAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -60,7 +60,7 @@ export default function Home() {
   });
 
   if (user) {
-    return <Link href="/dashboard" />;
+    return <Redirect to="/dashboard" />;
   }
 
   const categoryIcons: Record<string, any> = {
